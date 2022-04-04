@@ -8,8 +8,9 @@ from projdirs import optdir
 import numpy as np
 
 
-def make_dzn_file(DT, ETA_EL, C_PV, C_W, C_EL, C_HS, CF,
-                  W, S, L):
+def make_dzn_file(DT, ETA_EL, BAT_ETA_in, BAT_ETA_out,
+                  C_PV, C_W, C_EL, C_HS, C_BAT, CF,
+                  S, W, L):
 
     
     string = """
@@ -18,13 +19,16 @@ N = %i;
 DT = %.2f;      %% time difference between sample points (s)
 
 ETA_EL = %.2f;  %% conversion factor of the electrolyser (kgH/s/W)
+BAT_ETA_in = %.2f;   %%charging efficiency of electrochemical battery
+BAT_ETA_out = %.2f;  %%discharging efficiency of electrochemical battery 
 
-C_PV = %.2f;    %% unit cost of PV ($/W)
-C_W =  %.2f;    %% unit cost of Wind farm ($/W)
-C_EL =  %.2f;    %% unit cost of electrolyser ($/W)
-C_HS = %.2f;    %% unit cost of hydrogen storage ($/kgH)
+C_PV = %.4f;    %% unit cost of PV ($/W)
+C_W =  %.4f;    %% unit cost of Wind farm ($/W)
+C_EL =  %.4f;    %% unit cost of electrolyser ($/W)
+C_HS = %.4f;    %% unit cost of hydrogen storage ($/kgH)
+C_BAT = %.6f;   %% unit cost of electrochemical battery ($/W.s)
 
-R_CAPA = %.2f;       %% reserved hydrogen for lowered capcaity factor
+R_CAPA = %.4f;       %% reserved hydrogen for lowered capcaity factor
  
 %% Wind speed timeseries (m/s)
 W = %s; 
@@ -34,8 +38,9 @@ S = %s;
 
 %% load timeseries (kgH/s)                             
 L = %s;                              
-""" %(len(L), DT, ETA_EL, C_PV, C_W, C_EL, C_HS,
-     (1-CF)*sum(L)*DT, str(W), str(S), str(L))
+""" %(len(L), DT, ETA_EL, BAT_ETA_in, BAT_ETA_out,
+      C_PV, C_W, C_EL, C_HS, C_BAT, 
+      (1-CF)*sum(L)*DT, str(W), str(S), str(L))
 
     with open(optdir + "hydrogen_plant_data.dzn", "w") as text_file:
         text_file.write(string)
