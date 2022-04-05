@@ -56,6 +56,8 @@ constraint hs_capa >= 0;
 constraint forall(  i in tint  )(  pv_out[i] = pv_max * S[i]/1000  );
 constraint forall(  i in tint  )(  w_out[i] = w_max * ( (W[i]-0)/(10-0) )^2  );
 
+
+
 constraint forall(  i in tint  )(  pv_out[i] + w_out[i] - pc[i] - el_pin_wpv[i] - bat_pin[i] = 0  );
 constraint forall(  i in tint  )(  pc[i] >= 0  );
 
