@@ -54,10 +54,14 @@ constraint el_max >= 0;
 constraint hs_capa >= 0;
 
 constraint forall(  i in tint  )(  pv_out[i] = pv_max * S[i]/1000  );
+
+%% Quadratic wind turbine model with the following parameters:
+%% v_cutin = 3[m/s], v_rated = 13[m/s], v_cutoff = 23[m/s]
+%% quadratic model: p_out = p_rated x (v-v_cutin)^2 / (v_rated-v_cutin)^2
 constraint forall(  i in tint  )(  if ( (W[i] < 3) \/ (W[i] > 23) )  then w_out[i] = 0
-                                     elseif W[i] <= 13 then w_out[i] = w_max * ( (W[i]-3)/(13-3) )^2
-                                      else w_out[i] = w_max * ( (23-3)/(13-3) )^2
-                                       endif);
+                                   elseif W[i] <= 13 then w_out[i] = w_max * ( (W[i]-3)/(13-3) )^2
+                                   else w_out[i] = w_max * ( (13-3)/(13-3) )^2
+                                   endif);
 
 constraint forall(  i in tint  )(  pv_out[i] + w_out[i] - pc[i] - el_pin_wpv[i] - bat_pin[i] = 0  );
 constraint forall(  i in tint  )(  pc[i] >= 0  );
