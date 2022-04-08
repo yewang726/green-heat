@@ -45,7 +45,8 @@ obj = C_PV * pv_max + C_W * w_max + C_EL * el_max + C_HS * hs_capa + C_BAT * bat
 
 %=== CONSTRAINTS ===
 constraint r[1] = R_CAPA;
-constraint h_stored[1] = 20;
+%%constraint h_stored[1] = 20;
+constraint h_stored[1] = h_stored[N];
 constraint bat_e_stored[1] = 0;
 
 constraint pv_max >= 0;
