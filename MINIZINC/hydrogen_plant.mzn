@@ -14,10 +14,12 @@ float: C_EL;     %unit cost of electrolyser $/W
 float: C_HS;    %unit cost of hydrogen storage $/(kg of H)
 float: C_BAT;    %unit cost of battery storage ($/W.s)
 float: R_CAPA;       %virtual hydrogen reserve for reduced capacity factor (kg of H)
+float: pv_ref_capa;    %power capacity if the reference PV plant (W)
 
 array[tint] of float: W; %wind speed timeseries
-array[tint] of float: S; %solar radiation timeseries
+%array[tint] of float: S; %solar radiation timeseries
 array[tint] of float: L; %load timeseries (kg of H per hour)
+array[tint] of var float: pv_ref_out;    %power output from the reference PV plant (W)
 
 % === VARIABLES ===
 var float: pv_max;    %PV plant rated power
@@ -26,6 +28,8 @@ var float: el_max;     %electrolyser rated power
 var float: hs_capa;    %capacity of hydrogen storage cavern
 var float: bat_capa;    %energy capacity of the electrochemical battery (J)
 var float: bat_pmax;    %power capacity of the electrochemical battery (W)
+
+
 
 
 array[tint] of var float: pv_out;    %power out of PV plant (W)
@@ -39,6 +43,7 @@ array[tint] of var float: bat_pout;     %power flow out of the battery (W)
 array[tsamp] of var float: h_stored;   %stored hydrogen in storage (kg)
 array[tsamp] of var float: r;    %reserved hydrogen for load shut down (kg)
 array[tsamp] of var float: bat_e_stored;  %electrical energy stored in the battery (W.s)
+
 
 var float: obj;
 obj = C_PV * pv_max + C_W * w_max + C_EL * el_max + C_HS * hs_capa + C_BAT * bat_capa;
@@ -54,7 +59,7 @@ constraint w_max >= 0;
 constraint el_max >= 0;
 constraint hs_capa >= 0;
 
-constraint forall(  i in tint  )(  pv_out[i] = pv_max * S[i]/1000  );
+constraint forall(  i in tint  )(  pv_out[i] = pv_max/pv_ref_capa * pv_ref_out[i]  );
 
 %% Quadratic wind turbine model with the following parameters:
 %% v_cutin = 3[m/s], v_rated = 13[m/s], v_cutoff = 23[m/s]

@@ -9,8 +9,8 @@ import numpy as np
 
 
 def make_dzn_file(DT, ETA_EL, BAT_ETA_in, BAT_ETA_out,
-                  C_PV, C_W, C_EL, C_HS, C_BAT, CF,
-                  S, W, L):
+                  C_PV, C_W, C_EL, C_HS, C_BAT, CF, pv_ref_capa,
+                  pv_ref_out, W, L):
 
     
     string = """
@@ -29,18 +29,20 @@ C_HS = %.4f;    %% unit cost of hydrogen storage ($/kgH)
 C_BAT = %.6f;   %% unit cost of electrochemical battery ($/W.s)
 
 R_CAPA = %.4f;       %% reserved hydrogen for lowered capcaity factor
+
+pv_ref_capa = %.4f;       %%the capacity of the reference PV plant (W)
  
 %% Wind speed timeseries (m/s)
 W = %s; 
 
-%% solar radiation timeseries (W/m2)                            
-S = %s; 
+%% Power output time series from reference PV plant (W)                            
+pv_ref_out = %s; 
 
 %% load timeseries (kgH/s)                             
 L = %s;                              
 """ %(len(L), DT, ETA_EL, BAT_ETA_in, BAT_ETA_out,
       C_PV, C_W, C_EL, C_HS, C_BAT, 
-      (1-CF)*sum(L)*DT, str(W), str(S), str(L))
+      (1-CF)*sum(L)*DT, pv_ref_capa, str(W), str(pv_ref_out), str(L))
 
     with open(optdir + "hydrogen_plant_data.dzn", "w") as text_file:
         text_file.write(string)
@@ -52,8 +54,8 @@ def optimise(simparams):
     Parameters
     ----------
     simparams : a dictionary including the following parameters:
-        DT, ETA_PV, ETA_EL, C_PV, C_W, C_E, C_HS, CF,
-                  W, S, L
+        DT, ETA_PV, ETA_EL, C_PV, C_W, C_E, C_HS, CF, pv_ref_capa,
+                  W, pv_ref_out, L
 
     Returns
     -------
@@ -84,3 +86,4 @@ def optimise(simparams):
 
 
 ######################################################################
+
