@@ -5,7 +5,7 @@ Created on Tue Mar 29 10:32:04 2022
 @author: Ahmad Mojiri
 """
 
-import sys, os
+import os
  
 connector = '\\'
 basedir = os.path.realpath('..') + connector
