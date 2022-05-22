@@ -9,7 +9,7 @@ from projdirs import datadir
 import numpy as np
 import pandas as pd
 import json, io, requests
-import PySAM.Pvwattsv8 as PVWatts
+import PySAM.Pvwattsv8 as PVWatts, Windpower
 
 ################################################################
 def pv_gen(capacity):
@@ -24,7 +24,7 @@ def pv_gen(capacity):
     pv = PVWatts.new()
     
     dir = datadir + '\SAM INPUTS\SOLAR\\'
-    file_name = 'pv_plant_pvwattsv8'
+    file_name = 'pvfarm_pvwattsv8'
     module = pv
     
     with open(dir + file_name + ".json", 'r') as file:
@@ -38,6 +38,32 @@ def pv_gen(capacity):
     output = np.array(pv.Outputs.gen)*1000
     return(output.tolist())
 
+#################################################################
+def wind_gen():
+    """
+    Parameters
+    ----------
+    Capacity will be added later
+
+    Returns wind powr generated in W for each hour in a year
+    
+    """
+    wind = Windpower.new()
+    
+    dir = datadir + '\SAM INPUTS\WIND\\'
+    file_name = 'windfarm_windpower'
+    module = wind
+    
+    with open(dir + file_name + ".json", 'r') as file:
+        data = json.load(file)
+        for k,v in data.items():
+            if k != "number_inputs":
+                module.value(k, v)
+    
+    # module.SystemDesign.system_capacity = capacity/1000
+    wind.execute()
+    output = np.array(wind.Outputs.gen)*1000
+    return(output.tolist())
 
 #################################################################
 def WindSource(Lat,Lon):
@@ -103,14 +129,53 @@ def WindSource(Lat,Lon):
     data_temp.S = S
     data_100 = data_100.iloc[0:3].append(data_temp,ignore_index=True)
     data = pd.concat([data , data_100],axis=1)
+    
+    data.loc[-1] = 16*['Latitude:%d'%(Lat)]
+    data.index = data.index+1
+    data.sort_index(inplace=True)
+    data.loc[-1] = 16*['Longitude:%d'%(Lon)]
+    data.index = data.index+1
+    data.sort_index(inplace=True)
+    
     data_text = data.to_csv(header=False, index=False, line_terminator='\n')
-    data_text = 'Latitude:%d'%(Lat)+'\n' + 'Longitude:%d'%(Lon)+'\n' + data_text
+    # data_text = 'Latitude:%d'%(Lat)+'\n' + 'Longitude:%d'%(Lon)+'\n' + data_text
     path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\WIND'
     
     text_file = open(path + "\WindSource.csv", "w")
     text_file.write(data_text)
     text_file.close()
     return('Wind source file was created!')
+    
+##################################################################
+def SolarResource(Lat,Lon):
+    """
+    The function gets the TMY data from PVGIS:
+        API = https://re.jrc.ec.europa.eu/api/v5_2/tmy
+    
+    Parameters
+    ----------
+    lat: Latitude
+    long: longitude
+
+    Returns a epw file in .epw format for PV modelling in SAM
+        
+    """
+    url = 'https://re.jrc.ec.europa.eu/api/v5_2/tmy'
+
+    Params = {'lat':Lat,
+              'lon':Lon,
+              'outputformat':'epw'}
+    
+    response = requests.get(url,params=Params)
+    print('Status:', response.status_code)
+    response.close()
+    
+    data_text = response.text.replace('\r','')
+    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\SOLAR'
+    text_file = open(path + "\SolarSource.epw", "w")
+    text_file.write(data_text)
+    text_file.close()
+    return('Solar source file was created!') 
     
     
  #################################################################
