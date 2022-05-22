@@ -9,8 +9,8 @@ import numpy as np
 
 
 def make_dzn_file(DT, ETA_EL, BAT_ETA_in, BAT_ETA_out,
-                  C_PV, C_W, C_EL, C_HS, C_BAT, CF, pv_ref_capa,
-                  pv_ref_out, W, L):
+                  C_PV, C_W, C_EL, C_HS, C_BAT, CF, PV_ref_capa,
+                  PV_ref_out, Wind_ref_capa, Wind_ref_out, L):
 
     
     string = """
@@ -31,18 +31,22 @@ C_BAT = %.6f;   %% unit cost of electrochemical battery ($/W.s)
 R_CAPA = %.4f;       %% reserved hydrogen for lowered capcaity factor
 
 pv_ref_capa = %.4f;       %%the capacity of the reference PV plant (W)
- 
-%% Wind speed timeseries (m/s)
-W = %s; 
 
-%% Power output time series from reference PV plant (W)                            
-pv_ref_out = %s; 
+%% Power output time series from reference PV plant (W)
+pv_ref_out = %s;                                  
+ 
+ 
+wind_ref_capa = %.4f;  %% the capacity of the refernce wind plant (W)
+
+%% power output time series from the reference wind plant (W)
+wind_ref_out = %s;  
 
 %% load timeseries (kgH/s)                             
 L = %s;                              
 """ %(len(L), DT, ETA_EL, BAT_ETA_in, BAT_ETA_out,
       C_PV, C_W, C_EL, C_HS, C_BAT, 
-      (1-CF)*sum(L)*DT, pv_ref_capa, str(W), str(pv_ref_out), str(L))
+      (1-CF)*sum(L)*DT, PV_ref_capa, str(PV_ref_out), Wind_ref_capa,
+      str(Wind_ref_out), str(L))
 
     with open(optdir + "hydrogen_plant_data.dzn", "w") as text_file:
         text_file.write(string)
