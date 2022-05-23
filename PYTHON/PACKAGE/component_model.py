@@ -85,12 +85,19 @@ def WindSource(Lat,Lon):
               'lon':Lon}
     
     response = requests.get(url,params=Params)
-    print('Status:', response.status_code)
+    print('Connection Status:', response.status_code)
     response.close()
     text = response.text
     
+    
     text2 = 'time(UTC)'+ text.split('\ntime(UTC)')[1]
     text3 = text2.replace('\r\n\r\n','').split('T2m:')[0]
+    
+    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\WEATHER_DATA'
+    text_file = open(path + "\weather_data.csv", "w")
+    text_file.write(text3.replace('\r',''))
+    text_file.close()
+    print('Weather data file was downloaded!')
     
     data = io.StringIO(text3)
     data = pd.read_csv(data)
@@ -167,7 +174,7 @@ def SolarResource(Lat,Lon):
               'outputformat':'epw'}
     
     response = requests.get(url,params=Params)
-    print('Status:', response.status_code)
+    print('Connection Status:', response.status_code)
     response.close()
     
     data_text = response.text.replace('\r','')
