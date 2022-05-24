@@ -151,7 +151,8 @@ def WindSource(Lat,Lon):
     text_file = open(path + "\WindSource.csv", "w")
     text_file.write(data_text)
     text_file.close()
-    return('Wind source file was created!')
+    print('Wind source file was created!')
+    return('Wind source is ready!')
     
 ##################################################################
 def SolarResource(Lat,Lon):
@@ -182,7 +183,8 @@ def SolarResource(Lat,Lon):
     text_file = open(path + "\SolarSource.epw", "w")
     text_file.write(data_text)
     text_file.close()
-    return('Solar source file was created!') 
+    print('Solar source file was created!')
+    return('Solar source is ready!') 
     
     
  #################################################################
