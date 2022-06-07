@@ -9,8 +9,8 @@ import numpy as np
 
 
 def make_dzn_file(DT, ETA_EL, BAT_ETA_in, BAT_ETA_out,
-                  C_PV, C_W, C_EL, C_HS, C_BAT, CF, PV_ref_capa,
-                  PV_ref_out, Wind_ref_capa, Wind_ref_out, L):
+                  C_PV, C_W, C_EL, C_HS, C_BAT_energy, C_BAT_power,  CF,
+                  PV_ref_capa, PV_ref_out, Wind_ref_capa, Wind_ref_out, L):
 
     
     string = """
@@ -26,7 +26,8 @@ C_PV = %.4f;    %% unit cost of PV ($/W)
 C_W =  %.4f;    %% unit cost of Wind farm ($/W)
 C_EL =  %.4f;    %% unit cost of electrolyser ($/W)
 C_HS = %.4f;    %% unit cost of hydrogen storage ($/kgH)
-C_BAT = %.6f;   %% unit cost of electrochemical battery ($/W.s)
+C_BAT_energy = %.6f;   %% unit cost of electrochemical battery energy ($/W.s)
+C_BAT_power = %.6f;   %% unit cost of electrochemical battery power ($/W.s)
 
 R_CAPA = %.4f;       %% reserved hydrogen for lowered capcaity factor
 
@@ -44,7 +45,7 @@ wind_ref_out = %s;
 %% load timeseries (kgH/s)                             
 L = %s;                              
 """ %(len(L), DT, ETA_EL, BAT_ETA_in, BAT_ETA_out,
-      C_PV, C_W, C_EL, C_HS, C_BAT, 
+      C_PV, C_W, C_EL, C_HS, C_BAT_energy, C_BAT_power, 
       (1-CF)*sum(L)*DT, PV_ref_capa, str(PV_ref_out), Wind_ref_capa,
       str(Wind_ref_out), str(L))
 

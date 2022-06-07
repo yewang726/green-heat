@@ -12,11 +12,11 @@ float: C_PV;    %unit cost of PV plant  $/W
 float: C_W;     %unit cost of wind farm $/W
 float: C_EL;     %unit cost of electrolyser $/W
 float: C_HS;    %unit cost of hydrogen storage $/(kg of H)
-float: C_BAT;    %unit cost of battery storage ($/W.s)
+float: C_BAT_energy;    %unit cost of battery storage ($/W.s)
+float: C_BAT_power;    % unit cost of battery power capacpity ($/W)
 float: R_CAPA;       %virtual hydrogen reserve for reduced capacity factor (kg of H)
 float: pv_ref_capa;    %power capacity of the reference PV plant (W)
 float: wind_ref_capa;    %power capacity of the reference wind plant (W)
-
 
 %array[tint] of float: W; %wind speed timeseries
 %array[tint] of float: S; %solar radiation timeseries
@@ -32,24 +32,21 @@ var float: hs_capa;    %capacity of hydrogen storage cavern
 var float: bat_capa;    %energy capacity of the electrochemical battery (J)
 var float: bat_pmax;    %power capacity of the electrochemical battery (W)
 
-
-
-
 array[tint] of var float: pv_out;    %power out of PV plant (W)
 array[tint] of var float: w_out;     %power out of wind farm (W)
 array[tint] of var float: pc;    %curtailed power (W)
 array[tint] of var float: el_pin_wpv;    %power into the electrolyser (W)
 array[tint] of var float: r_hout;   %hydrogen extracted from virtual reserve (kgH/s)
 array[tint] of var float: el_hout;    %hydrogen produced in each interval (kgH/s)
+array[tint] of var float: el_pin;    %power flow into the electrolyser (W)
 array[tint] of var float: bat_pin;      %power flow into the battery (W)
 array[tint] of var float: bat_pout;     %power flow out of the battery (W)
 array[tsamp] of var float: h_stored;   %stored hydrogen in storage (kg)
 array[tsamp] of var float: r;    %reserved hydrogen for load shut down (kg)
 array[tsamp] of var float: bat_e_stored;  %electrical energy stored in the battery (W.s)
 
-
 var float: obj;
-obj = C_PV * pv_max + C_W * w_max + C_EL * el_max + C_HS * hs_capa + C_BAT * bat_capa;
+obj = C_PV * pv_max + C_W * w_max + C_EL * el_max + C_HS * hs_capa + C_BAT_energy * bat_capa + C_BAT_power * bat_pmax;
 
 %=== CONSTRAINTS ===
 constraint r[1] = R_CAPA;
@@ -58,20 +55,18 @@ constraint h_stored[1] = h_stored[N];
 constraint bat_e_stored[1] = 0;
 
 constraint pv_max >= 0;
+constraint pv_max <= 1e9;
 constraint w_max >= 0;
+constraint w_max <= 1e9;
 constraint el_max >= 0;
+constraint el_max <= 1e9;
 constraint hs_capa >= 0;
+constraint hs_capa <= 1e9;
+
+constraint forall(  i in tint  )(  el_pin[i] = el_pin_wpv[i] + bat_pout[i] );
 
 constraint forall(  i in tint  )(  pv_out[i] = pv_max/pv_ref_capa * pv_ref_out[i]  );
 constraint forall(  i in tint  )(  w_out[i] = w_max/wind_ref_capa * wind_ref_out[i]  );
-
-%% Quadratic wind turbine model with the following parameters:
-%% v_cutin = 3[m/s], v_rated = 13[m/s], v_cutoff = 23[m/s]
-%% quadratic model: p_out = p_rated x (v-v_cutin)^2 / (v_rated-v_cutin)^2
-%% constraint forall(  i in tint  )(  if ( (W[i] < 3) \/ (W[i] > 23) )  then w_out[i] = 0
- %%                                  elseif W[i] <= 13 then w_out[i] = w_max * ( (W[i]-3)/(13-3) )^2
-%%                                   else w_out[i] = w_max * ( (13-3)/(13-3) )^2
-%%                                   endif);
 
 constraint forall(  i in tint  )(  pv_out[i] + w_out[i] - pc[i] - el_pin_wpv[i] - bat_pin[i] = 0  );
 constraint forall(  i in tint  )(  pc[i] >= 0  );
@@ -91,7 +86,7 @@ constraint forall(  i in tsamp  )(  bat_e_stored[i] - bat_capa <= 0 );
 
 constraint forall(  i in tsamp  )(  h_stored[i] >= 0  );
 constraint forall(  i in tsamp  )(  h_stored[i] - hs_capa <= 0  );
-constraint forall(  i in tint  )(  el_hout[i] = ( el_pin_wpv[i] + bat_pout[i] ) * ETA_EL/ 142e6  );
+constraint forall(  i in tint  )(   el_hout[i] = el_pin[i] * ETA_EL/ 142e6 );
 constraint forall(  i in tint  )(   h_stored[i+1] = h_stored[i] + (el_hout[i] + r_hout[i] - L[i] )*DT  );
 
 constraint forall(  i in tsamp  )(  r[i] >= 0  );
@@ -115,6 +110,7 @@ output  ["!"] ++
         ["pc="] ++ [show(pc)] ++ [";"] ++
         ["bat_pin="] ++ [show(bat_pin)] ++ [";"] ++
         ["bat_pout="] ++ [show(bat_pout)] ++ [";"] ++
+        ["el_pin="] ++ [show(el_pin)] ++ [";"] ++
         ["he_out="] ++ [show(el_hout)] ++ [";"] ++
         ["hr_out="] ++ [show(r_hout)] ++ [";"] ++
         ["sh="] ++ [show(h_stored)] ++ [";"] ++
