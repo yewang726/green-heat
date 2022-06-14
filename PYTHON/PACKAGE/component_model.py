@@ -186,7 +186,134 @@ def SolarResource(Lat,Lon):
     print('Solar source file was created!')
     return('Solar source is ready!') 
     
+##################################################################
+def solcast_weather(location):
+    """
+    The function download tmy weather data from Solcast under a research
+    account.
+
+    Parameters
+    ----------
+    location : List object
+         includes [latitude,longitude] of the location
+
+    Returns a savd csv file in the format that can be used with SAM for PV
+    modelling.
+    """
+    base_url = 'https://api.solcast.com.au/'
+    tool = 'tmy_hourly?api_key='
+    key = 'YNEmGUM8_CfnWlNPinB9d3EnlGVpFwWV'
+    Parameters = {}
+    Parameters = dict(zip(['api_key','format','latitude','longitude'],
+                          [key,'x-sam+csv']+ location,
+                          ))
     
+    response = requests.get(base_url+tool,params=Parameters)
+    print('Connection Status:', response.status_code)
+    response.close()
+    
+    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\WEATHER_DATA'
+    text_file = open(path + "\weather_data_solcast.csv", "w")
+    text_file.write(response.text)
+    text_file.close()
+    print('Weather data was downloaded from Solcast database!')
+
+ #################################################################
+def SolarResource_solcast():
+    """
+    Parameters
+    ----------
+    None
+        
+    Returns
+    -------
+    copies the weather data into SOLAR folder for SAM.
+
+    """
+    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\WEATHER_DATA'
+    data = pd.read_csv(path + "\weather_data_solcast.csv")
+    
+    data_text = data.to_csv(index=False, line_terminator='\n')
+    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\SOLAR'
+    
+    text_file = open(path + "\SolarSource.csv", "w")
+    text_file.write(data_text)
+    text_file.close()
+    print('Solar data file was generated from Solcast database!')
+
+ #################################################################
+def WindSource_solcast():
+    """
+    Generates the wind source data for SAM based on the weather data 
+    that is stored in WEATHER folder
+    
+    Returns
+    -------
+    None.
+    
+    """
+    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\WEATHER_DATA'
+    data = pd.read_csv(path + "\weather_data_solcast.csv", skiprows=0)
+    Lat = data.lat[0]
+    Lon = data.lon[0]
+    data = pd.read_csv(path + "\weather_data_solcast.csv", skiprows=2)
+    
+    data_10 = data.iloc[:,[5,14,15,16]].copy()
+    data_10.Pressure=data_10.Pressure/1013.25
+    data_10 = data_10.rename(columns = {'Temperature':'T',
+                                        'Wind Speed':'S',
+                                        'Wind Direction':'D',
+                                        'Pressure':'P'})
+    heading_10 = pd.DataFrame({'T':['Temperature','C',10],
+                               'S':["Speed", 'm/s',10],
+                               'D':["Direction",'degrees',10],
+                               'P':['Pressure','atm',10]})
+    data_10 = heading_10.append(data_10).reset_index(drop=True)
+    data = data_10.copy()
+    Z_anem = 10
+    
+    Z = 40
+    data_40 = data_10.copy()
+    data_40.iloc[2,:]=Z
+    data_temp = data_40.iloc[3:].copy()
+    S = data_temp.apply(lambda x:speed(Z, Z_anem, data_temp['S']) )
+    data_temp.S = S
+    data_40 = data_40.iloc[0:3].append(data_temp,ignore_index=True)
+    data = pd.concat([data , data_40],axis=1)
+    
+    Z = 70
+    data_70 = data_10.copy()
+    data_70.iloc[2,:]=Z
+    data_temp = data_70.iloc[3:].copy()
+    S = data_temp.apply(lambda x:speed(Z, Z_anem, data_temp['S']) )
+    data_temp.S = S
+    data_70 = data_70.iloc[0:3].append(data_temp,ignore_index=True)
+    data = pd.concat([data , data_70],axis=1)
+    
+    Z = 100
+    data_100 = data_10.copy()
+    data_100.iloc[2,:]=Z
+    data_temp = data_100.iloc[3:].copy()
+    S = data_temp.apply(lambda x:speed(Z, Z_anem, data_temp['S']) )
+    data_temp.S = S
+    data_100 = data_100.iloc[0:3].append(data_temp,ignore_index=True)
+    data = pd.concat([data , data_100],axis=1)
+    
+    data.loc[-1] = 16*['Latitude:%s'%(Lat)]
+    data.index = data.index+1
+    data.sort_index(inplace=True)
+    data.loc[-1] = 16*['Longitude:%s'%(Lon)]
+    data.index = data.index+1
+    data.sort_index(inplace=True)
+    
+    data_text = data.to_csv(header=False, index=False, line_terminator='\n')
+    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\WIND'
+    
+    text_file = open(path + "\WindSource.csv", "w")
+    text_file.write(data_text)
+    text_file.close()
+    print("Wind source data file was generated from Solcast database!")
+   
  #################################################################
 def speed(Z,Z_anem,U_anem):
     """
