@@ -16,28 +16,28 @@ def make_dzn_file(DT, ETA_EL, BAT_ETA_in, BAT_ETA_out,
     string = """
 N = %i;
 
-DT = %.2f;      %% time difference between sample points (s)
+DT = %.7f;      %% time difference between sample points (s)
 
-ETA_EL = %.2f;  %% conversion factor of the electrolyser (kgH/s/W)
-BAT_ETA_in = %.2f;   %%charging efficiency of electrochemical battery
-BAT_ETA_out = %.2f;  %%discharging efficiency of electrochemical battery 
+ETA_EL = %.7f;  %% conversion factor of the electrolyser (kgH/s/W)
+BAT_ETA_in = %.7f;   %%charging efficiency of electrochemical battery
+BAT_ETA_out = %.7f;  %%discharging efficiency of electrochemical battery 
 
-C_PV = %.4f;    %% unit cost of PV ($/W)
-C_W =  %.4f;    %% unit cost of Wind farm ($/W)
-C_EL =  %.4f;    %% unit cost of electrolyser ($/W)
-C_HS = %.4f;    %% unit cost of hydrogen storage ($/kgH)
-C_BAT_energy = %.6f;   %% unit cost of electrochemical battery energy ($/W.s)
-C_BAT_power = %.6f;   %% unit cost of electrochemical battery power ($/W.s)
+C_PV = %.7f;    %% unit cost of PV ($/W)
+C_W =  %.7f;    %% unit cost of Wind farm ($/W)
+C_EL =  %.7f;    %% unit cost of electrolyser ($/W)
+C_HS = %.7f;    %% unit cost of hydrogen storage ($/kgH)
+C_BAT_energy = %.7f;   %% unit cost of electrochemical battery energy ($/W.s)
+C_BAT_power = %.7f;   %% unit cost of electrochemical battery power ($/W.s)
 
-R_CAPA = %.4f;       %% reserved hydrogen for lowered capcaity factor
+R_CAPA = %.7f;       %% reserved hydrogen for lowered capcaity factor
 
-pv_ref_capa = %.4f;       %%the capacity of the reference PV plant (W)
+pv_ref_capa = %.7f;       %%the capacity of the reference PV plant (W)
 
 %% Power output time series from reference PV plant (W)
 pv_ref_out = %s;                                  
  
  
-wind_ref_capa = %.4f;  %% the capacity of the refernce wind plant (W)
+wind_ref_capa = %.7f;  %% the capacity of the refernce wind plant (W)
 
 %% power output time series from the reference wind plant (W)
 wind_ref_out = %s;  

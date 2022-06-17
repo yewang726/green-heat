@@ -55,13 +55,15 @@ constraint h_stored[1] = h_stored[N];
 constraint bat_e_stored[1] = 0;
 
 constraint pv_max >= 0;
-constraint pv_max <= 1e9;
+%%constraint pv_max <= 1e9;
 constraint w_max >= 0;
-constraint w_max <= 1e9;
+%%constraint w_max <= 1e9;
 constraint el_max >= 0;
-constraint el_max <= 1e9;
+%%constraint el_max <= 1e9;
 constraint hs_capa >= 0;
-constraint hs_capa <= 1e9;
+%%constraint hs_capa <= 1e9;
+
+constraint bat_capa >= 0;
 
 constraint forall(  i in tint  )(  el_pin[i] = el_pin_wpv[i] + bat_pout[i] );
 
@@ -93,6 +95,8 @@ constraint forall(  i in tsamp  )(  r[i] >= 0  );
 constraint forall(  i in tsamp  )(  r[i] <= R_CAPA  );
 constraint forall(  i in tint  )(  r[i+1] = r[i] - r_hout[i]*DT  );
 constraint forall(  i in tint  )(  r_hout[i]>=0  );
+constraint forall(  i in tint  )(  r_hout[i]<=L[i]  );
+
 
 
 solve minimize obj;
