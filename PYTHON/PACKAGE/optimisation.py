@@ -7,6 +7,7 @@ Created on Tue Mar 29 10:28:44 2022
 from projdirs import optdir
 import numpy as np
 
+import platform
 
 def make_dzn_file(DT, ETA_EL, BAT_ETA_in, BAT_ETA_out,
                   C_PV, C_W, C_EL, C_HS, C_BAT_energy, C_BAT_power,  CF,
@@ -69,12 +70,20 @@ def optimise(simparams):
 
     """
     make_dzn_file(**simparams)
-    mzdir = r'C:\\Program Files\\MiniZinc\\'
     from subprocess import check_output
-    output = str(check_output([mzdir + 'minizinc', "--soln-sep", '""',
-                               "--search-complete-msg", '""', "--solver",
-                               "COIN-BC", optdir + "hydrogen_plant.mzn",
-                               optdir + "hydrogen_plant_data.dzn"]))
+
+    if platform.system()=='Windows':
+        mzdir = r'C:\\Program Files\\MiniZinc\\'
+        output = str(check_output([mzdir + 'minizinc', "--soln-sep", '""',
+                                   "--search-complete-msg", '""', "--solver",
+                                   "COIN-BC", optdir + "hydrogen_plant.mzn",
+                                   optdir + "hydrogen_plant_data.dzn"]))
+    elif platform.system()=='Linux':
+        output = str(check_output(['minizinc', "--soln-sep", '""',
+                                   "--search-complete-msg", '""', "--solver",
+                                   "COIN-BC", optdir + "hydrogen_plant.mzn",
+                                   optdir + "hydrogen_plant_data.dzn"]))
+
     
     output = output.replace('[','').replace(']','').split('!')
     for string in output:

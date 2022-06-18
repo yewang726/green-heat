@@ -11,6 +11,8 @@ import pandas as pd
 import json, io, requests
 import PySAM.Pvwattsv8 as PVWatts, Windpower
 
+import platform
+
 ################################################################
 def pv_gen(capacity):
     """
@@ -21,21 +23,22 @@ def pv_gen(capacity):
     Returns system powr generated in W for each hour in a year
     
     """
-    pv = PVWatts.new()
-    
-    dir = datadir + '\SAM INPUTS\SOLAR\\'
-    file_name = 'pvfarm_pvwattsv8'
-    module = pv
-    
-    with open(dir + file_name + ".json", 'r') as file:
-        data = json.load(file)
+    module = PVWatts.new()
+
+    if platform.system()=='Windows':
+        json_fn=datadir+'\json_pvWatts\default_pvwattsv8.json' 
+    elif platform.system()=='Linux':
+        json_fn=datadir+'/json_pvWatts/default_pvwattsv8.json'   
+  
+    with open(json_fn, 'r') as f:
+        data = json.load(f)
         for k,v in data.items():
             if k != "number_inputs":
                 module.value(k, v)
     
     module.SystemDesign.system_capacity = capacity/1000
-    pv.execute()
-    output = np.array(pv.Outputs.gen)*1000
+    module.execute()
+    output = np.array(module.Outputs.gen)*1000
     return(output.tolist())
 
 #################################################################
@@ -48,21 +51,22 @@ def wind_gen():
     Returns wind powr generated in W for each hour in a year
     
     """
-    wind = Windpower.new()
+    module = Windpower.new()
+
+    if platform.system()=='Windows':
+        json_fn=datadir+'\json_windpower\default_windpower.json' 
+    elif platform.system()=='Linux':
+        json_fn=datadir+'/json_windpower/default_windpower.json'   
     
-    dir = datadir + '\SAM INPUTS\WIND\\'
-    file_name = 'windfarm_windpower'
-    module = wind
-    
-    with open(dir + file_name + ".json", 'r') as file:
-        data = json.load(file)
+    with open(json_fn, 'r') as f:
+        data = json.load(f)
         for k,v in data.items():
             if k != "number_inputs":
                 module.value(k, v)
     
     # module.SystemDesign.system_capacity = capacity/1000
-    wind.execute()
-    output = np.array(wind.Outputs.gen)*1000
+    module.execute()
+    output = np.array(module.Outputs.gen)*1000
     return(output.tolist())
 
 #################################################################
@@ -89,12 +93,14 @@ def WindSource(Lat,Lon):
     response.close()
     text = response.text
     
-    
     text2 = 'time(UTC)'+ text.split('\ntime(UTC)')[1]
     text3 = text2.replace('\r\n\r\n','').split('T2m:')[0]
     
-    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\WEATHER_DATA'
-    text_file = open(path + "\weather_data.csv", "w")
+    if platform.system()=='Windows':
+        text_file = open(datadir + "\weather_data.csv", "w")
+    elif platform.system()=='Linux':
+        text_file = open(datadir + "/weather_data.csv", "w")
+
     text_file.write(text3.replace('\r',''))
     text_file.close()
     print('Weather data file was downloaded!')
@@ -115,7 +121,8 @@ def WindSource(Lat,Lon):
     data_40.iloc[2,:]=Z
     data_temp = data_40.iloc[3:].copy()
     S = data_temp.apply(lambda x:speed(Z, Z_anem, data_temp['S']) )
-    data_temp.S = S
+
+    data_temp.S = S.S
     data_40 = data_40.iloc[0:3].append(data_temp,ignore_index=True)
     data = pd.concat([data , data_40],axis=1)
     
@@ -124,7 +131,7 @@ def WindSource(Lat,Lon):
     data_70.iloc[2,:]=Z
     data_temp = data_70.iloc[3:].copy()
     S = data_temp.apply(lambda x:speed(Z, Z_anem, data_temp['S']) )
-    data_temp.S = S
+    data_temp.S = S.S
     data_70 = data_70.iloc[0:3].append(data_temp,ignore_index=True)
     data = pd.concat([data , data_70],axis=1)
     
@@ -133,7 +140,7 @@ def WindSource(Lat,Lon):
     data_100.iloc[2,:]=Z
     data_temp = data_100.iloc[3:].copy()
     S = data_temp.apply(lambda x:speed(Z, Z_anem, data_temp['S']) )
-    data_temp.S = S
+    data_temp.S = S.S
     data_100 = data_100.iloc[0:3].append(data_temp,ignore_index=True)
     data = pd.concat([data , data_100],axis=1)
     
@@ -146,9 +153,12 @@ def WindSource(Lat,Lon):
     
     data_text = data.to_csv(header=False, index=False, line_terminator='\n')
     # data_text = 'Latitude:%d'%(Lat)+'\n' + 'Longitude:%d'%(Lon)+'\n' + data_text
-    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\WIND'
-    
-    text_file = open(path + "\WindSource.csv", "w")
+
+    if platform.system()=='Windows':
+        text_file = open(datadir + "\WindSource.csv", "w")
+    elif platform.system()=='Linux':
+        text_file = open(datadir + "/WindSource.csv.csv", "w")
+
     text_file.write(data_text)
     text_file.close()
     print('Wind source file was created!')
@@ -179,8 +189,12 @@ def SolarResource(Lat,Lon):
     response.close()
     
     data_text = response.text.replace('\r','')
-    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\SOLAR'
-    text_file = open(path + "\SolarSource.epw", "w")
+
+    if platform.system()=='Windows':
+        text_file = open(datadir + "\SolarSource.epw", "w")
+    elif platform.system()=='Linux':
+        text_file = open(datadir + "/SolarSource.epw", "w")
+
     text_file.write(data_text)
     text_file.close()
     print('Solar source file was created!')
@@ -208,12 +222,20 @@ def solcast_weather(location):
                           [key,'x-sam+csv']+ location,
                           ))
     
+    url = 'https://api.solcast.com.au/'
+    values = {'username': 'joe.coventry@anu.edu.au',
+          'password': 'hiltcrc'}
+    r = requests.post(url, data=values)
+    
     response = requests.get(base_url+tool,params=Parameters)
     print('Connection Status:', response.status_code)
     response.close()
     
-    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\WEATHER_DATA'
-    text_file = open(path + "\weather_data_solcast.csv", "w")
+    if platform.system()=='Windows':
+        text_file = open(datadir + "\weather_data_solcast.csv", "w")
+    elif platform.system()=='Linux':
+        text_file = open(datadir + "/weather_data_solcast.csv", "w")
+
     text_file.write(response.text)
     text_file.close()
     print('Weather data was downloaded from Solcast database!')
@@ -230,13 +252,19 @@ def SolarResource_solcast():
     copies the weather data into SOLAR folder for SAM.
 
     """
-    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\WEATHER_DATA'
-    data = pd.read_csv(path + "\weather_data_solcast.csv")
+
+    if platform.system()=='Windows':
+        data = data = pd.read_csv(datadir + "\weather_data_solcast.csv")
+    elif platform.system()=='Linux':
+        data =pd.read_csv(datadir + "/weather_data_solcast.csv")
     
     data_text = data.to_csv(index=False, line_terminator='\n')
-    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\SOLAR'
-    
-    text_file = open(path + "\SolarSource.csv", "w")
+
+    if platform.system()=='Windows':
+        text_file = open(datadir + "\SolarSource.csv", "w")
+    elif platform.system()=='Linux':
+        text_file = open(datadir + "/SolarSource.csv", "w")
+
     text_file.write(data_text)
     text_file.close()
     print('Solar data file was generated from Solcast database!')
@@ -252,12 +280,18 @@ def WindSource_solcast():
     None.
     
     """
-    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\WEATHER_DATA'
-    data = pd.read_csv(path + "\weather_data_solcast.csv", skiprows=0)
-    Lat = data.lat[0]
-    Lon = data.lon[0]
-    data = pd.read_csv(path + "\weather_data_solcast.csv", skiprows=2)
-    
+
+    if platform.system()=='Windows':
+        data = pd.read_csv(datadir + "\weather_data_solcast.csv", skiprows=0)
+        Lat = data.lat[0]
+        Lon = data.lon[0]
+        data = pd.read_csv(datadir + "\weather_data_solcast.csv", skiprows=2)
+    elif platform.system()=='Linux':
+        data = pd.read_csv(datadir + "/weather_data_solcast.csv", skiprows=0)
+        Lat = data.lat[0]
+        Lon = data.lon[0]
+        data = pd.read_csv(datadir + "/weather_data_solcast.csv", skiprows=2)
+
     data_10 = data.iloc[:,[5,14,15,16]].copy()
     data_10.Pressure=data_10.Pressure/1013.25
     data_10 = data_10.rename(columns = {'Temperature':'T',
@@ -307,9 +341,12 @@ def WindSource_solcast():
     data.sort_index(inplace=True)
     
     data_text = data.to_csv(header=False, index=False, line_terminator='\n')
-    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\WIND'
-    
-    text_file = open(path + "\WindSource.csv", "w")
+
+    if platform.system()=='Windows':
+        text_file = open(datadir + "\WindSource.csv", "w")
+    elif platform.system()=='Linux':
+        text_file = open(datadir + "/WindSource.csv.csv", "w")
+
     text_file.write(data_text)
     text_file.close()
     print("Wind source data file was generated from Solcast database!")
