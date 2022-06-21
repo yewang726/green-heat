@@ -35,14 +35,16 @@ def pv_gen(capacity):
         for k,v in data.items():
             if k != "number_inputs":
                 module.value(k, v)
-    
+
+    module.value('solar_resource_file', datadir+'/SolarSource.epw')
+        
     module.SystemDesign.system_capacity = capacity/1000
     module.execute()
     output = np.array(module.Outputs.gen)*1000
     return(output.tolist())
 
 #################################################################
-def wind_gen():
+def wind_gen(capacity):
     """
     Parameters
     ----------
@@ -63,8 +65,10 @@ def wind_gen():
         for k,v in data.items():
             if k != "number_inputs":
                 module.value(k, v)
+
+    module.value('wind_resource_filename', datadir+'/WindSource.csv')
+    module.value('system_capacity', capacity/1000)
     
-    # module.SystemDesign.system_capacity = capacity/1000
     module.execute()
     output = np.array(module.Outputs.gen)*1000
     return(output.tolist())
