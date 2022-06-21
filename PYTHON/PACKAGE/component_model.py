@@ -16,7 +16,7 @@ def pv_gen(capacity):
     """
     Parameters
     ----------
-    capacity in W
+    capacity in kW
 
     Returns system powr generated in W for each hour in a year
     
@@ -33,9 +33,9 @@ def pv_gen(capacity):
             if k != "number_inputs":
                 module.value(k, v)
     
-    module.SystemDesign.system_capacity = capacity/1000
+    module.SystemDesign.system_capacity = capacity
     pv.execute()
-    output = np.array(pv.Outputs.gen)*1000
+    output = np.array(pv.Outputs.gen)
     return(output.tolist())
 
 #################################################################
@@ -62,7 +62,7 @@ def wind_gen():
     
     # module.SystemDesign.system_capacity = capacity/1000
     wind.execute()
-    output = np.array(wind.Outputs.gen)*1000
+    output = np.array(wind.Outputs.gen)
     return(output.tolist())
 
 #################################################################

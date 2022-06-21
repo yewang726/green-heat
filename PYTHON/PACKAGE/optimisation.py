@@ -6,45 +6,45 @@ Created on Tue Mar 29 10:28:44 2022
 """
 from projdirs import optdir
 import numpy as np
-
+# import pdb
 
 def make_dzn_file(DT, ETA_EL, BAT_ETA_in, BAT_ETA_out,
                   C_PV, C_W, C_EL, C_HS, C_BAT_energy, C_BAT_power,  CF,
                   PV_ref_capa, PV_ref_out, Wind_ref_capa, Wind_ref_out, L):
 
-    
+    # pdb.set_trace()    
     string = """
-N = %i;
-
-DT = %.7f;      %% time difference between sample points (s)
-
-ETA_EL = %.7f;  %% conversion factor of the electrolyser (kgH/s/W)
-BAT_ETA_in = %.7f;   %%charging efficiency of electrochemical battery
-BAT_ETA_out = %.7f;  %%discharging efficiency of electrochemical battery 
-
-C_PV = %.7f;    %% unit cost of PV ($/W)
-C_W =  %.7f;    %% unit cost of Wind farm ($/W)
-C_EL =  %.7f;    %% unit cost of electrolyser ($/W)
-C_HS = %.7f;    %% unit cost of hydrogen storage ($/kgH)
-C_BAT_energy = %.7f;   %% unit cost of electrochemical battery energy ($/W.s)
-C_BAT_power = %.7f;   %% unit cost of electrochemical battery power ($/W.s)
-
-R_CAPA = %.7f;       %% reserved hydrogen for lowered capcaity factor
-
-pv_ref_capa = %.7f;       %%the capacity of the reference PV plant (W)
-
-%% Power output time series from reference PV plant (W)
-pv_ref_out = %s;                                  
- 
- 
-wind_ref_capa = %.7f;  %% the capacity of the refernce wind plant (W)
-
-%% power output time series from the reference wind plant (W)
-wind_ref_out = %s;  
-
-%% load timeseries (kgH/s)                             
-L = %s;                              
-""" %(len(L), DT, ETA_EL, BAT_ETA_in, BAT_ETA_out,
+    N = %i;
+    
+    DT = %.3f;      %% time difference between sample points (hr)
+    
+    ETA_EL = %.3f;  %% conversion factor of the electrolyser
+    BAT_ETA_in = %.3f;   %%charging efficiency of electrochemical battery
+    BAT_ETA_out = %.3f;  %%discharging efficiency of electrochemical battery 
+    
+    C_PV = %.3f;    %% unit cost of PV ($/kW)
+    C_W =  %.3f;    %% unit cost of Wind farm ($/kW)
+    C_EL =  %.3f;    %% unit cost of electrolyser ($/kW)
+    C_HS = %.3f;    %% unit cost of hydrogen storage ($/kgH)
+    C_BAT_energy = %.3f;   %% unit cost of electrochemical battery energy ($/kWh)
+    C_BAT_power = %.3f;   %% unit cost of electrochemical battery power ($/kWh)
+    
+    R_CAPA = %.3f;       %% reserved hydrogen for lowered capcaity factor
+    
+    pv_ref_capa = %.3f;       %%the capacity of the reference PV plant (W)
+    
+    %% Power output time series from reference PV plant (W)
+    pv_ref_out = %s;                                  
+     
+     
+    wind_ref_capa = %.3f;  %% the capacity of the refernce wind plant (W)
+    
+    %% power output time series from the reference wind plant (W)
+    wind_ref_out = %s;  
+    
+    %% load timeseries (kgH/s)                             
+    L = %s;                              
+    """ %(len(L), DT, ETA_EL, BAT_ETA_in, BAT_ETA_out,
       C_PV, C_W, C_EL, C_HS, C_BAT_energy, C_BAT_power, 
       (1-CF)*sum(L)*DT, PV_ref_capa, str(PV_ref_out), Wind_ref_capa,
       str(Wind_ref_out), str(L))

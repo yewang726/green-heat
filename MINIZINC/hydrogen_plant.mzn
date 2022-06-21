@@ -5,52 +5,49 @@ set of int: tint = 1..N;     %number of intervals
 set of int: tsamp = 1..N+1;    %number of sample points
 
 float: DT;      %time difference between sample points (also, interval length) (s)
-float: ETA_EL;  %conversion efficiency of the electrolyser (kgH/s/W)
+float: ETA_EL;  %conversion efficiency of the electrolyser (kgH/s/kW)
 float: BAT_ETA_in;   %charging efficiency of electrochemical battery
 float: BAT_ETA_out;  %discharging efficiency of electrochemical battery 
-float: C_PV;    %unit cost of PV plant  $/W
-float: C_W;     %unit cost of wind farm $/W
-float: C_EL;     %unit cost of electrolyser $/W
+float: C_PV;    %unit cost of PV plant  $/kW
+float: C_W;     %unit cost of wind farm $/kW
+float: C_EL;     %unit cost of electrolyser $/kW
 float: C_HS;    %unit cost of hydrogen storage $/(kg of H)
-float: C_BAT_energy;    %unit cost of battery storage ($/W.s)
-float: C_BAT_power;    % unit cost of battery power capacpity ($/W)
+float: C_BAT_energy;    %unit cost of battery storage ($/kWh)
+float: C_BAT_power;    % unit cost of battery power capacpity ($/kW)
 float: R_CAPA;       %virtual hydrogen reserve for reduced capacity factor (kg of H)
-float: pv_ref_capa;    %power capacity of the reference PV plant (W)
-float: wind_ref_capa;    %power capacity of the reference wind plant (W)
+float: pv_ref_capa;    %power capacity of the reference PV plant (kW)
+float: wind_ref_capa;    %power capacity of the reference wind plant (kW)
 
-%array[tint] of float: W; %wind speed timeseries
-%array[tint] of float: S; %solar radiation timeseries
 array[tint] of float: L; %load timeseries (kg of H per hour)
-array[tint] of var float: pv_ref_out;    %power output from the reference PV plant (W)
-array[tint] of var float: wind_ref_out;    %power output from the reference wind plant (W)
+array[tint] of var float: pv_ref_out;    %power output from the reference PV plant (kW)
+array[tint] of var float: wind_ref_out;    %power output from the reference wind plant (kW)
 
 % === VARIABLES ===
-var float: pv_max;    %PV plant rated power
-var float: w_max;     %wind farm rated power
-var float: el_max;     %electrolyser rated power
-var float: hs_capa;    %capacity of hydrogen storage cavern
-var float: bat_capa;    %energy capacity of the electrochemical battery (J)
-var float: bat_pmax;    %power capacity of the electrochemical battery (W)
+var float: pv_max;    %PV plant rated power (kW)
+var float: w_max;     %wind farm rated power (kW)
+var float: el_max;     %electrolyser rated power (kW)
+var float: hs_capa;    %capacity of hydrogen storage cavern (kg of H2)
+var float: bat_capa;    %energy capacity of the electrochemical battery (kWh)
+var float: bat_pmax;    %power capacity of the electrochemical battery (kW)
 
-array[tint] of var float: pv_out;    %power out of PV plant (W)
-array[tint] of var float: w_out;     %power out of wind farm (W)
-array[tint] of var float: pc;    %curtailed power (W)
-array[tint] of var float: el_pin_wpv;    %power into the electrolyser (W)
+array[tint] of var float: pv_out;    %power out of PV plant (kW)
+array[tint] of var float: w_out;     %power out of wind farm (kW)
+array[tint] of var float: pc;    %curtailed power (kW)
+array[tint] of var float: el_pin_wpv;    %power into the electrolyser (kW)
 array[tint] of var float: r_hout;   %hydrogen extracted from virtual reserve (kgH/s)
 array[tint] of var float: el_hout;    %hydrogen produced in each interval (kgH/s)
-array[tint] of var float: el_pin;    %power flow into the electrolyser (W)
-array[tint] of var float: bat_pin;      %power flow into the battery (W)
-array[tint] of var float: bat_pout;     %power flow out of the battery (W)
+array[tint] of var float: el_pin;    %power flow into the electrolyser (kW)
+array[tint] of var float: bat_pin;      %power flow into the battery (kW)
+array[tint] of var float: bat_pout;     %power flow out of the battery (kW)
 array[tsamp] of var float: h_stored;   %stored hydrogen in storage (kg)
 array[tsamp] of var float: r;    %reserved hydrogen for load shut down (kg)
-array[tsamp] of var float: bat_e_stored;  %electrical energy stored in the battery (W.s)
+array[tsamp] of var float: bat_e_stored;  %electrical energy stored in the battery (kWh)
 
 var float: obj;
 obj = C_PV * pv_max + C_W * w_max + C_EL * el_max + C_HS * hs_capa + C_BAT_energy * bat_capa + C_BAT_power * bat_pmax;
 
 %=== CONSTRAINTS ===
 constraint r[1] = R_CAPA;
-%%constraint h_stored[1] = 20;
 constraint h_stored[1] = h_stored[N];
 constraint bat_e_stored[1] = 0;
 
@@ -88,12 +85,12 @@ constraint forall(  i in tsamp  )(  bat_e_stored[i] - bat_capa <= 0 );
 
 constraint forall(  i in tsamp  )(  h_stored[i] >= 0  );
 constraint forall(  i in tsamp  )(  h_stored[i] - hs_capa <= 0  );
-constraint forall(  i in tint  )(   el_hout[i] = el_pin[i] * ETA_EL/ 142e6 );
-constraint forall(  i in tint  )(   h_stored[i+1] = h_stored[i] + (el_hout[i] + r_hout[i] - L[i] )*DT  );
+constraint forall(  i in tint  )(   el_hout[i] = el_pin[i]/3600* ETA_EL/ 39.4 );  %% high calorific value of H2 = 39.4 kWh/kg
+constraint forall(  i in tint  )(   h_stored[i+1] = h_stored[i] + (el_hout[i] + r_hout[i] - L[i] )*DT*3600  );
 
 constraint forall(  i in tsamp  )(  r[i] >= 0  );
 constraint forall(  i in tsamp  )(  r[i] <= R_CAPA  );
-constraint forall(  i in tint  )(  r[i+1] = r[i] - r_hout[i]*DT  );
+constraint forall(  i in tint  )(  r[i+1] = r[i] - r_hout[i]*DT*3600  );
 constraint forall(  i in tint  )(  r_hout[i]>=0  );
 constraint forall(  i in tint  )(  r_hout[i]<=L[i]  );
 
