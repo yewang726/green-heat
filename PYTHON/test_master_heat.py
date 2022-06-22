@@ -18,7 +18,7 @@ class TestMasterHeat(unittest.TestCase):
         location='Port Augusta'
         self.RM=2
         self.t_storage=8
-        master(location, RM=self.RM, t_storage=self.t_storage, P_load_des=500e6, verbose=True)
+        master(location, RM=self.RM, t_storage=self.t_storage, P_load_des=500e3, verbose=True)
 
     def test(self):
 

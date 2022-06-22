@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 def AUD2USD(value):
     return(0.746 * value)
 
-def master(location, RM, t_storage, P_load_des=500e6, verbose=False):
+def master(location, RM, t_storage, P_load_des=500e3, verbose=False):
     '''
     Arguments:
         location   (str)  : site location
@@ -42,10 +42,10 @@ def master(location, RM, t_storage, P_load_des=500e6, verbose=False):
 
 
     ### Get SAM reference system outputs
-    pv_ref_capa = 1e6 #(W)
+    pv_ref_capa = 1e3 #(kW)
     pv_ref_out = pv_gen(pv_ref_capa, casedir)
 
-    wind_ref_capa = 200e6 #(W)
+    wind_ref_capa = 200e3 #(kW)
     wind_ref_out = wind_gen(wind_ref_capa, casedir)
 
     ### Set the inputs for plant optimisation and run the optimisation
@@ -53,23 +53,23 @@ def master(location, RM, t_storage, P_load_des=500e6, verbose=False):
     ETA_heater=0.99
     P_heater=P_load_des/ETA_heater
 
-    simparams = dict(DT = 3600,# [s] time steps
+    simparams = dict(DT = 1.,# [h] time steps
                      RM = RM, # renewable multiple
                      t_storage = t_storage, # [h] storage hour
                      BAT_ETA_in = 0.95,   # charging efficiency of battery
                      BAT_ETA_out = 0.95,  # discharg efficiency of battery
-                     P_heater = P_heater, # [W] heater designed power
+                     P_heater = P_heater, # [kW] heater designed power
                      ETA_heater = ETA_heater, # heater efficiency
-                     C_PV = 1.069,  # [USD/W] unit cost of PV
-                     C_Wind = AUD2USD(1.934), # [USD/W] unit cost of W
-                     C_BAT_energy = AUD2USD(196.76/1000/3600), # [USD/W.s] unit cost of battery energy storage
-                     C_BAT_power = 405.56/1000,  # [USD/W] unit cost of battery power capacpity
-                     C_heater = 206./1000, # [USD/W] unit cost of heater
-                     PV_ref_capa = pv_ref_capa,    #capacity of reference PV plant (W)
-                     PV_ref_out = pv_ref_out,           #power output from reference PV plant (W)
-                     Wind_ref_capa = wind_ref_capa,      #capacity of reference wind farm (W)
-                     Wind_ref_out = wind_ref_out,        #power output from the reference wind farm (W)
-                     L = [P_load_des for i in range(len(pv_ref_out))])       #[W] load profile timeseries
+                     C_PV = 1069,  # [USD/kW] unit cost of PV
+                     C_Wind = 1303, # [USD/kW] unit cost of W
+                     C_BAT_energy = 196.76, # [USD/kWh] unit cost of battery energy storage
+                     C_BAT_power = 405.56 ,  # [USD/kW] unit cost of battery power capacpity
+                     C_heater = 206., # [USD/kW] unit cost of heater
+                     PV_ref_capa = pv_ref_capa,    #capacity of reference PV plant (kW)
+                     PV_ref_out = pv_ref_out,           #power output from reference PV plant (kW)
+                     Wind_ref_capa = wind_ref_capa,      #capacity of reference wind farm (kW)
+                     Wind_ref_out = wind_ref_out,        #power output from the reference wind farm (kW)
+                     L = [P_load_des for i in range(len(pv_ref_out))])       #[kW] load profile timeseries
 
     #run the optimisation function and get the results in a dictionary:
     results = optimise(simparams)
@@ -79,10 +79,10 @@ def master(location, RM, t_storage, P_load_des=500e6, verbose=False):
     RM=results["RM"][0]
     t_storage=results["t_storage"][0]
     r_pv=results["r_pv"][0]
-    pv_max=results["pv_max"][0]/1.e6 # MW
-    wind_max=results["wind_max"][0]/1.e6 # MW
-    bat_capa=results["bat_capa"][0]/1.e6/3600. # MWh
-    bat_pmax=results["bat_pmax"][0]/1.e6 # MW
+    pv_max=results["pv_max"][0]/1.e3 # MW
+    wind_max=results["wind_max"][0]/1.e3 # MW
+    bat_capa=results["bat_capa"][0]/1.e3 # MWh
+    bat_pmax=results["bat_pmax"][0]/1.e3 # MW
     pv_out=results["pv_out"]
     wind_out=results["wind_out"]
     P_curt=results["P_curt"]

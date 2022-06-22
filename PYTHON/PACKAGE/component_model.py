@@ -18,7 +18,7 @@ def pv_gen(capacity, wea_dir=None):
     """
     Parameters
     ----------
-    capacity in W
+    capacity in kW
 
     Returns system powr generated in W for each hour in a year
     
@@ -42,9 +42,9 @@ def pv_gen(capacity, wea_dir=None):
         module.value('solar_resource_file', wea_dir+'/SolarSource.epw')
 
         
-    module.SystemDesign.system_capacity = capacity/1000
+    module.SystemDesign.system_capacity = capacity
     module.execute()
-    output = np.array(module.Outputs.gen)*1000
+    output = np.array(module.Outputs.gen)
     return(output.tolist())
 
 #################################################################
@@ -52,9 +52,9 @@ def wind_gen(capacity, wea_dir=None):
     """
     Parameters
     ----------
-    Capacity will be added later
+    capacity in kW
 
-    Returns wind powr generated in W for each hour in a year
+    Returns wind powr generated in kW for each hour in a year
     
     """
     module = Windpower.new()
@@ -75,10 +75,10 @@ def wind_gen(capacity, wea_dir=None):
     else:
         module.value('wind_resource_filename', wea_dir+'/WindSource.csv')
 
-    module.value('system_capacity', capacity/1000.)
+    module.value('system_capacity', capacity)
     
     module.execute()
-    output = np.array(module.Outputs.gen)*1000.
+    output = np.array(module.Outputs.gen)
     
     return(output.tolist())
 
