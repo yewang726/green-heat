@@ -107,7 +107,7 @@ def master(location, RM, t_storage, P_load_des=500e3, casedir=None, verbose=Fals
     ])
 
 
-    np.savetxt(casedir+'/summary_%s_%s.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
+    np.savetxt(casedir+'/summary_%.1f_%.1f.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
     
     if verbose:
         np.savetxt(casedir+'/pv_out.csv', pv_out, fmt='%.4f', delimiter=',')
@@ -150,12 +150,15 @@ def master(location, RM, t_storage, P_load_des=500e3, casedir=None, verbose=Fals
         '''
 
 if __name__=='__main__':
-    for RM in range(1, 5):
-        for SH in range(0, 12):
+    location='Newman'
+    t_storage=np.arange(0., 3.2, 0.2)
+
+    for RM in range(1, 10):
+        for SH in t_storage:
             casedir='./results/%s'%location
-            res_fn=casedir+'/summary_%s_%s.csv'%(RM, SH)
+            res_fn=casedir+'/summary_%.1f_%.1f.csv'%(RM, SH)
             if not os.path.exists(res_fn):
-                master(location='Newman', RM=RM, t_storage=SH, P_load_des=500e3, casedir=casedir, verbose=False)
+                master(location=location, RM=RM, t_storage=SH, P_load_des=500e3, casedir=casedir, verbose=False)
             print('RM', RM, 'SH', SH, 'Done')
 
 
