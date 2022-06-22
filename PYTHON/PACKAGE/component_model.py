@@ -14,7 +14,7 @@ import PySAM.Pvwattsv8 as PVWatts, Windpower
 import platform
 
 ################################################################
-def pv_gen(capacity):
+def pv_gen(capacity, wea_dir=None):
     """
     Parameters
     ----------
@@ -36,7 +36,11 @@ def pv_gen(capacity):
             if k != "number_inputs":
                 module.value(k, v)
 
-    module.value('solar_resource_file', datadir+'/SolarSource.epw')
+    if wea_dir==None:
+        module.value('solar_resource_file', datadir+'/SolarSource.epw')
+    else:
+        module.value('solar_resource_file', wea_dir+'/SolarSource.epw')
+
         
     module.SystemDesign.system_capacity = capacity/1000
     module.execute()
@@ -44,7 +48,7 @@ def pv_gen(capacity):
     return(output.tolist())
 
 #################################################################
-def wind_gen(capacity):
+def wind_gen(capacity, wea_dir=None):
     """
     Parameters
     ----------
@@ -66,15 +70,20 @@ def wind_gen(capacity):
             if k != "number_inputs":
                 module.value(k, v)
 
-    module.value('wind_resource_filename', datadir+'/WindSource.csv')
-    module.value('system_capacity', capacity/1000)
+    if wea_dir==None:
+        module.value('wind_resource_filename', datadir+'/WindSource.csv')
+    else:
+        module.value('wind_resource_filename', wea_dir+'/WindSource.csv')
+
+    module.value('system_capacity', capacity/1000.)
     
     module.execute()
-    output = np.array(module.Outputs.gen)*1000
+    output = np.array(module.Outputs.gen)*1000.
+    
     return(output.tolist())
 
 #################################################################
-def WindSource(Lat,Lon):
+def WindSource(Lat,Lon, casedir=None):
     """
     The function gets the TMY data from PVGIS:
         API = https://re.jrc.ec.europa.eu/api/v5_2/tmy
@@ -159,9 +168,15 @@ def WindSource(Lat,Lon):
     # data_text = 'Latitude:%d'%(Lat)+'\n' + 'Longitude:%d'%(Lon)+'\n' + data_text
 
     if platform.system()=='Windows':
-        text_file = open(datadir + "\WindSource.csv", "w")
+        if casedir==None:
+            text_file = open(datadir + "\WindSource.csv", "w")
+        else:
+            text_file = open(casedir + "\WindSource.csv", "w")            
     elif platform.system()=='Linux':
-        text_file = open(datadir + "/WindSource.csv.csv", "w")
+        if casedir==None:
+            text_file = open(datadir + "/WindSource.csv", "w")
+        else:
+            text_file = open(casedir + "/WindSource.csv", "w")            
 
     text_file.write(data_text)
     text_file.close()
@@ -169,7 +184,7 @@ def WindSource(Lat,Lon):
     return('Wind source is ready!')
     
 ##################################################################
-def SolarResource(Lat,Lon):
+def SolarResource(Lat,Lon, casedir=None):
     """
     The function gets the TMY data from PVGIS:
         API = https://re.jrc.ec.europa.eu/api/v5_2/tmy
@@ -195,9 +210,15 @@ def SolarResource(Lat,Lon):
     data_text = response.text.replace('\r','')
 
     if platform.system()=='Windows':
-        text_file = open(datadir + "\SolarSource.epw", "w")
+        if casedir==None:
+            text_file = open(datadir + "\SolarSource.epw", "w")
+        else:
+            text_file = open(casedir + "\SolarSource.epw", "w")
     elif platform.system()=='Linux':
-        text_file = open(datadir + "/SolarSource.epw", "w")
+        if casedir==None:
+            text_file = open(datadir + "/SolarSource.epw", "w")
+        else:
+            text_file = open(casedir + "/SolarSource.epw", "w")
 
     text_file.write(data_text)
     text_file.close()
