@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 def AUD2USD(value):
     return(0.746 * value)
 
-def master(location, RM, t_storage, P_load_des=500e3, verbose=False):
+def master(location, RM, t_storage, P_load_des=500e3, casedir=None, verbose=False):
     '''
     Arguments:
         location   (str)  : site location
@@ -24,7 +24,6 @@ def master(location, RM, t_storage, P_load_des=500e3, verbose=False):
 
     '''
 
-    casedir='./results/%s'%location
     if not os.path.exists(casedir):
         os.makedirs(casedir)
 
@@ -69,7 +68,8 @@ def master(location, RM, t_storage, P_load_des=500e3, verbose=False):
                      PV_ref_out = pv_ref_out,           #power output from reference PV plant (kW)
                      Wind_ref_capa = wind_ref_capa,      #capacity of reference wind farm (kW)
                      Wind_ref_out = wind_ref_out,        #power output from the reference wind farm (kW)
-                     L = [P_load_des for i in range(len(pv_ref_out))])       #[kW] load profile timeseries
+                     L = [P_load_des for i in range(len(pv_ref_out))],  #[kW] load profile timeseries
+                     casedir = casedir)  # directory of the minizinc input data file 
 
     #run the optimisation function and get the results in a dictionary:
     results = optimise(simparams)
@@ -110,15 +110,15 @@ def master(location, RM, t_storage, P_load_des=500e3, verbose=False):
     np.savetxt(casedir+'/summary_%s_%s.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
     
     if verbose:
-        np.savetxt('pv_out.csv', pv_out, fmt='%.4f', delimiter=',')
-        np.savetxt('wind_out.csv', wind_out, fmt='%.4f', delimiter=',')
-        np.savetxt('P_curt.csv', P_curt, fmt='%.4f', delimiter=',')
-        np.savetxt('P_st_in.csv', P_st_in, fmt='%.4f', delimiter=',')
-        np.savetxt('P_st_out.csv', P_st_out, fmt='%.4f', delimiter=',')
-        np.savetxt('P_ele.csv', P_ele, fmt='%.4f', delimiter=',')
-        np.savetxt('P_heat.csv', P_heat, fmt='%.4f', delimiter=',')
-        np.savetxt('bat_e_stored.csv', bat_e_stored, fmt='%.4f', delimiter=',')
-        np.savetxt('load.csv', load, fmt='%.4f', delimiter=',')
+        np.savetxt(casedir+'/pv_out.csv', pv_out, fmt='%.4f', delimiter=',')
+        np.savetxt(casedir+'/wind_out.csv', wind_out, fmt='%.4f', delimiter=',')
+        np.savetxt(casedir+'/P_curt.csv', P_curt, fmt='%.4f', delimiter=',')
+        np.savetxt(casedir+'/P_st_in.csv', P_st_in, fmt='%.4f', delimiter=',')
+        np.savetxt(casedir+'/P_st_out.csv', P_st_out, fmt='%.4f', delimiter=',')
+        np.savetxt(casedir+'/P_ele.csv', P_ele, fmt='%.4f', delimiter=',')
+        np.savetxt(casedir+'/P_heat.csv', P_heat, fmt='%.4f', delimiter=',')
+        np.savetxt(casedir+'/bat_e_stored.csv', bat_e_stored, fmt='%.4f', delimiter=',')
+        np.savetxt(casedir+'/load.csv', load, fmt='%.4f', delimiter=',')
 
 
         time=np.arange(len(pv_out))
@@ -152,9 +152,10 @@ def master(location, RM, t_storage, P_load_des=500e3, verbose=False):
 if __name__=='__main__':
     for RM in range(1, 5):
         for SH in range(0, 12):
-            res_fn='./results/%s/summary_%s_%s.csv'%(location, RM, SH)
+            casedir='./results/%s'%location
+            res_fn=casedir+'/summary_%s_%s.csv'%(RM, SH)
             if not os.path.exists(res_fn):
-                master(location='Newman', RM=RM, t_storage=SH, P_load_des=500e6, verbose=False)
+                master(location='Newman', RM=RM, t_storage=SH, P_load_des=500e3, casedir=casedir, verbose=False)
             print('RM', RM, 'SH', SH, 'Done')
 
 

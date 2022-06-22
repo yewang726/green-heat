@@ -10,7 +10,7 @@ import platform
 
 def make_dzn_file(DT, RM, t_storage, BAT_ETA_in, BAT_ETA_out, P_heater, ETA_heater, 
                   C_PV, C_Wind, C_BAT_energy, C_BAT_power, C_heater,
-                  PV_ref_capa, PV_ref_out, Wind_ref_capa, Wind_ref_out, L):
+                  PV_ref_capa, PV_ref_out, Wind_ref_capa, Wind_ref_out, L, casedir=None):
 
     string="""
 N = %i;
@@ -50,8 +50,15 @@ L = %s;
       PV_ref_capa, str(PV_ref_out), Wind_ref_capa,
       str(Wind_ref_out), str(L)) 
 
-    with open(optdir + "pv_wind_battery_hybrid_green_heat_data.dzn", "w") as text_file:
+    if casedir==None:
+        dzn_fn=optdir + "pv_wind_battery_hybrid_green_heat_data.dzn"
+    else:
+        dzn_fn=casedir+"/pv_wind_battery_hybrid_green_heat_data.dzn"
+
+    with open(dzn_fn, "w") as text_file:
         text_file.write(string)
+
+    return dzn_fn
         
         
 #####################################################################
@@ -69,7 +76,7 @@ def optimise(simparams):
     e_hs
 
     """
-    make_dzn_file(**simparams)
+    dzn_fn=make_dzn_file(**simparams)
     from subprocess import check_output
 
     if platform.system()=='Windows':
@@ -77,12 +84,12 @@ def optimise(simparams):
         output = str(check_output([mzdir + 'minizinc', "--soln-sep", '""',
                                    "--search-complete-msg", '""', "--solver",
                                    "COIN-BC", optdir + "pv_wind_battery_hybrid_green_heat.mzn",
-                                   optdir + "pv_wind_battery_hybrid_green_heat_data.dzn"]))
+                                   dzn_fn]))
     elif platform.system()=='Linux':
         output = str(check_output(['minizinc', "--soln-sep", '""',
                                    "--search-complete-msg", '""', "--solver",
                                    "COIN-BC", optdir + "pv_wind_battery_hybrid_green_heat.mzn",
-                                   optdir + "pv_wind_battery_hybrid_green_heat_data.dzn"]))
+                                   dzn_fn]))
 
     
     output = output.replace('[','').replace(']','').split('!')

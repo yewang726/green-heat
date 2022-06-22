@@ -16,18 +16,19 @@ class TestMasterHeat(unittest.TestCase):
 
     def setUp(self):
         location='Port Augusta'
-        self.RM=2
-        self.t_storage=8
-        master(location, RM=self.RM, t_storage=self.t_storage, P_load_des=500e3, verbose=True)
+        RM=2
+        t_storage=8
+        self.casedir='./test'
+        master(location, RM=RM, t_storage=t_storage, P_load_des=500e3, casedir=self.casedir, verbose=True)
 
     def test(self):
 
-        pv_out=np.loadtxt('pv_out.csv', delimiter=',')
-        wind_out=np.loadtxt('wind_out.csv',delimiter=',')
-        P_ele=np.loadtxt('P_ele.csv',delimiter=',')
-        P_curt=np.loadtxt('P_curt.csv', delimiter=',')
-        P_st_in=np.loadtxt('P_st_in.csv', delimiter=',')
-        P_st_out=np.loadtxt('P_st_out.csv', delimiter=',')
+        pv_out=np.loadtxt(self.casedir+'/pv_out.csv', delimiter=',')
+        wind_out=np.loadtxt(self.casedir+'/wind_out.csv',delimiter=',')
+        P_ele=np.loadtxt(self.casedir+'/P_ele.csv',delimiter=',')
+        P_curt=np.loadtxt(self.casedir+'/P_curt.csv', delimiter=',')
+        P_st_in=np.loadtxt(self.casedir+'/P_st_in.csv', delimiter=',')
+        P_st_out=np.loadtxt(self.casedir+'/P_st_out.csv', delimiter=',')
 
         # check
         pv_wind_direct=P_ele-P_st_out
