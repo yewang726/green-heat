@@ -2,156 +2,165 @@ import pandas as pd
 import numpy as np
 import os
 from projdirs import datadir #load the path that contains the data files 
-from PACKAGE.optimisation_green_heat import make_dzn_file, optimise
+from PACKAGE.optimisation_green_heat import optimise
 from PACKAGE.component_model import WindSource, SolarResource,pv_gen, wind_gen,solcast_weather, SolarResource_solcast, WindSource_solcast
 from PACKAGE.get_location import get_location
+from PACKAGE.parameters import Parameters
+from PACKAGE.outputs import Outputs
+from PACKAGE.gen_minizinc_input_data import GenDZN
 
-import matplotlib.pyplot as plt
 
 def AUD2USD(value):
     return(0.746 * value)
 
-def master(location, RM, t_storage, obj, P_load_des=500e3, casedir=None, verbose=False):
+def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, casedir=None, verbose=False):
     '''
     Arguments:
+        model_name (str)  : minizic model name
         location   (str)  : site location
         RM         (float): renewable multiple, the total size of the renewable energy collection system (e.g. PV+Wind) to the load
         t_storage  (float): storage hour (h)
         P_load_des (float): system load design power (W)
-        obj        (str)  : objective of the linear optimisation, options are 'CF', 'CAPEX', and it will choose the corresponding MINIZINC model
         casedir    (str)  : the case directory, if the default None is kept, it will load/save data in 'datadir'
         verbose    (bool) : to save and plot the time series results or not
 
     Returns:
 
-
     '''
-
     if not os.path.exists(casedir):
         os.makedirs(casedir)
 
-    ### Get wind and solar data for the designated location
-
     Lat,Lon = get_location(location)
 
-    if not os.path.exists(casedir+'/WindSource.csv'):
-        WindSource(Lat, Lon, casedir)
-    if not os.path.exists(casedir+'/SolarSource.epw'):
-        SolarResource(Lat,Lon, casedir)
+    if 'pv' in model_name:
+        # Get solar data
+        if not os.path.exists(casedir+'/SolarSource.epw'):
+            SolarResource(Lat,Lon, casedir)
+        # Get SAM reference system outputs
+        pv_ref_capa = 1e3 #(kW)
+        pv_ref_out = pv_gen(pv_ref_capa, casedir)        
+
+
+    if 'wind' in model_name:
+        # Get wind data
+        if not os.path.exists(casedir+'/WindSource.csv'):
+            WindSource(Lat, Lon, casedir)
+        # Get SAM reference system outputs
+        wind_ref_capa = 200e3 #(kW)
+        wind_ref_out = wind_gen(wind_ref_capa, casedir)
+
     #solcast_weather(Newman)
     #SolarResource_solcast()
     #WindSource_solcast()
 
 
-    ### Get SAM reference system outputs
-    pv_ref_capa = 1e3 #(kW)
-    pv_ref_out = pv_gen(pv_ref_capa, casedir)
+    # Set the inputs for plant optimisation and run the optimisation
+    # These inputs are used by make_dzn_file function to create an input text file called hydrogen_plant_data.dzn. 
+    pm=Parameters()
+    if model_name=='pv_wind_battery_heat':
+        P_heater=P_load_des/pm.eta_heater
+        simparams = dict(DT = 1.,# [h] time steps
+                         RM = RM, # renewable multiple
+                         t_storage = t_storage, # [h] storage hour
+                         BAT_ETA_in = pm.eta_bat_in,   # charging efficiency of battery
+                         BAT_ETA_out = pm.eta_bat_out,  # discharg efficiency of battery
+                         P_heater = P_heater, # [kW] heater designed power
+                         ETA_heater = pm.eta_heater, # heater efficiency
+                         C_PV = pm.c_pv,  # [USD/kW] unit cost of PV
+                         C_Wind = pm.c_wind, # [USD/kW] unit cost of W
+                         C_BAT_energy = pm.c_bat_energy, # [USD/kWh] unit cost of battery energy storage
+                         C_BAT_power = pm.c_bat_power,  # [USD/kW] unit cost of battery power capacpity
+                         C_heater = pm.c_heater, # [USD/kW] unit cost of heater
+                         PV_ref_capa = pv_ref_capa,    #capacity of reference PV plant (kW)
+                         PV_ref_out = pv_ref_out,           #power output from reference PV plant (kW)
+                         Wind_ref_capa = wind_ref_capa,      #capacity of reference wind farm (kW)
+                         Wind_ref_out = wind_ref_out,        #power output from the reference wind farm (kW)
+                         L = [P_load_des for i in range(len(pv_ref_out))],  #[kW] load profile timeseries
+                         r_pv= r_pv)  # pv ratio
 
-    wind_ref_capa = 200e3 #(kW)
-    wind_ref_out = wind_gen(wind_ref_capa, casedir)
 
-    ### Set the inputs for plant optimisation and run the optimisation
-    #   These inputs are used by make_dzn_file function to create an input text file called hydrogen_plant_data.dzn. 
-    ETA_heater=0.99
-    P_heater=P_load_des/ETA_heater
+    elif model_name=='pv_battery_heat':
+        P_heater=P_load_des/pm.eta_heater
+        simparams = dict(DT = 1.,# [h] time steps
+                         RM = RM, # renewable multiple
+                         t_storage = t_storage, # [h] storage hour
+                         BAT_ETA_in = pm.eta_bat_in,   # charging efficiency of battery
+                         BAT_ETA_out = pm.eta_bat_out,  # discharg efficiency of battery
+                         P_heater = P_heater, # [kW] heater designed power
+                         ETA_heater = pm.eta_heater, # heater efficiency
+                         C_PV = pm.c_pv,  # [USD/kW] unit cost of PV
+                         C_BAT_energy = pm.c_bat_energy, # [USD/kWh] unit cost of battery energy storage
+                         C_BAT_power = pm.c_bat_power,  # [USD/kW] unit cost of battery power capacpity
+                         C_heater = pm.c_heater, # [USD/kW] unit cost of heater
+                         PV_ref_capa = pv_ref_capa,    #capacity of reference PV plant (kW)
+                         PV_ref_out = pv_ref_out,           #power output from reference PV plant (kW)
+                         L = [P_load_des for i in range(len(pv_ref_out))])  #[kW] load profile timeseries
 
-    simparams = dict(DT = 1.,# [h] time steps
-                     RM = RM, # renewable multiple
-                     t_storage = t_storage, # [h] storage hour
-                     BAT_ETA_in = 0.95,   # charging efficiency of battery
-                     BAT_ETA_out = 0.95,  # discharg efficiency of battery
-                     P_heater = P_heater, # [kW] heater designed power
-                     ETA_heater = ETA_heater, # heater efficiency
-                     C_PV = 1122.73,  # [USD/kW] unit cost of PV
-                     C_Wind = 1455.45, # [USD/kW] unit cost of W
-                     C_BAT_energy = 196.76, # [USD/kWh] unit cost of battery energy storage
-                     C_BAT_power = 405.56 ,  # [USD/kW] unit cost of battery power capacpity
-                     C_heater = 206., # [USD/kW] unit cost of heater
-                     PV_ref_capa = pv_ref_capa,    #capacity of reference PV plant (kW)
-                     PV_ref_out = pv_ref_out,           #power output from reference PV plant (kW)
-                     Wind_ref_capa = wind_ref_capa,      #capacity of reference wind farm (kW)
-                     Wind_ref_out = wind_ref_out,        #power output from the reference wind farm (kW)
-                     L = [P_load_des for i in range(len(pv_ref_out))],  #[kW] load profile timeseries
-                     obj = obj,  # objective of the linear optimisation
-                     casedir = casedir)  # directory of the minizinc input data file 
+
+
+    elif model_name=='pv_wind_TES_heat':
+        P_heater=P_load_des/pm.eta_heater
+        simparams = dict(DT = 1.,# [h] time steps
+                         RM = RM, # renewable multiple
+                         t_storage = t_storage, # [h] storage hour
+                         eta_TES_in = pm.eta_TES_in,   # charging efficiency of battery
+                         eta_TES_out = pm.eta_TES_out,  # discharg efficiency of battery
+                         P_heater = P_heater, # [kW] heater designed power
+                         eta_heater = pm.eta_heater, # heater efficiency
+                         c_PV = pm.c_pv,  # [USD/kW] unit cost of PV
+                         c_Wind = pm.c_wind, # [USD/kW] unit cost of W
+                         c_TES = pm.c_TES, # [USD/kWh] unit cost of TES
+                         c_heater = pm.c_heater, # [USD/kW] unit cost of heater
+                         PV_ref_capa = pv_ref_capa,    # capacity of reference PV plant (kW)
+                         PV_ref_out = pv_ref_out,           #power output from reference PV plant (kW)
+                         Wind_ref_capa = wind_ref_capa,      #capacity of reference wind farm (kW)
+                         Wind_ref_out = wind_ref_out,        #power output from the reference wind farm (kW)
+                         L = [P_load_des for i in range(len(pv_ref_out))],  #[kW] load profile timeseries
+                         r_pv= r_pv)  # pv ratio
+
+
 
     #run the optimisation function and get the results in a dictionary:
-    results = optimise(simparams)
+    genDZN=GenDZN(model_name, simparams, casedir)
+    dzn_fn=genDZN.dzn_fn
+    results = optimise(model_name, dzn_fn, casedir)
 
-    CAPEX=results["CAPEX"][0]/1e6 # M.USD
-    CF=results["CF"][0]
-    RM=results["RM"][0]
-    t_storage=results["t_storage"][0]
-    r_pv=results["r_pv"][0]
-    pv_max=results["pv_max"][0]/1.e3 # MW
-    wind_max=results["wind_max"][0]/1.e3 # MW
-    bat_capa=results["bat_capa"][0]/1.e3 # MWh
-    bat_pmax=results["bat_pmax"][0]/1.e3 # MW
-    pv_out=results["pv_out"]
-    wind_out=results["wind_out"]
-    P_curt=results["P_curt"]
-    P_bat_in=results["P_bat_in"]
-    P_bat_out=results["P_bat_out"]
-    P_ele=results["P_ele"]
-    P_heat=results["P_heat"]
-    bat_e_stored=results["bat_e_stored"]
-    load=results["L"]
+    output=Outputs(verbose)
+    if 'pv_wind_battery_heat' in model_name:
+        output.pv_wind_battery_heat_outputs(results, casedir)
+
+    elif model_name=='pv_battery_heat':
+        output.pv_battery_heat_outputs(results, casedir)
+
+    elif model_name=='wind_battery_heat':
+        output.wind_battery_heat_outputs(results, casedir)
+
+    elif model_name=='pv_wind_TES_heat':
+        output.pv_wind_TES_heat_outputs(results, casedir)
 
 
-    summary=np.array([
-            ['RM',RM, '-'],
-            ['t_storage', t_storage, 'h'],
-            ['CF', CF, '-'],
-            ['CAPEX', CAPEX, 'M.USD'],
-            ['r_pv', r_pv, '-'],
-            ['pv_max', pv_max, 'MW'],
-            ['wind_max', wind_max, 'MW'],
-            ['bat_capa',bat_capa, 'MWh'],
-            ['bat_pmax',bat_pmax, 'MW']
-    ])
 
-
-    np.savetxt(casedir+'/summary_%.1f_%.1f.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
-    
-    if verbose:
-        np.savetxt(casedir+'/pv_out.csv', pv_out, fmt='%.4f', delimiter=',')
-        np.savetxt(casedir+'/wind_out.csv', wind_out, fmt='%.4f', delimiter=',')
-        np.savetxt(casedir+'/P_curt.csv', P_curt, fmt='%.4f', delimiter=',')
-        np.savetxt(casedir+'/P_bat_in.csv', P_bat_in, fmt='%.4f', delimiter=',')
-        np.savetxt(casedir+'/P_bat_out.csv', P_bat_out, fmt='%.4f', delimiter=',')
-        np.savetxt(casedir+'/P_ele.csv', P_ele, fmt='%.4f', delimiter=',')
-        np.savetxt(casedir+'/P_heat.csv', P_heat, fmt='%.4f', delimiter=',')
-        np.savetxt(casedir+'/bat_e_stored.csv', bat_e_stored, fmt='%.4f', delimiter=',')
-        np.savetxt(casedir+'/load.csv', load, fmt='%.4f', delimiter=',')
-
-
-        time=np.arange(len(pv_out))
-        plt.plot(time, pv_out, label='pv out')
-        plt.plot(time, wind_out, label='wind out')
-        plt.plot(time, P_ele, label='P_ele')
-        plt.plot(time, P_curt, label='P_curt')
-        plt.plot(time, P_bat_in, label='P_bat_in')
-        plt.plot(time, P_bat_out, label='P_bat_out')
-        plt.plot(time, load, label='load')
-        plt.legend()
-        plt.show()
-        plt.close()
-
-   
 
 if __name__=='__main__':
     location='Newman'
-    SH=np.arange(0, 20, 1)
-    RM=np.arange(1, 5, 0.5)
+    SH=np.arange(0, 20, 2)
+    RM=np.append(np.arange(1, 5, 0.5), np.arange(5, 11, 2))
+    model_name='pv_wind_battery_heat'
 
     for rm in RM:
         for sh in SH:
-            casedir='./results/%s'%location
+            casedir='./results/%s/%s-wind-only/'%(model_name, location)
             res_fn=casedir+'/summary_%.1f_%.1f.csv'%(rm, sh)
             if not os.path.exists(res_fn):
-                master(location=location, RM=rm, t_storage=sh, P_load_des=500e3, casedir=casedir, verbose=False)
-            print('RM', rm, 'SH', sh, 'Done')
 
+                try:
+                    master(model_name, location, rm, sh, P_load_des=500e3, r_pv=0, casedir=casedir, verbose=False)
+                    print('RM', rm, 'SH', sh, 'Done')
+                except:
+                    print('RM', rm, 'SH', sh, 'Unsolved')
+
+            else:
+                print('RM', rm, 'SH', sh, 'Done')
 
 
 
