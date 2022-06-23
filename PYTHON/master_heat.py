@@ -11,13 +11,16 @@ import matplotlib.pyplot as plt
 def AUD2USD(value):
     return(0.746 * value)
 
-def master(location, RM, t_storage, P_load_des=500e3, casedir=None, verbose=False):
+def master(location, RM, t_storage, obj, P_load_des=500e3, casedir=None, verbose=False):
     '''
     Arguments:
         location   (str)  : site location
         RM         (float): renewable multiple, the total size of the renewable energy collection system (e.g. PV+Wind) to the load
         t_storage  (float): storage hour (h)
         P_load_des (float): system load design power (W)
+        obj        (str)  : objective of the linear optimisation, options are 'CF', 'CAPEX', and it will choose the corresponding MINIZINC model
+        casedir    (str)  : the case directory, if the default None is kept, it will load/save data in 'datadir'
+        verbose    (bool) : to save and plot the time series results or not
 
     Returns:
 
@@ -69,6 +72,7 @@ def master(location, RM, t_storage, P_load_des=500e3, casedir=None, verbose=Fals
                      Wind_ref_capa = wind_ref_capa,      #capacity of reference wind farm (kW)
                      Wind_ref_out = wind_ref_out,        #power output from the reference wind farm (kW)
                      L = [P_load_des for i in range(len(pv_ref_out))],  #[kW] load profile timeseries
+                     obj = obj,  # objective of the linear optimisation
                      casedir = casedir)  # directory of the minizinc input data file 
 
     #run the optimisation function and get the results in a dictionary:
@@ -86,8 +90,8 @@ def master(location, RM, t_storage, P_load_des=500e3, casedir=None, verbose=Fals
     pv_out=results["pv_out"]
     wind_out=results["wind_out"]
     P_curt=results["P_curt"]
-    P_st_in=results["P_st_in"]
-    P_st_out=results["P_st_out"]
+    P_bat_in=results["P_bat_in"]
+    P_bat_out=results["P_bat_out"]
     P_ele=results["P_ele"]
     P_heat=results["P_heat"]
     bat_e_stored=results["bat_e_stored"]
@@ -113,8 +117,8 @@ def master(location, RM, t_storage, P_load_des=500e3, casedir=None, verbose=Fals
         np.savetxt(casedir+'/pv_out.csv', pv_out, fmt='%.4f', delimiter=',')
         np.savetxt(casedir+'/wind_out.csv', wind_out, fmt='%.4f', delimiter=',')
         np.savetxt(casedir+'/P_curt.csv', P_curt, fmt='%.4f', delimiter=',')
-        np.savetxt(casedir+'/P_st_in.csv', P_st_in, fmt='%.4f', delimiter=',')
-        np.savetxt(casedir+'/P_st_out.csv', P_st_out, fmt='%.4f', delimiter=',')
+        np.savetxt(casedir+'/P_bat_in.csv', P_bat_in, fmt='%.4f', delimiter=',')
+        np.savetxt(casedir+'/P_bat_out.csv', P_bat_out, fmt='%.4f', delimiter=',')
         np.savetxt(casedir+'/P_ele.csv', P_ele, fmt='%.4f', delimiter=',')
         np.savetxt(casedir+'/P_heat.csv', P_heat, fmt='%.4f', delimiter=',')
         np.savetxt(casedir+'/bat_e_stored.csv', bat_e_stored, fmt='%.4f', delimiter=',')
@@ -126,28 +130,14 @@ def master(location, RM, t_storage, P_load_des=500e3, casedir=None, verbose=Fals
         plt.plot(time, wind_out, label='wind out')
         plt.plot(time, P_ele, label='P_ele')
         plt.plot(time, P_curt, label='P_curt')
-        plt.plot(time, P_st_in, label='P_st_in')
-        plt.plot(time, P_st_out, label='P_st_out')
+        plt.plot(time, P_bat_in, label='P_bat_in')
+        plt.plot(time, P_bat_out, label='P_bat_out')
         plt.plot(time, load, label='load')
         plt.legend()
         plt.show()
         plt.close()
 
-        '''
-        pv_out=np.loadtxt('pv_out.csv', delimiter=',')
-        wind_out=np.loadtxt('wind_out.csv',delimiter=',')
-        P_ele=np.loadtxt('P_ele.csv',delimiter=',')
-        P_curt=np.loadtxt('P_curt.csv', delimiter=',')
-        P_st_in=np.loadtxt('P_st_in.csv', delimiter=',')
-        P_st_out=np.loadtxt('P_st_out.csv', delimiter=',')
-
-        print(np.max(P_curt))
-
-        # check
-        pv_wind_direct=P_ele-P_st_out
-        check=(pv_out+ wind_out - P_curt - pv_wind_direct - P_st_in)
-        print(np.sum(check))
-        '''
+   
 
 if __name__=='__main__':
     location='Newman'

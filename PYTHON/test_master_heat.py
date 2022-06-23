@@ -19,7 +19,7 @@ class TestMasterHeat(unittest.TestCase):
         RM=2
         t_storage=8
         self.casedir='./test'
-        master(location, RM=RM, t_storage=t_storage, P_load_des=500e3, casedir=self.casedir, verbose=True)
+        master(location, RM=RM, t_storage=t_storage, obj='CF', P_load_des=500e3, casedir=self.casedir, verbose=True)
 
     def test(self):
 
@@ -27,12 +27,12 @@ class TestMasterHeat(unittest.TestCase):
         wind_out=np.loadtxt(self.casedir+'/wind_out.csv',delimiter=',')
         P_ele=np.loadtxt(self.casedir+'/P_ele.csv',delimiter=',')
         P_curt=np.loadtxt(self.casedir+'/P_curt.csv', delimiter=',')
-        P_st_in=np.loadtxt(self.casedir+'/P_st_in.csv', delimiter=',')
-        P_st_out=np.loadtxt(self.casedir+'/P_st_out.csv', delimiter=',')
+        P_bat_in=np.loadtxt(self.casedir+'/P_bat_in.csv', delimiter=',')
+        P_bat_out=np.loadtxt(self.casedir+'/P_bat_out.csv', delimiter=',')
 
         # check
-        pv_wind_direct=P_ele-P_st_out
-        check=sum(pv_out+ wind_out - P_curt - pv_wind_direct - P_st_in)
+        pv_wind_direct=P_ele-P_bat_out
+        check=sum(pv_out+ wind_out - P_curt - pv_wind_direct - P_bat_in)
         print('check=', check)
         self.assertTrue(check<1e-2)
 

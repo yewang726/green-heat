@@ -36,8 +36,8 @@ array[tint] of var float: P_ele;    % power into the heater (kW)
 array[tint] of var float: P_heat;    % heat into the load (kW)
 var float: bat_capa;    % energy capacity of the electrochemical battery (kWh)
 var float: bat_pmax;    % power capacity of the electrochemical battery (kW)
-array[tint] of var float: P_st_in;      % power flow into the battery (kW)
-array[tint] of var float: P_st_out;     % power flow out of the battery (kW)
+array[tint] of var float: P_bat_in;      % power flow into the battery (kW)
+array[tint] of var float: P_bat_out;     % power flow out of the battery (kW)
 array[tsamp] of var float: bat_e_stored;  % electrical energy stored in the battery (kWh)
 
 var float: obj; % objective is the capacity factor
@@ -56,21 +56,21 @@ constraint CAPEX=C_PV * pv_max + C_Wind * wind_max + C_BAT_energy * bat_capa + C
 
 constraint forall(  i in tint  )(  pv_out[i] = pv_max/pv_ref_capa * pv_ref_out[i]  );
 constraint forall(  i in tint  )(  wind_out[i] = wind_max/wind_ref_capa * wind_ref_out[i]  );
-constraint forall(  i in tint  )(  pv_out[i] + wind_out[i] - P_curt[i] - pv_wind_direct[i] - P_st_in[i] = 0  );
-constraint forall(  i in tint  )(  P_ele[i] = pv_wind_direct[i] + P_st_out[i] );
+constraint forall(  i in tint  )(  pv_out[i] + wind_out[i] - P_curt[i] - pv_wind_direct[i] - P_bat_in[i] = 0  );
+constraint forall(  i in tint  )(  P_ele[i] = pv_wind_direct[i] + P_bat_out[i] );
 constraint forall(  i in tint  )(  P_heat[i]=P_ele[i]*ETA_heater  );
 
 constraint forall(  i in tint  )(  P_curt[i] >= 0  );
-constraint forall(  i in tint  )(  P_st_in[i] >= 0 );
-constraint forall(  i in tint  )(  P_st_in[i] - bat_pmax <= 0 );
+constraint forall(  i in tint  )(  P_bat_in[i] >= 0 );
+constraint forall(  i in tint  )(  P_bat_in[i] - bat_pmax <= 0 );
 
-constraint forall(  i in tint  )(  P_st_out[i] >= 0 );
-constraint forall(  i in tint  )(  P_st_out[i] - bat_pmax <= 0 );
+constraint forall(  i in tint  )(  P_bat_out[i] >= 0 );
+constraint forall(  i in tint  )(  P_bat_out[i] - bat_pmax <= 0 );
 
 constraint forall(  i in tint  )(  pv_wind_direct[i] >= 0  );
-constraint forall(  i in tint  )(  pv_wind_direct[i] + P_st_out[i] - P_heater <= 0  );
+constraint forall(  i in tint  )(  pv_wind_direct[i] + P_bat_out[i] - P_heater <= 0  );
 
-constraint forall(  i in tint  )(  bat_e_stored[i+1] = bat_e_stored[i] + ( P_st_in[i] * BAT_ETA_in - P_st_out[i]/BAT_ETA_out ) * DT  );
+constraint forall(  i in tint  )(  bat_e_stored[i+1] = bat_e_stored[i] + ( P_bat_in[i] * BAT_ETA_in - P_bat_out[i]/BAT_ETA_out ) * DT  );
 constraint forall(  i in tsamp  )(  bat_e_stored[i] >= 0 );
 constraint forall(  i in tsamp  )(  bat_e_stored[i] - bat_capa <= 0 );  
 
@@ -90,8 +90,8 @@ output  ["!"] ++
         ["pv_out="] ++ [show(pv_out)] ++ [";"]++
         ["wind_out="] ++ [show(wind_out)] ++ [";"]++
         ["P_curt="] ++ [show(P_curt)] ++ [";"] ++
-        ["P_st_in="] ++ [show(P_st_in)] ++ [";"] ++
-        ["P_st_out="] ++ [show(P_st_out)] ++ [";"] ++
+        ["P_bat_in="] ++ [show(P_bat_in)] ++ [";"] ++
+        ["P_bat_out="] ++ [show(P_bat_out)] ++ [";"] ++
         ["P_ele="] ++ [show(P_ele)] ++ [";"] ++
         ["P_heat="] ++ [show(P_heat)] ++ [";"] ++
         ["bat_e_stored="] ++ [show(bat_e_stored)] ++ [";"] ++

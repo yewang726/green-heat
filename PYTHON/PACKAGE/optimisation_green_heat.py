@@ -10,7 +10,7 @@ import platform
 
 def make_dzn_file(DT, RM, t_storage, BAT_ETA_in, BAT_ETA_out, P_heater, ETA_heater, 
                   C_PV, C_Wind, C_BAT_energy, C_BAT_power, C_heater,
-                  PV_ref_capa, PV_ref_out, Wind_ref_capa, Wind_ref_out, L, casedir=None):
+                  PV_ref_capa, PV_ref_out, Wind_ref_capa, Wind_ref_out, L, casedir=None, obj=None):
 
     string="""
 N = %i;
@@ -50,10 +50,14 @@ L = %s;
       PV_ref_capa, str(PV_ref_out), Wind_ref_capa,
       str(Wind_ref_out), str(L)) 
 
+
+    if obj=='CF':
+        model_name='pv_wind_battery_heat_obj-CF'
+
     if casedir==None:
-        dzn_fn=optdir + "pv_wind_battery_hybrid_green_heat_data.dzn"
+        dzn_fn=optdir +"%s_data.dzn"%model_name
     else:
-        dzn_fn=casedir+"/pv_wind_battery_hybrid_green_heat_data.dzn"
+        dzn_fn=casedir+"/%s_data.dzn"%model_name
 
     with open(dzn_fn, "w") as text_file:
         text_file.write(string)
@@ -79,16 +83,20 @@ def optimise(simparams):
     dzn_fn=make_dzn_file(**simparams)
     from subprocess import check_output
 
+    obj=simparams['obj']
+    if obj=='CF':
+        model_name='pv_wind_battery_heat_obj-CF'
+
     if platform.system()=='Windows':
         mzdir = r'C:\\Program Files\\MiniZinc\\'
         output = str(check_output([mzdir + 'minizinc', "--soln-sep", '""',
                                    "--search-complete-msg", '""', "--solver",
-                                   "COIN-BC", optdir + "pv_wind_battery_hybrid_green_heat.mzn",
+                                   "COIN-BC", optdir + ".mzn"%model_name,
                                    dzn_fn]))
     elif platform.system()=='Linux':
         output = str(check_output(['minizinc', "--soln-sep", '""',
                                    "--search-complete-msg", '""', "--solver",
-                                   "COIN-BC", optdir + "pv_wind_battery_hybrid_green_heat.mzn",
+                                   "COIN-BC", optdir + "%s.mzn"%model_name,
                                    dzn_fn]))
 
     
