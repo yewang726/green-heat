@@ -59,8 +59,8 @@ def master(location, RM, t_storage, P_load_des=500e3, casedir=None, verbose=Fals
                      BAT_ETA_out = 0.95,  # discharg efficiency of battery
                      P_heater = P_heater, # [kW] heater designed power
                      ETA_heater = ETA_heater, # heater efficiency
-                     C_PV = 1069,  # [USD/kW] unit cost of PV
-                     C_Wind = 1303, # [USD/kW] unit cost of W
+                     C_PV = 1122.73,  # [USD/kW] unit cost of PV
+                     C_Wind = 1455.45, # [USD/kW] unit cost of W
                      C_BAT_energy = 196.76, # [USD/kWh] unit cost of battery energy storage
                      C_BAT_power = 405.56 ,  # [USD/kW] unit cost of battery power capacpity
                      C_heater = 206., # [USD/kW] unit cost of heater
@@ -151,15 +151,16 @@ def master(location, RM, t_storage, P_load_des=500e3, casedir=None, verbose=Fals
 
 if __name__=='__main__':
     location='Newman'
-    t_storage=np.arange(0., 3.2, 0.2)
+    SH=np.arange(0, 20, 1)
+    RM=np.arange(1, 5, 0.5)
 
-    for RM in range(1, 10):
-        for SH in t_storage:
+    for rm in RM:
+        for sh in SH:
             casedir='./results/%s'%location
-            res_fn=casedir+'/summary_%.1f_%.1f.csv'%(RM, SH)
+            res_fn=casedir+'/summary_%.1f_%.1f.csv'%(rm, sh)
             if not os.path.exists(res_fn):
-                master(location=location, RM=RM, t_storage=SH, P_load_des=500e3, casedir=casedir, verbose=False)
-            print('RM', RM, 'SH', SH, 'Done')
+                master(location=location, RM=rm, t_storage=sh, P_load_des=500e3, casedir=casedir, verbose=False)
+            print('RM', rm, 'SH', sh, 'Done')
 
 
 
