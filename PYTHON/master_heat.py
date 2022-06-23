@@ -3,7 +3,7 @@ import numpy as np
 import os
 from projdirs import datadir #load the path that contains the data files 
 from PACKAGE.optimisation_green_heat import optimise
-from PACKAGE.component_model import WindSource, SolarResource,pv_gen, wind_gen,solcast_weather, SolarResource_solcast, WindSource_solcast
+from PACKAGE.component_model import WindSource, SolarResource,pv_gen, wind_gen, cst_gen, solcast_weather, SolarResource_solcast, WindSource_solcast
 from PACKAGE.get_location import get_location
 from PACKAGE.parameters import Parameters
 from PACKAGE.outputs import Outputs
@@ -48,6 +48,13 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, cas
         # Get SAM reference system outputs
         wind_ref_capa = 200e3 #(kW)
         wind_ref_out = wind_gen(wind_ref_capa, casedir)
+
+
+    if 'CST' in model_name:
+        if not os.path.exists(casedir+'/SolarSource.epw'):
+            SolarResource(Lat,Lon, casedir)
+        # Get SAM output 
+        P_recv_out, H_recv, D_recv, H_tower, n_helios, A_land = cst_gen(Q_des_th=P_load_des, SM=RM, wea_dir=casedir)
 
     #solcast_weather(Newman)
     #SolarResource_solcast()
@@ -119,6 +126,14 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, cas
                          r_pv= r_pv)  # pv ratio
 
 
+    elif model_name=='CST_TES_heat':
+        simparams = dict(DT = 1.,# [h] time steps
+                         t_storage = t_storage, # [h] storage hour
+                         eta_TES_in = pm.eta_TES_in,   # charging efficiency of battery
+                         eta_TES_out = pm.eta_TES_out,  # discharg efficiency of battery
+                         P_recv_out = P_recv_out,        #power output from the reference wind farm (kW)
+                         L = [P_load_des for i in range(len(P_recv_out))])  #[kW] load profile timeseries
+
 
     #run the optimisation function and get the results in a dictionary:
     genDZN=GenDZN(model_name, simparams, casedir)
@@ -138,6 +153,8 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, cas
     elif model_name=='pv_wind_TES_heat':
         output.pv_wind_TES_heat_outputs(results, casedir)
 
+    elif model_name=='CST_TES_heat':
+        output.CST_TES_heat_outputs(results, casedir, RM, H_recv, D_recv, H_tower, n_helios, A_land)
 
 
 

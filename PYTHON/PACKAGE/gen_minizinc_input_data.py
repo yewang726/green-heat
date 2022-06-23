@@ -18,8 +18,9 @@ class GenDZN:
             textinput=self.data_pv_wind_TES_heat(**simparams)
         elif model_name=='pv_battery_heat':
             textinput=self.data_pv_battery_heat(**simparams)            
-        elif model_name=='wind_battery_heat':
-            textinput=self.data_wind_battery_heat(**simparams)             
+        elif model_name=='CST_TES_heat':
+            textinput=self.data_CST_TES_heat(**simparams)  
+                   
         
 
         if casedir==None:
@@ -167,4 +168,25 @@ L = %s;
         if r_pv!=None:
             textinput+='\nr_pv=%s;'%r_pv
         
+        return textinput 
+
+
+    def data_CST_TES_heat(self, DT, t_storage, eta_TES_in, eta_TES_out, P_recv_out, L):
+
+        textinput="""
+N = %i;
+DT = %.2f;      %% time difference between sample points (s)
+t_storage = %.1f;   %% storage hour (h)
+eta_TES_in = %.2f;   %%charging efficiency of electrochemical battery
+eta_TES_out = %.2f;  %%discharging efficiency of electrochemical battery 
+
+%% Power output time series from the receiver (kW)
+P_recv_out = %s;                                  
+
+%% load timeseries                          
+L = %s;                              
+"""%(len(L), DT, t_storage, eta_TES_in, eta_TES_out,
+        str(P_recv_out), str(L)) 
+
+
         return textinput 

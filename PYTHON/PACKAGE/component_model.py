@@ -10,7 +10,7 @@ import numpy as np
 import pandas as pd
 import json, io, requests
 import PySAM.Pvwattsv8 as PVWatts, Windpower
-
+import PySAM.TcsmoltenSalt as CSP
 import platform
 
 ################################################################
@@ -32,9 +32,10 @@ def pv_gen(capacity, wea_dir=None):
   
     with open(json_fn, 'r') as f:
         data = json.load(f)
-        for k,v in data.items():
-            if k != "number_inputs":
-                module.value(k, v)
+    f.close()
+    for k,v in data.items():
+        if k != "number_inputs":
+            module.value(k, v)
 
     if wea_dir==None:
         module.value('solar_resource_file', datadir+'/SolarSource.epw')
@@ -57,7 +58,7 @@ def wind_gen(capacity, wea_dir=None):
     Returns wind powr generated in kW for each hour in a year
     
     """
-    module = Windpower.new()
+    module = CSP.new()
 
     if platform.system()=='Windows':
         json_fn=datadir+'\json_windpower\default_windpower.json' 
@@ -66,9 +67,11 @@ def wind_gen(capacity, wea_dir=None):
     
     with open(json_fn, 'r') as f:
         data = json.load(f)
-        for k,v in data.items():
-            if k != "number_inputs":
-                module.value(k, v)
+    f.close()
+
+    for k,v in data.items():
+        if k != "number_inputs":
+            module.value(k, v)
 
     if wea_dir==None:
         module.value('wind_resource_filename', datadir+'/WindSource.csv')
@@ -81,6 +84,62 @@ def wind_gen(capacity, wea_dir=None):
     output = np.array(module.Outputs.gen)
     
     return(output.tolist())
+
+
+def cst_gen(Q_des_th, SM, wea_dir=None):
+
+    """
+    Arguments:
+        Q_des_th (float): system design thermal power (kW)
+        SM       (float): solar multiple
+        wea_dir  (str)  : directory of the weather data
+    """
+    module = CSP.new()
+
+    if platform.system()=='Windows':
+        json_fn=datadir+'\json_cst\SAM-CSP-molten-salt_tcsmolten_salt.json' 
+    elif platform.system()=='Linux':
+        json_fn=datadir+'/json_cst/SAM-CSP-molten-salt_tcsmolten_salt.json'   
+    
+    with open(json_fn, 'r') as f:
+        data = json.load(f)
+    f.close()
+
+    for k,v in data.items():
+        if k != "number_inputs":
+            module.value(k, v)
+
+    module.value('f_rec_min', 1e-6) # minimal receiver turndown fraction
+    module.value('solarm', SM) # solar multiple
+    module.value('tshours', 0) # no need to set storage, because this model cares only about the receiver output
+
+    if wea_dir==None:
+        module.value('solar_resource_file', datadir+'/SolarSource.epw')
+    else:
+        module.value('solar_resource_file', wea_dir+'/SolarSource.epw')
+
+    P_pb_name=Q_des_th*0.412/1000. # 0.412 is the default PB efficiency, and convert to MW
+    module.value('P_ref', P_pb_name) # this is capacity of electricity, 
+
+    module.execute()
+
+    H_recv=module.TowerAndReceiver.rec_height #Receiver height [m]
+    D_recv=module.TowerAndReceiver.D_rec #The overall outer diameter of the receiver [m]
+    H_tower=module.TowerAndReceiver.h_tower # Tower height [m]
+    n_helios=module.HeliostatField.N_hel #Number of heliostats
+    A_land=module.Outputs.csp_pt_cost_total_land_area*4046.86 # Total land area [m2] (converted [acre] to m2)
+
+    #eta_field=module.Outputs.eta_field # field optical efficiency
+    eta_recv=np.array(module.Outputs.eta_therm) # receiver thermal efficiency
+    Q_recv_in=np.array(module.Outputs.q_dot_rec_inc) # incident thermal power on the receiver [MW_th]
+
+    Q_recv_out=Q_recv_in*eta_recv*1000. # kW_th 
+
+
+    return(Q_recv_out.tolist(), H_recv, D_recv, H_tower, n_helios, A_land)    
+
+
+
 
 #################################################################
 def WindSource(Lat,Lon, casedir=None):

@@ -42,10 +42,8 @@ def optimise(model_name, dzn_fn, casedir=None):
     
     output = output.replace('[','').replace(']','').split('!')
 
-    for string in output:
-        if 'CAPEX' in string:
-            results = string.split(';')
-    
+
+    results = output[1].split(';')   
     results = list(filter(None, results))
     
     RESULTS = {}

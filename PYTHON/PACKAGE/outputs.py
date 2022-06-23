@@ -215,6 +215,45 @@ class Outputs:
             np.savetxt(casedir+'/load.csv', load, fmt='%.4f', delimiter=',')
 
 
+    def CST_TES_heat_outputs(self, results, casedir, SM, H_recv, D_recv, H_tower, n_helios, A_land):
 
+        CF=results["CF"][0]
+        t_storage=results["t_storage"][0]
+        TES_capa=results["TES_capa"][0]/1.e3 # MWh
+        TES_pmax=results["TES_pmax"][0]/1.e3 # MW
+        P_recv_out=results["P_recv_out"]
+        P_curt=results["P_curt"]
+        P_direct=results["P_direct"]
+        P_TES_in=results["P_TES_in"]
+        P_TES_out=results["P_TES_out"]
+        P_heat=results["P_heat"]
+        TES_e_stored=results["TES_e_stored"]
+        load=results["L"]
+
+
+        summary=np.array([
+                ['SM',SM, '-'],
+                ['t_storage', t_storage, 'h'],
+                ['CF', CF, '-'],
+                ['H_recv', H_recv, 'm'],
+                ['D_recv', D_recv, 'm'],
+                ['H_tower', H_tower, 'm'],
+                ['n_helios', n_helios, '-'],
+                ['A_land', A_land, 'm2'],
+                ['TES_capa',TES_capa, 'MWh'],
+                ['TES_pmax',TES_pmax, 'MW']
+        ])
+
+        np.savetxt(casedir+'/summary_%.1f_%.1f.csv'%(SM, t_storage), summary, fmt='%s', delimiter=',')
+        
+        if self.verbose:
+            np.savetxt(casedir+'/P_recv_out.csv', P_recv_out, fmt='%.4f', delimiter=',')
+            np.savetxt(casedir+'/P_curt.csv', P_curt, fmt='%.4f', delimiter=',')
+            np.savetxt(casedir+'/P_direct.csv', P_direct, fmt='%.4f', delimiter=',')
+            np.savetxt(casedir+'/P_TES_in.csv', P_TES_in, fmt='%.4f', delimiter=',')
+            np.savetxt(casedir+'/P_TES_out.csv', P_TES_out, fmt='%.4f', delimiter=',')
+            np.savetxt(casedir+'/P_heat.csv', P_heat, fmt='%.4f', delimiter=',')
+            np.savetxt(casedir+'/TES_e_stored.csv', TES_e_stored, fmt='%.4f', delimiter=',')
+            np.savetxt(casedir+'/load.csv', load, fmt='%.4f', delimiter=',')
   
 
