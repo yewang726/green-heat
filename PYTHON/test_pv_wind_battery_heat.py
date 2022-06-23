@@ -2,15 +2,11 @@ import pandas as pd
 import numpy as np
 import os
 from projdirs import datadir #load the path that contains the data files 
-from PACKAGE.optimisation_green_heat import make_dzn_file, optimise
-from PACKAGE.component_model import WindSource, SolarResource,pv_gen, wind_gen,solcast_weather, SolarResource_solcast, WindSource_solcast
 from master_heat import master
 
 import unittest
 import matplotlib.pyplot as plt
 
-def AUD2USD(value):
-    return(0.746 * value)
 
 class TestMasterHeat(unittest.TestCase):
 
@@ -18,8 +14,10 @@ class TestMasterHeat(unittest.TestCase):
         location='Port Augusta'
         RM=2
         t_storage=8
-        self.casedir='./test'
-        master(location, RM=RM, t_storage=t_storage, obj='CF', P_load_des=500e3, casedir=self.casedir, verbose=True)
+
+        model_name='pv_wind_battery_heat'
+        self.casedir='test/'+model_name
+        master(model_name, location, RM=RM, t_storage=t_storage, P_load_des=500e3, casedir=self.casedir, verbose=True)
 
     def test(self):
 
