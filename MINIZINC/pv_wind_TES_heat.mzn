@@ -43,7 +43,7 @@ var float: TES_capa;    % energy capacity of the TES (kWh)
 var float: TES_pmax;    % power capacity of the TES (kW)
 array[tint] of var float: P_TES_in;      % power flow into the TES (kW)
 array[tint] of var float: P_TES_out;     % power flow out of the TES (kW)
-array[tsamp] of var float: TES_e_stored;  % electrical energy stored in the battery (kWh)
+array[tsamp] of var float: TES_e_stored;  % thermal energy stored in the TES (kWh)
 
 var float: obj; % objective is the capacity factor
 %obj = sum(P_heat);
