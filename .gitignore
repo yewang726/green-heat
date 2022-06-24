@@ -2,7 +2,6 @@
 *.dll
 *.h
 *.pyc
-*.csv
 *.dzn
 MINIZINC/hydrogen_plant_data.dzn
 MINIZINC/hydrogen_plant_data.dzn
