@@ -15,7 +15,7 @@ class Outputs:
         self.verbose=verbose
         
 
-    def pv_wind_battery_heat_outputs(self, results, casedir):
+    def pv_wind_battery_heat_outputs(self, results, casedir, LCOH):
 
         CAPEX=results["CAPEX"][0]/1e6 # M.USD
         CF=results["CF"][0]
@@ -40,6 +40,7 @@ class Outputs:
         summary=np.array([
                 ['RM',RM, '-'],
                 ['t_storage', t_storage, 'h'],
+                ['LCOH', LCOH, '-'],
                 ['CF', CF, '-'],
                 ['CAPEX', CAPEX, 'M.USD'],
                 ['r_pv', r_pv, '-'],
@@ -78,7 +79,7 @@ class Outputs:
 
 
 
-    def pv_battery_heat_outputs(self, results, casedir):
+    def pv_battery_heat_outputs(self, results, casedir, LCOH):
 
         CAPEX=results["CAPEX"][0]/1e6 # M.USD
         CF=results["CF"][0]
@@ -100,6 +101,7 @@ class Outputs:
         summary=np.array([
                 ['RM',RM, '-'],
                 ['t_storage', t_storage, 'h'],
+                ['LCOH', LCOH, '-'],
                 ['CF', CF, '-'],
                 ['CAPEX', CAPEX, 'M.USD'],
                 ['pv_max', pv_max, 'MW'],
@@ -121,7 +123,7 @@ class Outputs:
 
 
 
-    def wind_battery_heat_outputs(self, results, casedir):
+    def wind_battery_heat_outputs(self, results, casedir, LCOH):
 
         CAPEX=results["CAPEX"][0]/1e6 # M.USD
         CF=results["CF"][0]
@@ -143,6 +145,7 @@ class Outputs:
         summary=np.array([
                 ['RM',RM, '-'],
                 ['t_storage', t_storage, 'h'],
+                ['LCOH', LCOH, '-'],
                 ['CF', CF, '-'],
                 ['CAPEX', CAPEX, 'M.USD'],
                 ['wind_max', wind_max, 'MW'],
@@ -163,7 +166,7 @@ class Outputs:
             np.savetxt(casedir+'/load.csv', load, fmt='%.4f', delimiter=',')
 
 
-    def pv_wind_TES_heat_outputs(self, results, casedir):
+    def pv_wind_TES_heat_outputs(self, results, casedir, LCOH):
 
         CAPEX=results["CAPEX"][0]/1e6 # M.USD
         CF=results["CF"][0]
@@ -190,6 +193,7 @@ class Outputs:
         summary=np.array([
                 ['RM',RM, '-'],
                 ['t_storage', t_storage, 'h'],
+                ['LCOH', LCOH, '-'],
                 ['CF', CF, '-'],
                 ['CAPEX', CAPEX, 'M.USD'],
                 ['r_pv', r_pv, '-'],
@@ -215,7 +219,7 @@ class Outputs:
             np.savetxt(casedir+'/load.csv', load, fmt='%.4f', delimiter=',')
 
 
-    def CST_TES_heat_outputs(self, results, casedir, SM, H_recv, D_recv, H_tower, n_helios, A_land):
+    def CST_TES_heat_outputs(self, results, casedir, SM, H_recv, D_recv, H_tower, n_helios, A_land, LCOH):
 
         CF=results["CF"][0]
         t_storage=results["t_storage"][0]
@@ -234,6 +238,7 @@ class Outputs:
         summary=np.array([
                 ['SM',SM, '-'],
                 ['t_storage', t_storage, 'h'],
+                ['LCOH', LCOH, '-'],
                 ['CF', CF, '-'],
                 ['H_recv', H_recv, 'm'],
                 ['D_recv', D_recv, 'm'],

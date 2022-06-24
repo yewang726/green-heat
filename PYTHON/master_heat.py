@@ -147,7 +147,6 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, cas
 
     CF=results['CF'][0]
     if 'pv_wind_battery_heat' in model_name:
-        output.pv_wind_battery_heat_outputs(results, casedir)
 
         CAPEX=results['CAPEX'][0]
         pv_max = results['pv_max'][0]
@@ -158,9 +157,10 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, cas
         C_indirect = (pm.r_EPC+pm.r_tax)*C_direct #TODO and C_land
         C_cap=C_direct + C_indirect
         LCOH=cal_LCOH(CF,  P_load_des, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_cons)
+        output.pv_wind_battery_heat_outputs(results, casedir, LCOH)
 
     elif model_name=='pv_battery_heat':
-        output.pv_battery_heat_outputs(results, casedir)
+
 
         CAPEX=results['CAPEX'][0]
         pv_max = results['pv_max'][0]
@@ -171,9 +171,9 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, cas
         C_cap=C_direct + C_indirect
         LCOH=cal_LCOH(CF,  P_load_des, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_cons)
 
+        output.pv_battery_heat_outputs(results, casedir, LCOH)
 
     elif model_name=='pv_wind_TES_heat':
-        output.pv_wind_TES_heat_outputs(results, casedir)
 
         CAPEX=results['CAPEX'][0]
         pv_max = results['pv_max'][0]
@@ -184,10 +184,10 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, cas
         C_indirect = (pm.r_EPC+pm.r_tax)*C_direct #TODO and C_land
         C_cap = C_direct + C_indirect
         LCOH = cal_LCOH(CF, P_load_des, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_cons)
+        output.pv_wind_TES_heat_outputs(results, casedir, LCOH)
 
 
     elif model_name=='CST_TES_heat':
-        output.CST_TES_heat_outputs(results, casedir, RM, H_recv, D_recv, H_tower, n_helios, A_land)
 
         C_recv = pm.C_recv_ref * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_scale
         C_tower = pm.C_tower_fixed * np.exp(pm.f_tower_scale * (H_tower - H_recv/2.+pm.H_helio/2.))
@@ -202,6 +202,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, cas
         C_indirect = (pm.r_EPC+pm.r_tax)*C_direct + C_land 
         C_cap=C_direct + C_indirect
         LCOH=cal_LCOH(CF,  P_load_des, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_cons)
+        output.CST_TES_heat_outputs(results, casedir, RM, H_recv, D_recv, H_tower, n_helios, A_land, LCOH)
         #print('C_CAP', C_cap)
         #print('CF', CF)
         #print(RM, t_storage, H_recv, D_recv, H_tower, n_helios, A_land)

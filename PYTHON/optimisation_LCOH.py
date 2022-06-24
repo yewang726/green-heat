@@ -118,7 +118,7 @@ except:
     LCOH=9999
     CF=0
 
-res=[LCOH, CF]
+res=[LCOH, -CF]
 
 for i, r in enumerate(results.responses()):
 	if r.asv.function:
@@ -137,7 +137,7 @@ results.write()
 if __name__=='__main__':
 
     location='Newman'
-    model_name='pv_battery_heat' #'CST_TES_heat'
+    model_name='CST_TES_heat' #'pv_battery_heat' 
     casedir='results/optimisation_%s'%model_name
     var_names=['RM', 't_storage']
     nominals=[2, 8]
