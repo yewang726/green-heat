@@ -40,7 +40,7 @@ class Outputs:
         summary=np.array([
                 ['RM',RM, '-'],
                 ['t_storage', t_storage, 'h'],
-                ['LCOH', LCOH, '-'],
+                ['LCOH', LCOH, 'USD/MWh_th'],
                 ['CF', CF, '-'],
                 ['CAPEX', CAPEX, 'M.USD'],
                 ['r_pv', r_pv, '-'],
@@ -101,7 +101,7 @@ class Outputs:
         summary=np.array([
                 ['RM',RM, '-'],
                 ['t_storage', t_storage, 'h'],
-                ['LCOH', LCOH, '-'],
+                ['LCOH', LCOH, 'USD/MWh_th'],
                 ['CF', CF, '-'],
                 ['CAPEX', CAPEX, 'M.USD'],
                 ['pv_max', pv_max, 'MW'],
@@ -145,7 +145,7 @@ class Outputs:
         summary=np.array([
                 ['RM',RM, '-'],
                 ['t_storage', t_storage, 'h'],
-                ['LCOH', LCOH, '-'],
+                ['LCOH', LCOH, 'USD/MWh_th'],
                 ['CF', CF, '-'],
                 ['CAPEX', CAPEX, 'M.USD'],
                 ['wind_max', wind_max, 'MW'],
@@ -193,7 +193,7 @@ class Outputs:
         summary=np.array([
                 ['RM',RM, '-'],
                 ['t_storage', t_storage, 'h'],
-                ['LCOH', LCOH, '-'],
+                ['LCOH', LCOH, 'USD/MWh_th'],
                 ['CF', CF, '-'],
                 ['CAPEX', CAPEX, 'M.USD'],
                 ['r_pv', r_pv, '-'],
@@ -238,7 +238,7 @@ class Outputs:
         summary=np.array([
                 ['SM',SM, '-'],
                 ['t_storage', t_storage, 'h'],
-                ['LCOH', LCOH, '-'],
+                ['LCOH', LCOH, 'USD/MWh_th'],
                 ['CF', CF, '-'],
                 ['H_recv', H_recv, 'm'],
                 ['D_recv', D_recv, 'm'],
