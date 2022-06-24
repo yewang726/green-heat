@@ -11,13 +11,13 @@ import matplotlib.pyplot as plt
 class TestMasterHeat(unittest.TestCase):
 
     def setUp(self):
-        location='Port Augusta'
+        location='Newman'
         RM=2
         t_storage=8
 
         model_name='pv_battery_heat'
         self.casedir='test/'+model_name
-        master(model_name, location, RM=RM, t_storage=t_storage, P_load_des=500e3, casedir=self.casedir, verbose=True)
+        self.LCOH=master(model_name, location, RM=RM, t_storage=t_storage, P_load_des=500e3, casedir=self.casedir, verbose=True)
 
     def test(self):
 
@@ -32,6 +32,7 @@ class TestMasterHeat(unittest.TestCase):
         check=sum(pv_out+ - P_curt - pv_direct - P_bat_in)
         print('check=', check)
         self.assertTrue(check<1e-2)
+        self.assertTrue(abs(self.LCOH-112.9)<0.1)
 
         #os.system('rm *.csv')
 

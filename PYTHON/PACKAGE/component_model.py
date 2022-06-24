@@ -38,7 +38,7 @@ def pv_gen(capacity, wea_dir=None):
             module.value(k, v)
 
     if wea_dir==None:
-        module.value('solar_resource_file', datadir+'/SolarSource.epw')
+        module.value('solar_resource_file', datadir+'/SolarSource.csv')
     else:
         module.value('solar_resource_file', wea_dir+'/SolarSource.epw')
 
@@ -58,7 +58,7 @@ def wind_gen(capacity, wea_dir=None):
     Returns wind powr generated in kW for each hour in a year
     
     """
-    module = CSP.new()
+    module = Windpower.new()
 
     if platform.system()=='Windows':
         json_fn=datadir+'\json_windpower\default_windpower.json' 
@@ -99,7 +99,8 @@ def cst_gen(Q_des_th, SM, wea_dir=None):
     if platform.system()=='Windows':
         json_fn=datadir+'\json_cst\SAM-CSP-molten-salt_tcsmolten_salt.json' 
     elif platform.system()=='Linux':
-        json_fn=datadir+'/json_cst/SAM-CSP-molten-salt_tcsmolten_salt.json'   
+        #json_fn=datadir+'/json_cst/SAM-CSP-molten-salt_tcsmolten_salt.json'   
+        json_fn=datadir+'/json_cst/SAM-CSP-molten-salt_tcsmolten_salt.json'  
     
     with open(json_fn, 'r') as f:
         data = json.load(f)
@@ -109,12 +110,13 @@ def cst_gen(Q_des_th, SM, wea_dir=None):
         if k != "number_inputs":
             module.value(k, v)
 
+    module.value('field_model_type', 0) # SAM will optimise the field, tower and receiver size 
     module.value('f_rec_min', 1e-6) # minimal receiver turndown fraction
     module.value('solarm', SM) # solar multiple
-    module.value('tshours', 0) # no need to set storage, because this model cares only about the receiver output
+    module.value('tshours', 100) # because this model only takes the receiver output, a very large storage is set to ignor impact from SAM control 
 
     if wea_dir==None:
-        module.value('solar_resource_file', datadir+'/SolarSource.epw')
+        module.value('solar_resource_file', datadir+'/SolarSource.csv')
     else:
         module.value('solar_resource_file', wea_dir+'/SolarSource.epw')
 
@@ -134,7 +136,8 @@ def cst_gen(Q_des_th, SM, wea_dir=None):
     Q_recv_in=np.array(module.Outputs.q_dot_rec_inc) # incident thermal power on the receiver [MW_th]
 
     Q_recv_out=Q_recv_in*eta_recv*1000. # kW_th 
-
+    np.savetxt('sam_Q_recv_in.csv', Q_recv_in, fmt='%.4f', delimiter=',')
+    np.savetxt('sam_eta_recv.csv', eta_recv, fmt='%.6f', delimiter=',')
 
     return(Q_recv_out.tolist(), H_recv, D_recv, H_tower, n_helios, A_land)    
 

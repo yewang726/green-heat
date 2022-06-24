@@ -11,13 +11,13 @@ import matplotlib.pyplot as plt
 class TestMasterHeat(unittest.TestCase):
 
     def setUp(self):
-        location='Port Augusta'
+        location='Newman'
         RM=2
         t_storage=8
 
         model_name='CST_TES_heat'
         self.casedir='test/'+model_name
-        master(model_name, location, RM=RM, t_storage=t_storage, P_load_des=500e3, casedir=self.casedir, verbose=True)
+        self.LCOH=master(model_name, location, RM=RM, t_storage=t_storage, P_load_des=500e3, casedir=self.casedir, verbose=True)
 
     def test(self):
 
@@ -38,7 +38,7 @@ class TestMasterHeat(unittest.TestCase):
 
         self.assertTrue(balance_1<1e-2)
         self.assertTrue(balance_2<1e-2)
-
+        self.assertTrue(abs(self.LCOH-43.3)<1e-2)
 
         #os.system('rm *.csv')
 
