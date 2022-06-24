@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 class TestMasterHeat(unittest.TestCase):
 
     def setUp(self):
-        location='Port Augusta'
+        location='Newman'
         RM=2
         t_storage=8
 
