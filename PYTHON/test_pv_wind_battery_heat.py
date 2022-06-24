@@ -17,7 +17,7 @@ class TestMasterHeat(unittest.TestCase):
 
         model_name='pv_wind_battery_heat'
         self.casedir='test/'+model_name
-        self.LCOH=master(model_name, location, RM=RM, t_storage=t_storage, P_load_des=500e3, casedir=self.casedir, verbose=True)
+        self.LCOH, CF =master(model_name, location, RM=RM, t_storage=t_storage, P_load_des=500e3, casedir=self.casedir, verbose=True)
 
     def test(self):
 
