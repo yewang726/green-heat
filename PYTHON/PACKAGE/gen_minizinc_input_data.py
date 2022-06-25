@@ -10,7 +10,7 @@ import platform
 
 class GenDZN:
     
-    def __init__(self, model_name, simparams, casedir=None):
+    def __init__(self, model_name, simparams, casename, casedir=None):
         
         if model_name=='pv_wind_battery_heat':
             textinput=self.data_pv_wind_battery_heat(**simparams)
@@ -24,9 +24,9 @@ class GenDZN:
         
 
         if casedir==None:
-            self.dzn_fn=optdir +"%s_data.dzn"%model_name
+            self.dzn_fn=optdir +"%s_data.dzn"%casename
         else:
-            self.dzn_fn=casedir+"/%s_data.dzn"%model_name
+            self.dzn_fn=casedir+"/%s_data.dzn"%casename
         
 
         with open(self.dzn_fn, "w") as text_file:

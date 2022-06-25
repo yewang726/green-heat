@@ -139,7 +139,8 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, cas
 
 
     #run the optimisation function and get the results in a dictionary:
-    genDZN=GenDZN(model_name, simparams, casedir)
+    casename=model_name+'_%.2f_%.2f'%(RM, t_storage)
+    genDZN=GenDZN(model_name, simparams, casename, casedir)
     dzn_fn=genDZN.dzn_fn
     results = optimise(model_name, dzn_fn, casedir)
 

@@ -39,7 +39,7 @@ def gen_dakota_input(casedir, var_names, nominals, lbs, ubs):
 		method
 		    moga
             seed = 10983
-            max_function_evaluations = 2500
+            max_function_evaluations = 10000
             initialization_type unique_random
             population_size= 8		
             crossover_type shuffle_random
@@ -137,12 +137,12 @@ results.write()
 if __name__=='__main__':
 
     location='Newman'
-    model_name='CST_TES_heat' #'pv_battery_heat' 
-    casedir='results/optimisation_%s'%model_name
-    var_names=['RM', 't_storage']
-    nominals=[2, 8]
-    lbs=[1, 1e-6]
-    ubs=[9, 40]
+    model_name='pv_wind_battery_heat' #'CST_TES_heat' #
+    casedir='results/optimisation_%s-wind'%model_name
+    var_names=['RM', 't_storage', 'r_pv']
+    nominals=[2, 8, 0]
+    lbs=[1, 1e-6, 0]
+    ubs=[20, 60, 0]
 
     if not os.path.exists(casedir):
         os.makedirs(casedir)
