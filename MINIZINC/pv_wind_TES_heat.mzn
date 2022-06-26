@@ -12,7 +12,7 @@ float: t_storage;   % storage hour (h)
 float: eta_TES_in;   % charging efficiency of electrochemical battery
 float: eta_TES_out;  % discharging efficiency of electrochemical battery 
 
-float: P_heater; % design power of the heater (kW)
+
 float: eta_heater; % efficiency of the heater, that converts electricity to heat
 
 float: c_PV;    % unit cost of PV plant  USD/kW
@@ -32,6 +32,7 @@ var float: CAPEX; % total capital cost (USD)
 var float: r_pv; % ratio of PV, r_pv=pv_max/(pv_max+wind_max) 
 var float: pv_max;    % PV plant rated power (kW)
 var float: wind_max;     % wind farm rated power (kW)
+var float: P_heater; % design power of the heater (kW)
 array[tint] of var float: pv_out;    % power out of PV plant (kW)
 array[tint] of var float: wind_out;     % power out of wind farm (kW)
 array[tint] of var float: P_curt;    % curtailed power (kW)
@@ -67,13 +68,14 @@ constraint forall(  i in tint  )(  P_heater_out[i] = P_heat_direct[i] + P_TES_in
 constraint forall(  i in tint  )(  P_heat[i] = P_heat_direct[i] + P_TES_out[i]  );
 
 constraint forall(  i in tint  )(  P_TES_in[i] >= 0 );
-constraint forall(  i in tint  )(  P_TES_in[i] - TES_pmax <= 0 );
+%constraint forall(  i in tint  )(  P_TES_in[i] - TES_pmax <= 0 );
 
 constraint forall(  i in tint  )(  P_TES_out[i] >= 0 );
 constraint forall(  i in tint  )(  P_TES_out[i] - TES_pmax <= 0 );
 
 constraint forall(  i in tint  )(  P_curt[i] >= 0  );
 constraint forall(  i in tint  )(  P_heater_in[i] >= 0  );
+constraint forall(  i in tint  )(  P_heater_out[i] <= P_heater  );
 constraint forall(  i in tint  )(  P_heat_direct[i] + P_TES_out[i] - L[i] <= 0  );
 
 constraint forall(  i in tint  )(  TES_e_stored[i+1] = TES_e_stored[i] + ( P_TES_in[i] * eta_TES_in - P_TES_out[i]/eta_TES_out ) * DT  );
@@ -93,6 +95,7 @@ output  ["!"] ++
         ["wind_max="] ++ [show(wind_max)] ++ [";"] ++
         ["TES_capa="] ++ [show(TES_capa)] ++ [";"]++
         ["TES_pmax="] ++ [show(TES_pmax)] ++ [";"]++
+        ["P_heater="] ++ [show(P_heater)] ++ [";"] ++
         ["pv_out="] ++ [show(pv_out)] ++ [";"]++
         ["wind_out="] ++ [show(wind_out)] ++ [";"]++
         ["P_curt="] ++ [show(P_curt)] ++ [";"] ++

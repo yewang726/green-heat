@@ -109,13 +109,13 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, cas
 
 
     elif model_name=='pv_wind_TES_heat':
-        P_heater=P_load_des/pm.eta_heater
+        #P_heater=P_load_des/pm.eta_heater
         simparams = dict(DT = 1.,# [h] time steps
                          RM = RM, # renewable multiple
                          t_storage = t_storage, # [h] storage hour
                          eta_TES_in = pm.eta_TES_in,   # charging efficiency of battery
                          eta_TES_out = pm.eta_TES_out,  # discharg efficiency of battery
-                         P_heater = P_heater, # [kW] heater designed power
+                         #P_heater = P_heater, # [kW] heater designed power
                          eta_heater = pm.eta_heater, # heater efficiency
                          c_PV = pm.c_pv,  # [USD/kW] unit cost of PV
                          c_Wind = pm.c_wind, # [USD/kW] unit cost of W
@@ -268,18 +268,18 @@ def cal_LCOH(CF, load, C_cap, OM_fixed, c_OM_var, r_discount, t_life, t_cons):
 
 if __name__=='__main__':
     location='Newman'
-    SH=np.arange(0, 20, 2)
+    SH=np.arange(1e-6, 20.+1e-6, 2.)
     RM=np.append(np.arange(1, 5, 0.5), np.arange(5, 11, 2))
-    model_name='pv_wind_battery_heat'
+    model_name='CST_TES_heat'
 
     for rm in RM:
         for sh in SH:
-            casedir='./results/%s/%s-wind-only/'%(model_name, location)
+            casedir='./results/CF-%s/%s/'%(model_name, location)
             res_fn=casedir+'/summary_%.1f_%.1f.csv'%(rm, sh)
             if not os.path.exists(res_fn):
 
                 try:
-                    master(model_name, location, rm, sh, P_load_des=500e3, r_pv=0, casedir=casedir, verbose=False)
+                    LCOH, CF=master(model_name, location, rm, sh, P_load_des=500e3, r_pv=None, casedir=casedir, verbose=False)
                     print('RM', rm, 'SH', sh, 'Done')
                 except:
                     print('RM', rm, 'SH', sh, 'Unsolved')
