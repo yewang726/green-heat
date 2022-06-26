@@ -41,7 +41,7 @@ def gen_dakota_input(casedir, var_names, nominals, lbs, ubs):
             seed = 10983
             max_function_evaluations = 10000
             initialization_type unique_random
-            population_size= 8		
+            population_size= 48		
             crossover_type shuffle_random
             num_offspring = 2 num_parents = 2
             crossover_rate = 0.8
@@ -137,12 +137,12 @@ results.write()
 if __name__=='__main__':
 
     location='Newman'
-    model_name='pv_wind_battery_heat' #'CST_TES_heat' #
-    casedir='results/optimisation_%s-wind'%model_name
-    var_names=['RM', 't_storage', 'r_pv']
-    nominals=[2, 8, 0]
-    lbs=[1, 1e-6, 0]
-    ubs=[20, 60, 0]
+    model_name='pv_wind_TES_heat' #'CST_TES_heat' # 'pv_wind_battery_heat' 
+    casedir='results/optimisation_%s'%model_name
+    var_names=['RM', 't_storage']
+    nominals=[2, 8]
+    lbs=[1, 1e-6]
+    ubs=[20, 60]
 
     if not os.path.exists(casedir):
         os.makedirs(casedir)
@@ -153,7 +153,7 @@ if __name__=='__main__':
     # generate dakota input file
     gen_dakota_input(casedir, var_names, nominals, lbs, ubs)
 
-
+    subprocess.call('chmod a+x %s/interface_bb.py'%casedir, shell=True)
     # run dakota
     np=mp.cpu_count()
     #subprocess.call('mpirun --use-hwthread-cpus -np %s dakota -i sample.in -o sample.out > sample.stdout'%np, shell=True)
