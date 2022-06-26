@@ -213,7 +213,8 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, cas
     print('LCOH', LCOH)
     print('CF', CF)
     print('C_cap', C_cap)
-    os.system('rm '+ genDZN.dzn_fn)
+    if not verbose:
+        os.system('rm '+ genDZN.dzn_fn)
 
     return LCOH, CF
 

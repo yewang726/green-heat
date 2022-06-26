@@ -136,8 +136,8 @@ def cst_gen(Q_des_th, SM, wea_dir=None):
     Q_recv_in=np.array(module.Outputs.q_dot_rec_inc) # incident thermal power on the receiver [MW_th]
 
     Q_recv_out=Q_recv_in*eta_recv*1000. # kW_th 
-    np.savetxt('sam_Q_recv_in.csv', Q_recv_in, fmt='%.4f', delimiter=',')
-    np.savetxt('sam_eta_recv.csv', eta_recv, fmt='%.6f', delimiter=',')
+    #np.savetxt('sam_Q_recv_in.csv', Q_recv_in, fmt='%.4f', delimiter=',')
+    #np.savetxt('sam_eta_recv.csv', eta_recv, fmt='%.6f', delimiter=',')
 
     return(Q_recv_out.tolist(), H_recv, D_recv, H_tower, n_helios, A_land)    
 
