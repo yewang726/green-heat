@@ -8,46 +8,46 @@ from projdirs import optdir
 import numpy as np
 # import pdb
 
-def make_dzn_file(DT, ETA_EL, BAT_ETA_in, BAT_ETA_out,
-                  C_PV, C_W, C_EL, C_HS, C_BAT_energy, C_BAT_power,  CF,
-                  PV_ref_capa, PV_ref_out, Wind_ref_capa, Wind_ref_out, L):
+def make_dzn_file(DT, EL_ETA, BAT_ETA_in, BAT_ETA_out,
+                  C_PV, C_WIND, C_EL, C_HSTORAGE, C_BAT_ENERGY, C_BAT_POWER, CF,
+                  PV_REF, PV_REF_POUT, WIND_REF, WIND_REF_POUT, LOAD):
 
     # pdb.set_trace()    
     string = """
     N = %i;
     
-    DT = %.3f;      %% time difference between sample points (hr)
+    DT = %.2f;      %% time difference between sample points (hr)
     
-    ETA_EL = %.3f;  %% conversion factor of the electrolyser
-    BAT_ETA_in = %.3f;   %%charging efficiency of electrochemical battery
-    BAT_ETA_out = %.3f;  %%discharging efficiency of electrochemical battery 
+    EL_ETA = %.2f;  %% conversion factor of the electrolyser
+    BAT_ETA_in = %.2f;   %%charging efficiency of electrochemical battery
+    BAT_ETA_out = %.2f;  %%discharging efficiency of electrochemical battery 
     
-    C_PV = %.3f;    %% unit cost of PV ($/kW)
-    C_W =  %.3f;    %% unit cost of Wind farm ($/kW)
-    C_EL =  %.3f;    %% unit cost of electrolyser ($/kW)
-    C_HS = %.3f;    %% unit cost of hydrogen storage ($/kgH)
-    C_BAT_energy = %.3f;   %% unit cost of electrochemical battery energy ($/kWh)
-    C_BAT_power = %.3f;   %% unit cost of electrochemical battery power ($/kWh)
+    C_PV = %.2f;    %% unit cost of PV ($/kW)
+    C_WIND =  %.2f;    %% unit cost of Wind farm ($/kW)
+    C_EL =  %.2f;    %% unit cost of electrolyser ($/kW)
+    C_HSTORAGE = %.2f;    %% unit cost of hydrogen storage ($/kgH)
+    C_BAT_ENERGY = %.2f;   %% unit cost of electrochemical battery energy ($/kWh)
+    C_BAT_POWER = %.2f;   %% unit cost of electrochemical battery power ($/kWh)
     
-    R_CAPA = %.3f;       %% reserved hydrogen for lowered capcaity factor
+    RES_H = %.2f;       %% reserved hydrogen for lowered capcaity factor
     
-    pv_ref_capa = %.3f;       %%the capacity of the reference PV plant (W)
+    PV_REF = %.2f;       %%the capacity of the reference PV plant (W)
     
     %% Power output time series from reference PV plant (W)
-    pv_ref_out = %s;                                  
+    PV_REF_POUT = %s;                                  
      
      
-    wind_ref_capa = %.3f;  %% the capacity of the refernce wind plant (W)
+    WIND_REF = %.2f;  %% the capacity of the refernce wind plant (W)
     
     %% power output time series from the reference wind plant (W)
-    wind_ref_out = %s;  
+    WIND_REF_POUT = %s;  
     
     %% load timeseries (kgH/s)                             
-    L = %s;                              
-    """ %(len(L), DT, ETA_EL, BAT_ETA_in, BAT_ETA_out,
-      C_PV, C_W, C_EL, C_HS, C_BAT_energy, C_BAT_power, 
-      (1-CF)*sum(L)*DT, PV_ref_capa, str(PV_ref_out), Wind_ref_capa,
-      str(Wind_ref_out), str(L))
+    LOAD = %s;                              
+    """ %(len(LOAD), DT, EL_ETA, BAT_ETA_in, BAT_ETA_out,
+      C_PV, C_WIND, C_EL, C_HSTORAGE, C_BAT_ENERGY, C_BAT_POWER, 
+      (1-CF)*sum(LOAD)*DT*3600, PV_REF, str(PV_REF_POUT), WIND_REF,
+      str(WIND_REF_POUT), str(LOAD))
 
     with open(optdir + "hydrogen_plant_data.dzn", "w") as text_file:
         text_file.write(string)
