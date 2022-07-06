@@ -12,7 +12,7 @@ float: t_storage;   % storage hour (h)
 float: eta_TES_in;   % charging efficiency of electrochemical battery
 float: eta_TES_out;  % discharging efficiency of electrochemical battery 
 
-
+float: P_heater; % design power of the heater (kW)
 float: eta_heater; % efficiency of the heater, that converts electricity to heat
 
 float: c_PV;    % unit cost of PV plant  USD/kW
@@ -32,7 +32,6 @@ var float: CAPEX; % total capital cost (USD)
 var float: r_pv; % ratio of PV, r_pv=pv_max/(pv_max+wind_max) 
 var float: pv_max;    % PV plant rated power (kW)
 var float: wind_max;     % wind farm rated power (kW)
-var float: P_heater; % design power of the heater (kW)
 array[tint] of var float: pv_out;    % power out of PV plant (kW)
 array[tint] of var float: wind_out;     % power out of wind farm (kW)
 array[tint] of var float: P_curt;    % curtailed power (kW)

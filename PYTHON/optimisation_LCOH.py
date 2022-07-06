@@ -111,9 +111,14 @@ if 'r_pv' in names:
 else:
     r_pv=None
 
+if 'P_heater' in names:
+    P_heater=params.__getitem__('P_heater')
+else:
+    P_heater=None
+
 from master_heat import master
 try:
-    LCOH, CF =master(model_name='%s', location='%s', RM=var_sets['RM'], t_storage=var_sets['t_storage'], P_load_des=%s, r_pv=r_pv, casedir='%s', verbose=False)
+    LCOH, CF =master(model_name='%s', location='%s', RM=var_sets['RM'], t_storage=var_sets['t_storage'], P_load_des=%s, r_pv=r_pv, P_heater=P_heater, casedir='%s', verbose=False)
 except:
     LCOH=9999
     CF=0
@@ -138,36 +143,11 @@ if __name__=='__main__':
 
     location='Newman'
     model_name='pv_wind_TES_heat' #'CST_TES_heat' # 'pv_wind_battery_heat' 
-    casedir='results/optimisation_%s-wind'%model_name
-    var_names=['RM', 't_storage', 'r_pv']
-    nominals=[2, 8,0]
-    lbs=[1, 1e-6,0]
-    ubs=[20, 60,0]
-
-    if not os.path.exists(casedir):
-        os.makedirs(casedir)
-
-    # generate interface_bb.py that dakota can run
-    gen_interface_bb(casedir, model_name, location, P_load_des=500e3)
-
-    # generate dakota input file
-    gen_dakota_input(casedir, var_names, nominals, lbs, ubs)
-
-    subprocess.call('chmod a+x %s/interface_bb.py'%casedir, shell=True)
-    # run dakota
-    np=mp.cpu_count()
-    #subprocess.call('mpirun --use-hwthread-cpus -np %s dakota -i sample.in -o sample.out > sample.stdout'%np, shell=True)
-    #subprocess.call('dakota -i %s/sample.in -o %s/sample.out > %s/sample.stdout'%(casedir, casedir, casedir), shell=True)
-    subprocess.call('mpirun --use-hwthread-cpus -np %s dakota -i %s/sample.in -o %s/sample.out > %s/sample.stdout'%(4, casedir, casedir, casedir), shell=True)
-
-
-    location='Newman'
-    model_name='pv_wind_TES_heat' #'CST_TES_heat' # 'pv_wind_battery_heat' 
-    casedir='results/optimisation_%s-pv'%model_name
-    var_names=['RM', 't_storage', 'r_pv']
-    nominals=[2, 8,1]
-    lbs=[1, 1e-6,1]
-    ubs=[20, 60,1]
+    casedir='results/optimisation_%s'%model_name
+    var_names=['RM', 't_storage', 'r_pv', 'P_heater']
+    nominals=[2, 8, 0.5, 2000e3]
+    lbs=[1, 1e-6, 0, 500e3]
+    ubs=[20, 60, 1, 5000e3]
 
     if not os.path.exists(casedir):
         os.makedirs(casedir)

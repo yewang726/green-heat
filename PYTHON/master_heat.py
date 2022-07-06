@@ -13,7 +13,7 @@ from PACKAGE.gen_minizinc_input_data import GenDZN
 def AUD2USD(value):
     return(0.746 * value)
 
-def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, casedir=None, verbose=False):
+def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_heater=None, casedir=None, verbose=False):
     '''
     Arguments:
         model_name (str)  : minizic model name
@@ -115,7 +115,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, cas
                          t_storage = t_storage, # [h] storage hour
                          eta_TES_in = pm.eta_TES_in,   # charging efficiency of battery
                          eta_TES_out = pm.eta_TES_out,  # discharg efficiency of battery
-                         #P_heater = P_heater, # [kW] heater designed power
+                         P_heater = P_heater, # [kW] heater designed power
                          eta_heater = pm.eta_heater, # heater efficiency
                          c_PV = pm.c_pv,  # [USD/kW] unit cost of PV
                          c_Wind = pm.c_wind, # [USD/kW] unit cost of W

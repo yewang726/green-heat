@@ -124,7 +124,7 @@ L = %s;
 
   
 
-    def data_pv_wind_TES_heat(self, DT, RM, t_storage, eta_TES_in, eta_TES_out, eta_heater, 
+    def data_pv_wind_TES_heat(self, DT, RM, t_storage, eta_TES_in, eta_TES_out, P_heater, eta_heater, 
                       c_PV, c_Wind, c_TES, c_heater,
                       PV_ref_capa, PV_ref_out, Wind_ref_capa, Wind_ref_out, L, r_pv=None):
 
@@ -139,6 +139,7 @@ t_storage = %.1f;   %% storage hour (h)
 eta_TES_in = %.2f;   %%charging efficiency of electrochemical battery
 eta_TES_out = %.2f;  %%discharging efficiency of electrochemical battery 
 
+P_heater = %.1f;    %% design power of the heater (kW)
 eta_heater = %.4f;  %% efficiency of the heater
 
 c_PV = %.4f;    %% unit cost of PV (USD/kW)
@@ -159,7 +160,7 @@ wind_ref_out = %s;
 %% load timeseries                          
 L = %s;                              
 """%(len(L), DT, RM, t_storage, eta_TES_in, eta_TES_out,
-        eta_heater,
+        P_heater, eta_heater,
         c_PV, c_Wind, c_TES, c_heater,
         PV_ref_capa, str(PV_ref_out), Wind_ref_capa,
         str(Wind_ref_out), str(L)) 
