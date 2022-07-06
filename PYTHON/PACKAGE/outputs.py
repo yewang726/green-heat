@@ -50,7 +50,7 @@ class Outputs:
                 ['bat_pmax',bat_pmax, 'MW']
         ])
 
-        np.savetxt(casedir+'/summary_%.1f_%.1f.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
+        np.savetxt(casedir+'/summary_%.4f_%.4f.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
         
         if self.verbose:
             np.savetxt(casedir+'/pv_out.csv', pv_out, fmt='%.4f', delimiter=',')
@@ -109,7 +109,7 @@ class Outputs:
                 ['bat_pmax',bat_pmax, 'MW']
         ])
 
-        np.savetxt(casedir+'/summary_%.1f_%.1f.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
+        np.savetxt(casedir+'/summary_%.4f_%.4f.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
         
         if self.verbose:
             np.savetxt(casedir+'/pv_out.csv', pv_out, fmt='%.4f', delimiter=',')
@@ -153,7 +153,7 @@ class Outputs:
                 ['bat_pmax',bat_pmax, 'MW']
         ])
 
-        np.savetxt(casedir+'/summary_%.1f_%.1f.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
+        np.savetxt(casedir+'/summary_%.4f_%.4f.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
         
         if self.verbose:
             np.savetxt(casedir+'/wind_out.csv', wind_out, fmt='%.4f', delimiter=',')
@@ -205,7 +205,7 @@ class Outputs:
                 ['P_heater',P_heater, 'MW']
         ])
 
-        np.savetxt(casedir+'/summary_%.1f_%.1f.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
+        np.savetxt(casedir+'/summary_%.4f_%.4f.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
         
         if self.verbose:
             np.savetxt(casedir+'/pv_out.csv', pv_out, fmt='%.4f', delimiter=',')
@@ -251,7 +251,7 @@ class Outputs:
                 ['TES_pmax',TES_pmax, 'MW']
         ])
 
-        np.savetxt(casedir+'/summary_%.1f_%.1f.csv'%(SM, t_storage), summary, fmt='%s', delimiter=',')
+        np.savetxt(casedir+'/summary_%.4f_%.4f.csv'%(SM, t_storage), summary, fmt='%s', delimiter=',')
         
         if self.verbose:
             np.savetxt(casedir+'/P_recv_out.csv', P_recv_out, fmt='%.4f', delimiter=',')
