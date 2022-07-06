@@ -117,18 +117,21 @@ else:
     P_heater=None
 
 if 'bat_pmax' in names:
-    bat_pmax=params.__getitem__('bat_pmax')
+    bat_pmax=int(params.__getitem__('bat_pmax'))*1000.
 else:
     bat_pmax=None
 
 
 from master_heat import master
+
 try:
     LCOH, CF =master(model_name='%s', location='%s', RM=var_sets['RM'], t_storage=var_sets['t_storage'], P_load_des=%s, r_pv=r_pv, P_heater=P_heater, bat_pmax=bat_pmax, casedir='%s', verbose=False)
 except:
     LCOH=9999
     CF=0
 
+
+print('LCOH', LCOH)
 res=[LCOH, -CF]
 
 for i, r in enumerate(results.responses()):
@@ -148,12 +151,12 @@ results.write()
 if __name__=='__main__':
 
     location='Newman'
-    model_name='pv_wind_TES_heat' #'CST_TES_heat' # 'pv_wind_battery_heat' 
+    model_name='pv_wind_battery_heat' #'pv_wind_TES_heat' #'CST_TES_heat' # 
     casedir='results/optimisation_%s'%model_name
-    var_names=['RM', 't_storage', 'r_pv', 'P_heater']
-    nominals=[2, 8, 0.5, 2000e3]
-    lbs=[1, 1e-6, 0, 500e3]
-    ubs=[20, 60, 1, 5000e3]
+    var_names=['RM', 't_storage', 'r_pv', 'bat_pmax'] #TODO,  note bat_pmax must be integer for MW
+    nominals=[2, 8, 0.5, 600]
+    lbs=[1, 1e-6, 0, 500]
+    ubs=[20, 60, 1, 5000]
 
     if not os.path.exists(casedir):
         os.makedirs(casedir)
