@@ -6,14 +6,14 @@ import matplotlib.pyplot as plt
 results=np.array([])
 
 RM=np.append(np.arange(1, 5, 0.5), np.arange(5, 11, 2))
-SH=np.arange(2, 20, 2)
+SH=np.arange(1e-6, 20.+1e-6, 2.)
 
 m=int(len(RM))
 n=int(len(SH))
 
 location='Newman'
-model_name='pv_wind_battery_heat_obj-CF'
-casedir='./results/%s/%s-pv-wind-hybrid'%(model_name, location)
+model_name='pv_wind_TES_heat'
+casedir='./results/CF-%s/%s/'%(model_name, location)
 for rm in RM:
     for sh in SH:
 
@@ -22,15 +22,16 @@ for rm in RM:
         data=np.loadtxt(res_fn, dtype=str, delimiter=',')
         results=np.append(results, data[:,1].astype(float))
 
-results=results.reshape(int(len(results)/9), 9)
+results=results.reshape(int(len(results)/11), 11)
 
 
 RM=results[:,0].reshape(m,n)
 SH=results[:,1].reshape(m,n)
-CF=results[:,2].reshape(m,n)
-R=results[:,4].reshape(m,n)
-BT_Cap=results[:,7].reshape(m,n)
-BT_P=results[:,8].reshape(m,n)
+LCOH=results[:,2].reshape(m,n)
+CF=results[:,3].reshape(m,n)
+#R=results[:,4].reshape(m,n)
+#BT_Cap=results[:,7].reshape(m,n)
+#BT_P=results[:,8].reshape(m,n)
 
 
 for i in range(m):
@@ -43,6 +44,18 @@ plt.legend(loc=1, bbox_to_anchor=(1.3,1.))
 plt.savefig(open(casedir+'/CF.png', 'wb'),  bbox_inches='tight')
 #plt.show()
 plt.close()
+
+for i in range(m):
+    plt.plot(SH[i], LCOH[i], label='RM = %s'%RM[i,0])
+
+#plt.ylim([0,1])
+plt.xlabel('Storage hour')
+plt.ylabel('LCOH')
+plt.legend(loc=1, bbox_to_anchor=(1.3,1.))
+plt.savefig(open(casedir+'/LCOH.png', 'wb'),  bbox_inches='tight')
+#plt.show()
+plt.close()
+
 
 
 '''

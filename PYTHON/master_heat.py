@@ -270,22 +270,38 @@ if __name__=='__main__':
     location='Newman'
     SH=np.arange(1e-6, 20.+1e-6, 2.)
     RM=np.append(np.arange(1, 5, 0.5), np.arange(5, 11, 2))
-    model_name='CST_TES_heat'
+    model_name='pv_wind_TES_heat'#'CST_TES_heat'
 
     for rm in RM:
         for sh in SH:
-            casedir='./results/CF-%s/%s/'%(model_name, location)
+            casedir='./results/CF-%s-wind/%s/'%(model_name, location)
             res_fn=casedir+'/summary_%.1f_%.1f.csv'%(rm, sh)
             if not os.path.exists(res_fn):
 
                 try:
-                    LCOH, CF=master(model_name, location, rm, sh, P_load_des=500e3, r_pv=None, casedir=casedir, verbose=False)
+                    LCOH, CF=master(model_name, location, rm, sh, P_load_des=500e3, r_pv=0, casedir=casedir, verbose=False)
                     print('RM', rm, 'SH', sh, 'Done')
                 except:
                     print('RM', rm, 'SH', sh, 'Unsolved')
 
             else:
                 print('RM', rm, 'SH', sh, 'Done')
+
+    for rm in RM:
+        for sh in SH:
+            casedir='./results/CF-%s-pv/%s/'%(model_name, location)
+            res_fn=casedir+'/summary_%.1f_%.1f.csv'%(rm, sh)
+            if not os.path.exists(res_fn):
+
+                try:
+                    LCOH, CF=master(model_name, location, rm, sh, P_load_des=500e3, r_pv=1., casedir=casedir, verbose=False)
+                    print('RM', rm, 'SH', sh, 'Done')
+                except:
+                    print('RM', rm, 'SH', sh, 'Unsolved')
+
+            else:
+                print('RM', rm, 'SH', sh, 'Done')
+
 
 
 

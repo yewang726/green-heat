@@ -39,7 +39,7 @@ def gen_dakota_input(casedir, var_names, nominals, lbs, ubs):
 		method
 		    moga
             seed = 10983
-            max_function_evaluations = 10000
+            max_function_evaluations = 2400
             initialization_type unique_random
             population_size= 48		
             crossover_type shuffle_random
@@ -138,11 +138,36 @@ if __name__=='__main__':
 
     location='Newman'
     model_name='pv_wind_TES_heat' #'CST_TES_heat' # 'pv_wind_battery_heat' 
-    casedir='results/optimisation_%s'%model_name
-    var_names=['RM', 't_storage']
-    nominals=[2, 8]
-    lbs=[1, 1e-6]
-    ubs=[20, 60]
+    casedir='results/optimisation_%s-wind'%model_name
+    var_names=['RM', 't_storage', 'r_pv']
+    nominals=[2, 8,0]
+    lbs=[1, 1e-6,0]
+    ubs=[20, 60,0]
+
+    if not os.path.exists(casedir):
+        os.makedirs(casedir)
+
+    # generate interface_bb.py that dakota can run
+    gen_interface_bb(casedir, model_name, location, P_load_des=500e3)
+
+    # generate dakota input file
+    gen_dakota_input(casedir, var_names, nominals, lbs, ubs)
+
+    subprocess.call('chmod a+x %s/interface_bb.py'%casedir, shell=True)
+    # run dakota
+    np=mp.cpu_count()
+    #subprocess.call('mpirun --use-hwthread-cpus -np %s dakota -i sample.in -o sample.out > sample.stdout'%np, shell=True)
+    #subprocess.call('dakota -i %s/sample.in -o %s/sample.out > %s/sample.stdout'%(casedir, casedir, casedir), shell=True)
+    subprocess.call('mpirun --use-hwthread-cpus -np %s dakota -i %s/sample.in -o %s/sample.out > %s/sample.stdout'%(4, casedir, casedir, casedir), shell=True)
+
+
+    location='Newman'
+    model_name='pv_wind_TES_heat' #'CST_TES_heat' # 'pv_wind_battery_heat' 
+    casedir='results/optimisation_%s-pv'%model_name
+    var_names=['RM', 't_storage', 'r_pv']
+    nominals=[2, 8,1]
+    lbs=[1, 1e-6,1]
+    ubs=[20, 60,1]
 
     if not os.path.exists(casedir):
         os.makedirs(casedir)
