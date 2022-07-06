@@ -39,7 +39,7 @@ constraint forall(  i in tint  )(  P_recv_out[i] - P_curt[i] - P_TES_in[i] - P_d
 constraint forall(  i in tint  )(  P_heat[i] = P_direct[i] + P_TES_out[i] );
 
 constraint forall(  i in tint  )(  P_TES_in[i] >= 0 );
-constraint forall(  i in tint  )(  P_TES_in[i] - TES_pmax <= 0 );
+%constraint forall(  i in tint  )(  P_TES_in[i] - TES_pmax <= 0 );
 
 constraint forall(  i in tint  )(  P_TES_out[i] >= 0 );
 constraint forall(  i in tint  )(  P_TES_out[i] - TES_pmax <= 0 );
