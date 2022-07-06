@@ -34,7 +34,7 @@ class GenDZN:
 
 
 
-    def data_pv_wind_battery_heat(self, DT, RM, t_storage, BAT_ETA_in, BAT_ETA_out, P_heater, ETA_heater, 
+    def data_pv_wind_battery_heat(self, DT, RM, t_storage, bat_pmax, BAT_ETA_in, BAT_ETA_out, P_heater, ETA_heater, 
                       C_PV, C_Wind, C_BAT_energy, C_BAT_power, C_heater,
                       PV_ref_capa, PV_ref_out, Wind_ref_capa, Wind_ref_out, L, r_pv=None):
 
@@ -45,7 +45,7 @@ DT = %.2f;      %% time difference between sample points (s)
 
 RM = %.1f;  %% renewable multiple
 t_storage = %.1f;   %% storage hour (h)
-
+bat_pmax = %.1f;   %% power of the battery (kW)
 BAT_ETA_in = %.2f;   %%charging efficiency of electrochemical battery
 BAT_ETA_out = %.2f;  %%discharging efficiency of electrochemical battery 
 
@@ -70,7 +70,7 @@ wind_ref_out = %s;
 
 %% load timeseries                          
 L = %s;                              
-"""%(len(L), DT, RM, t_storage, BAT_ETA_in, BAT_ETA_out,
+"""%(len(L), DT, RM, t_storage, bat_pmax, BAT_ETA_in, BAT_ETA_out,
         P_heater, ETA_heater,
         C_PV, C_Wind, C_BAT_energy, C_BAT_power, C_heater,
         PV_ref_capa, str(PV_ref_out), Wind_ref_capa,
@@ -83,7 +83,7 @@ L = %s;
 
    
 
-    def data_pv_battery_heat(self, DT, RM, t_storage, BAT_ETA_in, BAT_ETA_out, P_heater, ETA_heater, 
+    def data_pv_battery_heat(self, DT, RM, t_storage, bat_pmax, BAT_ETA_in, BAT_ETA_out, P_heater, ETA_heater, 
                       C_PV, C_BAT_energy, C_BAT_power, C_heater,
                       PV_ref_capa, PV_ref_out, L):
 
@@ -95,7 +95,7 @@ DT = %.2f;      %% time difference between sample points (h)
 
 RM = %.1f;  %% renewable multiple
 t_storage = %.1f;   %% storage hour (h)
-
+bat_pmax = %.1f;   %% power of the battery (kW)
 BAT_ETA_in = %.2f;   %%charging efficiency of electrochemical battery
 BAT_ETA_out = %.2f;  %%discharging efficiency of electrochemical battery 
 
@@ -114,7 +114,7 @@ pv_ref_out = %s;
  
 %% load timeseries                          
 L = %s;                              
-"""%(len(L), DT, RM, t_storage, BAT_ETA_in, BAT_ETA_out,
+"""%(len(L), DT, RM, t_storage, bat_pmax, BAT_ETA_in, BAT_ETA_out,
         P_heater, ETA_heater,
         C_PV, C_BAT_energy, C_BAT_power, C_heater,
         PV_ref_capa, str(PV_ref_out), str(L)) 

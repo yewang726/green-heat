@@ -116,9 +116,15 @@ if 'P_heater' in names:
 else:
     P_heater=None
 
+if 'bat_pmax' in names:
+    bat_pmax=params.__getitem__('bat_pmax')
+else:
+    bat_pmax=None
+
+
 from master_heat import master
 try:
-    LCOH, CF =master(model_name='%s', location='%s', RM=var_sets['RM'], t_storage=var_sets['t_storage'], P_load_des=%s, r_pv=r_pv, P_heater=P_heater, casedir='%s', verbose=False)
+    LCOH, CF =master(model_name='%s', location='%s', RM=var_sets['RM'], t_storage=var_sets['t_storage'], P_load_des=%s, r_pv=r_pv, P_heater=P_heater, bat_pmax=bat_pmax, casedir='%s', verbose=False)
 except:
     LCOH=9999
     CF=0

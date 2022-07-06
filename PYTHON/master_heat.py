@@ -13,14 +13,17 @@ from PACKAGE.gen_minizinc_input_data import GenDZN
 def AUD2USD(value):
     return(0.746 * value)
 
-def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_heater=None, casedir=None, verbose=False):
+def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_heater=None, bat_pmax=None, casedir=None, verbose=False):
     '''
     Arguments:
         model_name (str)  : minizic model name
         location   (str)  : site location
         RM         (float): renewable multiple, the total size of the renewable energy collection system (e.g. PV+Wind) to the load
         t_storage  (float): storage hour (h)
-        P_load_des (float): system load design power (W)
+		r_pv       (float): fraction of pv, 1 is 100% pv, 0 is 100% wind, required by the pv+wind hybrid model
+		P_heater   (float): electric power of the heater (kW), required by the pv/wind/hybrid+TES model
+		bat_pmax   (float): power of the battery (kW), required by the pv/wind/hybrid+battery model
+        P_load_des (float): system load design power (kW)
         casedir    (str)  : the case directory, if the default None is kept, it will load/save data in 'datadir'
         verbose    (bool) : to save and plot the time series results or not
 
@@ -72,6 +75,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         simparams = dict(DT = 1.,# [h] time steps
                          RM = RM, # renewable multiple
                          t_storage = t_storage, # [h] storage hour
+						 bat_pmax = bat_pmax, #[kW] battery power
                          BAT_ETA_in = pm.eta_bat_in,   # charging efficiency of battery
                          BAT_ETA_out = pm.eta_bat_out,  # discharg efficiency of battery
                          P_heater = P_heater, # [kW] heater designed power
@@ -94,6 +98,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         simparams = dict(DT = 1.,# [h] time steps
                          RM = RM, # renewable multiple
                          t_storage = t_storage, # [h] storage hour
+						 bat_pmax = bat_pmax, #[kW] battery power
                          BAT_ETA_in = pm.eta_bat_in,   # charging efficiency of battery
                          BAT_ETA_out = pm.eta_bat_out,  # discharg efficiency of battery
                          P_heater = P_heater, # [kW] heater designed power

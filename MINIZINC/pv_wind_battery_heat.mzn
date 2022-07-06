@@ -11,6 +11,7 @@ float: C_PV;    % unit cost of PV plant  USD/kW
 float: wind_ref_capa;    % power capacity of the reference wind plant (KW)
 float: C_Wind;     % unit cost of wind farm USD/kW
 float: t_storage;   % storage hour (h)
+float: bat_pmax;    % power of the battery (kW)
 float: BAT_ETA_in;   % charging efficiency of electrochemical battery
 float: BAT_ETA_out;  % discharging efficiency of electrochemical battery 
 float: C_BAT_energy;    % unit cost of battery storage (USD/kWh)
@@ -35,7 +36,6 @@ array[tint] of var float: pv_wind_direct;    % power out from pv and wind that g
 array[tint] of var float: P_ele;    % power into the heater (kW)
 array[tint] of var float: P_heat;    % heat into the load (kW)
 var float: bat_capa;    % energy capacity of the electrochemical battery (kWh)
-var float: bat_pmax;    % power capacity of the electrochemical battery (kW)
 array[tint] of var float: P_bat_in;      % power flow into the battery (kW)
 array[tint] of var float: P_bat_out;     % power flow out of the battery (kW)
 array[tsamp] of var float: bat_e_stored;  % electrical energy stored in the battery (kWh)
@@ -51,7 +51,6 @@ constraint r_pv >= 0;
 constraint pv_max=r_pv*RM*L[1];
 constraint wind_max=(1-r_pv)*RM*L[1];
 constraint bat_capa=bat_pmax*t_storage;
-constraint bat_pmax=P_heater;
 constraint CAPEX=C_PV * pv_max + C_Wind * wind_max + C_BAT_energy * bat_capa + C_BAT_power * bat_pmax + C_heater*P_heater;
 
 constraint forall(  i in tint  )(  pv_out[i] = pv_max/pv_ref_capa * pv_ref_out[i]  );
