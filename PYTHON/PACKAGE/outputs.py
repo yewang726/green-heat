@@ -15,7 +15,7 @@ class Outputs:
         self.verbose=verbose
         
 
-    def pv_wind_battery_heat_outputs(self, results, casedir, LCOH):
+    def pv_wind_battery_heat_outputs(self, results, casedir, LCOH, location, solar_data_fn, wind_data_fn):
 
         CAPEX=results["CAPEX"][0]/1e6 # M.USD
         CF=results["CF"][0]
@@ -47,7 +47,10 @@ class Outputs:
                 ['pv_max', pv_max, 'MW'],
                 ['wind_max', wind_max, 'MW'],
                 ['bat_capa',bat_capa, 'MWh'],
-                ['bat_pmax',bat_pmax, 'MW']
+                ['bat_pmax',bat_pmax, 'MW'],
+                ['location',location, '-'],
+                ['solar_data',solar_data_fn, '-'],
+                ['wind_data',wind_data_fn, '-']                
         ])
 
         np.savetxt(casedir+'/summary_%.3f_%.2f.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
@@ -79,7 +82,7 @@ class Outputs:
 
 
 
-    def pv_battery_heat_outputs(self, results, casedir, LCOH):
+    def pv_battery_heat_outputs(self, results, casedir, LCOH, location, solar_data_fn):
 
         CAPEX=results["CAPEX"][0]/1e6 # M.USD
         CF=results["CF"][0]
@@ -106,7 +109,9 @@ class Outputs:
                 ['CAPEX', CAPEX, 'M.USD'],
                 ['pv_max', pv_max, 'MW'],
                 ['bat_capa',bat_capa, 'MWh'],
-                ['bat_pmax',bat_pmax, 'MW']
+                ['bat_pmax',bat_pmax, 'MW'],
+                ['location',location, '-'],
+                ['solar_data',solar_data_fn, '-']
         ])
 
         np.savetxt(casedir+'/summary_%.3f_%.2f.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
@@ -123,7 +128,7 @@ class Outputs:
 
 
 
-    def wind_battery_heat_outputs(self, results, casedir, LCOH):
+    def wind_battery_heat_outputs(self, results, casedir, LCOH, location, wind_data_fn):
 
         CAPEX=results["CAPEX"][0]/1e6 # M.USD
         CF=results["CF"][0]
@@ -150,7 +155,9 @@ class Outputs:
                 ['CAPEX', CAPEX, 'M.USD'],
                 ['wind_max', wind_max, 'MW'],
                 ['bat_capa',bat_capa, 'MWh'],
-                ['bat_pmax',bat_pmax, 'MW']
+                ['bat_pmax',bat_pmax, 'MW'],
+                ['location',location, '-'],
+                ['wind_data',wind_data_fn, '-']   
         ])
 
         np.savetxt(casedir+'/summary_%.3f_%.2f.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
@@ -166,7 +173,7 @@ class Outputs:
             np.savetxt(casedir+'/load.csv', load, fmt='%.4f', delimiter=',')
 
 
-    def pv_wind_TES_heat_outputs(self, results, casedir, LCOH):
+    def pv_wind_TES_heat_outputs(self, results, casedir, LCOH, location, solar_data_fn, wind_data_fn):
 
         CAPEX=results["CAPEX"][0]/1e6 # M.USD
         CF=results["CF"][0]
@@ -202,7 +209,10 @@ class Outputs:
                 ['wind_max', wind_max, 'MW'],
                 ['TES_capa',TES_capa, 'MWh'],
                 ['TES_pmax',TES_pmax, 'MW'],
-                ['P_heater',P_heater, 'MW']
+                ['P_heater',P_heater, 'MW'],
+                ['location',location, '-'],
+                ['solar_data',solar_data_fn, '-'],
+                ['wind_data',wind_data_fn, '-']   
         ])
 
         np.savetxt(casedir+'/summary_%.3f_%.2f.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
@@ -221,7 +231,7 @@ class Outputs:
             np.savetxt(casedir+'/load.csv', load, fmt='%.4f', delimiter=',')
 
 
-    def CST_TES_heat_outputs(self, results, casedir, SM, H_recv, D_recv, H_tower, n_helios, A_land, LCOH):
+    def CST_TES_heat_outputs(self, results, casedir, SM, H_recv, D_recv, H_tower, n_helios, A_land, LCOH, location, solar_data_fn):
 
         CF=results["CF"][0]
         t_storage=results["t_storage"][0]
@@ -248,7 +258,9 @@ class Outputs:
                 ['n_helios', n_helios, '-'],
                 ['A_land', A_land, 'm2'],
                 ['TES_capa',TES_capa, 'MWh'],
-                ['TES_pmax',TES_pmax, 'MW']
+                ['TES_pmax',TES_pmax, 'MW'],
+                ['location',location, '-'],
+                ['solar_data',solar_data_fn, '-']
         ])
 
         np.savetxt(casedir+'/summary_%.3f_%.2f.csv'%(SM, t_storage), summary, fmt='%s', delimiter=',')

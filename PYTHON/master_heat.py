@@ -3,7 +3,7 @@ import numpy as np
 import os
 from projdirs import datadir #load the path that contains the data files 
 from PACKAGE.optimisation_green_heat import optimise
-from PACKAGE.component_model import WindSource, SolarResource,pv_gen, wind_gen, cst_gen, solcast_weather, SolarResource_solcast, WindSource_solcast
+from PACKAGE.component_model import pv_gen, wind_gen, cst_gen, solcast_weather, SolarResource_solcast_TMY, WindSource_solcast_TMY
 from PACKAGE.get_location import get_location
 from PACKAGE.parameters import Parameters
 from PACKAGE.outputs import Outputs
@@ -33,7 +33,9 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
     if not os.path.exists(casedir):
         os.makedirs(casedir)
 
-    Lat,Lon = get_location(location)
+    #Lat,Lon = get_location(location)
+    solar_data_fn=SolarResource_solcast_TMY(location)
+    wind_data_fn=WindSource_solcast_TMY(location)
 
     #TODO the weather data is loaded from the pre-saved data in data dir
     # it is Newman TMY from Solcast, sent by AM on 24 Jun
@@ -44,7 +46,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         #    SolarResource(Lat,Lon, casedir)
         # Get SAM reference system outputs
         pv_ref_capa = 1e3 #(kW)
-        pv_ref_out = pv_gen(pv_ref_capa, wea_dir=None)        
+        pv_ref_out = pv_gen(pv_ref_capa, wea_fn=solar_data_fn)        
 
 
     if 'wind' in model_name:
@@ -53,14 +55,14 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         #    WindSource(Lat, Lon, casedir)
         # Get SAM reference system outputs
         wind_ref_capa = 200e3 #(kW)
-        wind_ref_out = wind_gen(wind_ref_capa, wea_dir=None)
+        wind_ref_out = wind_gen(wind_ref_capa, wea_fn=wind_data_fn)
 
 
     if 'CST' in model_name:
         #if not os.path.exists(casedir+'/SolarSource.epw'):
         #    SolarResource(Lat,Lon, casedir)
         # Get SAM output 
-        P_recv_out, H_recv, D_recv, H_tower, n_helios, A_land = cst_gen(Q_des_th=P_load_des, SM=RM, wea_dir=None)
+        P_recv_out, H_recv, D_recv, H_tower, n_helios, A_land = cst_gen(Q_des_th=P_load_des, SM=RM, wea_fn=solar_data_fn)
 
     #solcast_weather(Newman)
     #SolarResource_solcast()
@@ -163,7 +165,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         C_indirect = (pm.r_EPC+pm.r_tax)*C_direct #TODO and C_land
         C_cap=C_direct + C_indirect
         LCOH=cal_LCOH(CF,  P_load_des, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_cons)
-        output.pv_wind_battery_heat_outputs(results, casedir, LCOH)
+        output.pv_wind_battery_heat_outputs(results, casedir, LCOH, location, solar_data_fn, wind_data_fn)
 
     elif model_name=='pv_battery_heat':
 
@@ -177,7 +179,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         C_cap=C_direct + C_indirect
         LCOH=cal_LCOH(CF,  P_load_des, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_cons)
 
-        output.pv_battery_heat_outputs(results, casedir, LCOH)
+        output.pv_battery_heat_outputs(results, casedir, LCOH, location, solar_data_fn)
 
     elif model_name=='pv_wind_TES_heat':
 
@@ -190,7 +192,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         C_indirect = (pm.r_EPC+pm.r_tax)*C_direct #TODO and C_land
         C_cap = C_direct + C_indirect
         LCOH = cal_LCOH(CF, P_load_des, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_cons)
-        output.pv_wind_TES_heat_outputs(results, casedir, LCOH)
+        output.pv_wind_TES_heat_outputs(results, casedir, LCOH, location, solar_data_fn, wind_data_fn)
 
 
     elif model_name=='CST_TES_heat':
@@ -208,7 +210,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         C_indirect = (pm.r_EPC+pm.r_tax)*C_direct + C_land 
         C_cap=C_direct + C_indirect
         LCOH=cal_LCOH(CF,  P_load_des, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_cons)
-        output.CST_TES_heat_outputs(results, casedir, RM, H_recv, D_recv, H_tower, n_helios, A_land, LCOH)
+        output.CST_TES_heat_outputs(results, casedir, RM, H_recv, D_recv, H_tower, n_helios, A_land, LCOH, location, solar_data_fn)
         #print('C_CAP', C_cap)
         #print('CF', CF)
         #print(RM, t_storage, H_recv, D_recv, H_tower, n_helios, A_land)

@@ -151,9 +151,9 @@ results.write()
 
 if __name__=='__main__':
 
-    location='Newman'
+    location='Burnie'
     model_name='pv_wind_TES_heat' #'pv_wind_battery_heat' #'CST_TES_heat' 
-    casedir='results/optimisation_%s'%model_name
+    casedir='results/optimisation_%s_%s'%(model_name, location)
     var_names=['RM', 't_storage', 'r_pv', 'P_heater'] #TODO,  note bat_pmax must be integer for MW
     nominals=[2, 8, 0.5, 2000e3]
     lbs=[1, 1e-6, 0, 500e3]

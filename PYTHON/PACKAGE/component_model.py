@@ -12,9 +12,10 @@ import json, io, requests
 import PySAM.Pvwattsv8 as PVWatts, Windpower
 import PySAM.TcsmoltenSalt as CSP
 import platform
+import re
 
 ################################################################
-def pv_gen(capacity, wea_dir=None):
+def pv_gen(capacity, wea_fn=None):
     """
     Parameters
     ----------
@@ -37,10 +38,10 @@ def pv_gen(capacity, wea_dir=None):
         if k != "number_inputs":
             module.value(k, v)
 
-    if wea_dir==None:
+    if wea_fn==None:
         module.value('solar_resource_file', datadir+'/SolarSource.csv')
     else:
-        module.value('solar_resource_file', wea_dir+'/SolarSource.epw')
+        module.value('solar_resource_file', wea_fn)
 
         
     module.SystemDesign.system_capacity = capacity
@@ -49,7 +50,7 @@ def pv_gen(capacity, wea_dir=None):
     return(output.tolist())
 
 #################################################################
-def wind_gen(capacity, wea_dir=None):
+def wind_gen(capacity, wea_fn=None):
     """
     Parameters
     ----------
@@ -73,10 +74,10 @@ def wind_gen(capacity, wea_dir=None):
         if k != "number_inputs":
             module.value(k, v)
 
-    if wea_dir==None:
+    if wea_fn==None:
         module.value('wind_resource_filename', datadir+'/WindSource.csv')
     else:
-        module.value('wind_resource_filename', wea_dir+'/WindSource.csv')
+        module.value('wind_resource_filename', wea_fn)
 
     module.value('system_capacity', capacity)
     
@@ -86,13 +87,13 @@ def wind_gen(capacity, wea_dir=None):
     return(output.tolist())
 
 
-def cst_gen(Q_des_th, SM, wea_dir=None):
+def cst_gen(Q_des_th, SM, wea_fn=None):
 
     """
     Arguments:
         Q_des_th (float): system design thermal power (kW)
         SM       (float): solar multiple
-        wea_dir  (str)  : directory of the weather data
+        wea_fn  (str)  : directory of the weather data
     """
     module = CSP.new()
 
@@ -115,10 +116,10 @@ def cst_gen(Q_des_th, SM, wea_dir=None):
     module.value('solarm', SM) # solar multiple
     module.value('tshours', 100) # because this model only takes the receiver output, a very large storage is set to ignor impact from SAM control 
 
-    if wea_dir==None:
+    if wea_fn==None:
         module.value('solar_resource_file', datadir+'/SolarSource.csv')
     else:
-        module.value('solar_resource_file', wea_dir+'/SolarSource.epw')
+        module.value('solar_resource_file', wea_fn)
 
     P_pb_name=Q_des_th*0.412/1000. # 0.412 is the default PB efficiency, and convert to MW
     module.value('P_ref', P_pb_name) # this is capacity of electricity, 
@@ -456,3 +457,211 @@ def speed(Z,Z_anem,U_anem):
     Z0 = 0.003
     U_H = U_anem * np.log(Z/Z0)/np.log(Z_anem/Z0)
     return(U_H)   
+
+
+def SolarResource_solcast_TMY(location):
+    """
+
+	Arguments:
+		location (str): name of the location, e.g. 'Newman', 'Burnie'
+
+    """
+    wea_repo='/media/yewang/Data/Work/Research/Topics/svn-hilt/WEATHER DATA/TMY DATA for H2 HUBS/'
+
+    # elevation from the see level: https://www.freemaptools.com/elevation-finder.htm
+    # time zone (UTC) https://www.timeanddate.com/time/map/
+    if location=='Burnie':
+        fn='Burnie - HourlyTmy -41.05 145.91 p50.csv'
+        timezone=10
+        elevation=6
+    elif location=='Gladstone':
+        fn='Gladstone - HourlyTmy -23.84 151.25 p50.csv'
+        timezone=10
+        elevation=9
+    elif location=='Newman':
+        fn='Newman - HourlyTmy -23.35 119.75 p50.csv'
+        timezone=8
+        elevation=533
+    elif location=='Pinjarra':
+        fn='Pinjarra - HourlyTmy -32.63 115.87 p50.csv'
+        timezone=8
+        elevation=11   
+    elif location=='Port Augusta':
+        fn='Port Augusta - HourlyTmy -32.49 137.77 p50.csv'
+        timezone=9
+        elevation=20
+    elif location=='Tom Price':
+        fn='Tom Price - HourlyTmy -22.69 117.79 p50.csv'
+        timezone=8
+        elevation=730
+    elif location=='Whyalla':
+        fn='Whyalla - HourlyTmy -33.04 137.59 p50.csv'
+        timezone=9
+        elevation=7
+
+    lat_lon=num =re.findall(r"[-+]?\d*\.\d+|\d+", fn)
+    lat=lat_lon[0]
+    lon=lat_lon[1]
+    
+    template=pd.read_csv(datadir+'/SolarSource.csv')
+    template.loc[0,'source']='Solcast TMY repo'
+    template.loc[0,'timezone']=timezone
+    template.loc[0,'lat']=lat
+    template.loc[0,'lon']=lon   
+    template.loc[0,'elevation']=elevation
+
+    title=template[:1].to_csv(index=False, line_terminator='\n')
+
+    new_header=template.iloc[1]
+    content=template.iloc[2:].copy()
+    content.columns=new_header
+
+    data =pd.read_csv(wea_repo+fn)
+
+    content['Temperature']= data['AirTemp'].values
+    content['Azimuth']=data['Azimuth'].values
+    content['Cloud Opacity']=data['CloudOpacity'].values    
+    content['Dew Point']=data['DewpointTemp'].values  
+    content['DHI']= data['Dhi'].values
+    content['DNI']= data['Dni'].values
+    content['EBH']= data['Ebh'].values
+    content['GHI']= data['Ghi'].values
+    content['Snow Depth']= 'NaN'
+    content['Pressure']= data['SurfacePressure'].values
+    content['Wind Direction']= data['WindDirection10m'].values
+    content['Wind Speed']= data['WindSpeed10m'].values
+    content['Zenith'] = data['Zenith'].values
+
+    new_data=title+content.to_csv(index=False, line_terminator='\n')
+ 
+    if platform.system()=='Windows':
+        wea_fn=datadir + "\SolarSource_%s.csv"%location
+
+    elif platform.system()=='Linux':
+        wea_fn=datadir + "/SolarSource_%s.csv"%location
+
+    text_file = open(wea_fn , "w")
+
+    text_file.write(new_data)
+    text_file.close()
+
+    print('Solar data file was generated from Solcast TMY file')
+    return wea_fn
+
+def WindSource_solcast_TMY(location):
+    """
+
+	Arguments:
+		location (str): name of the location, e.g. 'Newman', 'Burnie'
+
+    """
+    wea_repo='/media/yewang/Data/Work/Research/Topics/svn-hilt/WEATHER DATA/TMY DATA for H2 HUBS/'
+
+    # elevation from the see level: https://www.freemaptools.com/elevation-finder.htm
+    # time zone (UTC) https://www.timeanddate.com/time/map/
+    if location=='Burnie':
+        fn='Burnie - HourlyTmy -41.05 145.91 p50.csv'
+        timezone=10
+        elevation=6
+    elif location=='Gladstone':
+        fn='Gladstone - HourlyTmy -23.84 151.25 p50.csv'
+        timezone=10
+        elevation=9
+    elif location=='Newman':
+        fn='Newman - HourlyTmy -23.35 119.75 p50.csv'
+        timezone=8
+        elevation=533
+    elif location=='Pinjarra':
+        fn='Pinjarra - HourlyTmy -32.63 115.87 p50.csv'
+        timezone=8
+        elevation=11   
+    elif location=='Port Augusta':
+        fn='Port Augusta - HourlyTmy -32.49 137.77 p50.csv'
+        timezone=9
+        elevation=20
+    elif location=='Tom Price':
+        fn='Tom Price - HourlyTmy -22.69 117.79 p50.csv'
+        timezone=8
+        elevation=730
+    elif location=='Whyalla':
+        fn='Whyalla - HourlyTmy -33.04 137.59 p50.csv'
+        timezone=9
+        elevation=7
+
+    lat_lon=num =re.findall(r"[-+]?\d*\.\d+|\d+", fn)
+    lat=lat_lon[0]
+    lon=lat_lon[1]
+
+    data =pd.read_csv(wea_repo+fn)
+
+    data_10 = data.iloc[:,[3,14,15,16]].copy()
+
+
+
+    data_10.SurfacePressure=data_10.SurfacePressure/1013.25
+    data_10 = data_10.rename(columns = {'AirTemp':'T',
+                                        'WindSpeed10m':'S',
+                                        'WindDirection10m':'D',
+                                        'SurfacePressure':'P'})
+    heading_10 = pd.DataFrame({'T':['Temperature','C',10],
+                               'S':["Speed", 'm/s',10],
+                               'D':["Direction",'degrees',10],
+                               'P':['Pressure','atm',10]})
+    data_10 = heading_10.append(data_10).reset_index(drop=True)
+    data = data_10.copy()
+    Z_anem = 10
+    
+    Z = 40
+    data_40 = data_10.copy()
+    data_40.iloc[2,:]=Z
+    data_temp = data_40.iloc[3:].copy()
+
+    S = data_temp.apply(lambda x:speed(Z, Z_anem, data_temp['S']) )
+
+    data_temp.S = S['S']
+
+    data_40 = data_40.iloc[0:3].append(data_temp,ignore_index=True)
+    data = pd.concat([data , data_40],axis=1)
+    
+    Z = 70
+    data_70 = data_10.copy()
+    data_70.iloc[2,:]=Z
+    data_temp = data_70.iloc[3:].copy()
+    S = data_temp.apply(lambda x:speed(Z, Z_anem, data_temp['S']) )
+    data_temp.S = S['S']
+    data_70 = data_70.iloc[0:3].append(data_temp,ignore_index=True)
+    data = pd.concat([data , data_70],axis=1)
+    
+    Z = 100
+    data_100 = data_10.copy()
+    data_100.iloc[2,:]=Z
+    data_temp = data_100.iloc[3:].copy()
+    S = data_temp.apply(lambda x:speed(Z, Z_anem, data_temp['S']) )
+    data_temp.S = S['S']
+    data_100 = data_100.iloc[0:3].append(data_temp,ignore_index=True)
+    data = pd.concat([data , data_100],axis=1)
+    
+    data.loc[-1] = 16*['Latitude:%s'%(lat)]
+    data.index = data.index+1
+    data.sort_index(inplace=True)
+    data.loc[-1] = 16*['Longitude:%s'%(lon)]
+    data.index = data.index+1
+    data.sort_index(inplace=True)
+    
+    data_text = data.to_csv(header=False, index=False, line_terminator='\n')
+
+    if platform.system()=='Windows':
+        wea_fn=datadir + "\WindSource_%s.csv"%location
+
+    elif platform.system()=='Linux':
+        wea_fn=datadir + "/WindSource_%s.csv"%location
+
+    text_file = open(wea_fn , "w")
+    text_file.write(data_text)
+    text_file.close()
+    print("Wind source data file was generated from Solcast TMY file!")
+    return wea_fn
+
+if __name__=='__main__':
+    SolarResource_solcast_TMY(location='Newman')
+    #WindSource_solcast_TMY(location='Burnie')
