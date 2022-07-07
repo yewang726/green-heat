@@ -43,8 +43,8 @@ N = %i;
 
 DT = %.2f;      %% time difference between sample points (s)
 
-RM = %.1f;  %% renewable multiple
-t_storage = %.1f;   %% storage hour (h)
+RM = %.3f;  %% renewable multiple
+t_storage = %.2f;   %% storage hour (h)
 bat_pmax = %.1f;   %% power of the battery (kW)
 BAT_ETA_in = %.2f;   %%charging efficiency of electrochemical battery
 BAT_ETA_out = %.2f;  %%discharging efficiency of electrochemical battery 
@@ -93,8 +93,8 @@ N = %i;
 
 DT = %.2f;      %% time difference between sample points (h)
 
-RM = %.1f;  %% renewable multiple
-t_storage = %.1f;   %% storage hour (h)
+RM = %.3f;  %% renewable multiple
+t_storage = %.2f;   %% storage hour (h)
 bat_pmax = %.1f;   %% power of the battery (kW)
 BAT_ETA_in = %.2f;   %%charging efficiency of electrochemical battery
 BAT_ETA_out = %.2f;  %%discharging efficiency of electrochemical battery 
@@ -133,8 +133,8 @@ N = %i;
 
 DT = %.2f;      %% time difference between sample points (s)
 
-RM = %.1f;  %% renewable multiple
-t_storage = %.1f;   %% storage hour (h)
+RM = %.3f;  %% renewable multiple
+t_storage = %.2f;   %% storage hour (h)
 
 eta_TES_in = %.2f;   %%charging efficiency of electrochemical battery
 eta_TES_out = %.2f;  %%discharging efficiency of electrochemical battery 
@@ -176,7 +176,7 @@ L = %s;
         textinput="""
 N = %i;
 DT = %.2f;      %% time difference between sample points (s)
-t_storage = %.1f;   %% storage hour (h)
+t_storage = %.2f;   %% storage hour (h)
 eta_TES_in = %.2f;   %%charging efficiency of electrochemical battery
 eta_TES_out = %.2f;  %%discharging efficiency of electrochemical battery 
 
