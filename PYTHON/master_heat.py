@@ -221,7 +221,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
     if not verbose:
         os.system('rm '+ genDZN.dzn_fn)
 
-    return LCOH, CF
+    return LCOH, CF, CAPEX
 
 def cal_LCOH(CF, load, C_cap, OM_fixed, c_OM_var, r_discount, t_life, t_cons):
     """Levelised cost of heat in USD/MWh. 
