@@ -472,37 +472,34 @@ def SolarResource_solcast_TMY(location):
     # time zone (UTC) https://www.timeanddate.com/time/map/
     if location=='Burnie':
         fn='Burnie - HourlyTmy -41.05 145.91 p50.csv'
-        timezone=10
         elevation=6
     elif location=='Gladstone':
         fn='Gladstone - HourlyTmy -23.84 151.25 p50.csv'
-        timezone=10
         elevation=9
     elif location=='Newman':
         fn='Newman - HourlyTmy -23.35 119.75 p50.csv'
-        timezone=8
         elevation=533
     elif location=='Pinjarra':
         fn='Pinjarra - HourlyTmy -32.63 115.87 p50.csv'
-        timezone=8
         elevation=11   
     elif location=='Port Augusta':
         fn='Port Augusta - HourlyTmy -32.49 137.77 p50.csv'
-        timezone=9
         elevation=20
     elif location=='Tom Price':
         fn='Tom Price - HourlyTmy -22.69 117.79 p50.csv'
-        timezone=8
         elevation=730
     elif location=='Whyalla':
         fn='Whyalla - HourlyTmy -33.04 137.59 p50.csv'
-        timezone=9
         elevation=7
 
     lat_lon=num =re.findall(r"[-+]?\d*\.\d+|\d+", fn)
     lat=lat_lon[0]
     lon=lat_lon[1]
-    
+
+    data =pd.read_csv(wea_repo+fn)
+    time_text=re.findall(r"[-+]?\d*\.\d+|\d+", data.loc[0,'PeriodStart'])
+    timezone=float(time_text[-2])
+   
     template=pd.read_csv(datadir+'/SolarSource.csv')
     template.loc[0,'source']='Solcast TMY repo'
     template.loc[0,'timezone']=timezone
@@ -516,7 +513,7 @@ def SolarResource_solcast_TMY(location):
     content=template.iloc[2:].copy()
     content.columns=new_header
 
-    data =pd.read_csv(wea_repo+fn)
+
 
     content['Temperature']= data['AirTemp'].values
     content['Azimuth']=data['Azimuth'].values
@@ -557,36 +554,22 @@ def WindSource_solcast_TMY(location):
     """
     wea_repo='/media/yewang/Data/Work/Research/Topics/svn-hilt/WEATHER DATA/TMY DATA for H2 HUBS/'
 
-    # elevation from the see level: https://www.freemaptools.com/elevation-finder.htm
-    # time zone (UTC) https://www.timeanddate.com/time/map/
+
     if location=='Burnie':
         fn='Burnie - HourlyTmy -41.05 145.91 p50.csv'
-        timezone=10
-        elevation=6
     elif location=='Gladstone':
         fn='Gladstone - HourlyTmy -23.84 151.25 p50.csv'
-        timezone=10
-        elevation=9
     elif location=='Newman':
         fn='Newman - HourlyTmy -23.35 119.75 p50.csv'
-        timezone=8
-        elevation=533
     elif location=='Pinjarra':
-        fn='Pinjarra - HourlyTmy -32.63 115.87 p50.csv'
-        timezone=8
-        elevation=11   
+        fn='Pinjarra - HourlyTmy -32.63 115.87 p50.csv' 
     elif location=='Port Augusta':
         fn='Port Augusta - HourlyTmy -32.49 137.77 p50.csv'
-        timezone=9
-        elevation=20
     elif location=='Tom Price':
         fn='Tom Price - HourlyTmy -22.69 117.79 p50.csv'
-        timezone=8
-        elevation=730
     elif location=='Whyalla':
         fn='Whyalla - HourlyTmy -33.04 137.59 p50.csv'
-        timezone=9
-        elevation=7
+
 
     lat_lon=num =re.findall(r"[-+]?\d*\.\d+|\d+", fn)
     lat=lat_lon[0]
@@ -663,5 +646,5 @@ def WindSource_solcast_TMY(location):
     return wea_fn
 
 if __name__=='__main__':
-    SolarResource_solcast_TMY(location='Newman')
+    SolarResource_solcast_TMY(location='Pinjarra')
     #WindSource_solcast_TMY(location='Burnie')
