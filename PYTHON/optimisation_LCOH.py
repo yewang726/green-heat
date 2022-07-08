@@ -129,7 +129,7 @@ try:
 except:
     LCOH=9999
     CF=0
-    CAPEX=9999
+    CAPEX=9e14
 
 
 print('LCOH', LCOH)
@@ -154,10 +154,10 @@ if __name__=='__main__':
     location='Burnie'
     model_name='pv_wind_TES_heat' #'pv_wind_battery_heat' #'CST_TES_heat' 
     casedir='results/optimisation_%s_%s'%(model_name, location)
-    var_names=['RM', 't_storage', 'r_pv', 'P_heater'] #TODO,  note bat_pmax must be integer for MW
-    nominals=[2, 8, 0.5, 2000e3]
-    lbs=[1, 1e-6, 0, 500e3]
-    ubs=[20, 60, 1, 5000e3]
+    var_names=['RM', 't_storage', 'P_heater'] #TODO,  note bat_pmax must be integer for MW
+    nominals=[2, 8, 2000e3]
+    lbs=[1, 1e-6, 500e3]
+    ubs=[20, 60, 5000e3]
 
     if not os.path.exists(casedir):
         os.makedirs(casedir)
@@ -174,4 +174,6 @@ if __name__=='__main__':
     #subprocess.call('mpirun --use-hwthread-cpus -np %s dakota -i sample.in -o sample.out > sample.stdout'%np, shell=True)
     #subprocess.call('dakota -i %s/sample.in -o %s/sample.out > %s/sample.stdout'%(casedir, casedir, casedir), shell=True)
     subprocess.call('mpirun --use-hwthread-cpus -np %s dakota -i %s/sample.in -o %s/sample.out > %s/sample.stdout'%(4, casedir, casedir, casedir), shell=True)
+
+
 
