@@ -3,14 +3,15 @@
 Created on Tue Mar 29 10:28:44 2022 @author: Ahmad Mojiri
 Modified on 18 Jun 2022 by Ye Wang for Green Heat models
 """
-from projdirs import optdir
+
+from greenheatpy.projdirs import optdir
 import numpy as np
 from subprocess import check_output
 
 import platform
 
 
-def optimise(model_name, dzn_fn, casedir=None):
+def run_minizinc(model_name, dzn_fn, casedir=None):
     """
     Parameters
     ----------
@@ -41,7 +42,6 @@ def optimise(model_name, dzn_fn, casedir=None):
 
     
     output = output.replace('[','').replace(']','').split('!')
-
 
     results = output[1].split(';')   
     results = list(filter(None, results))

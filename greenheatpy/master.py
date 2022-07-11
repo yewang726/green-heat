@@ -1,13 +1,14 @@
 import pandas as pd
 import numpy as np
 import os
-from projdirs import datadir #load the path that contains the data files 
-from PACKAGE.optimisation_green_heat import optimise
-from PACKAGE.component_model import pv_gen, wind_gen, cst_gen, solcast_weather, SolarResource_solcast_TMY, WindSource_solcast_TMY
-from PACKAGE.get_location import get_location
-from PACKAGE.parameters import Parameters
-from PACKAGE.outputs import Outputs
-from PACKAGE.gen_minizinc_input_data import GenDZN
+from greenheatpy.projdirs import datadir #load the path that contains the data files 
+from greenheatpy.run_minizinc import run_minizinc
+from greenheatpy.pySAM_models import pv_gen, wind_gen, cst_gen
+from greenheatpy.get_weather_data import SolarResource_solcast_TMY, WindSource_solcast_TMY
+from greenheatpy.get_location import get_location
+from greenheatpy.parameters import Parameters
+from greenheatpy.outputs import Outputs
+from greenheatpy.gen_minizinc_input_data import GenDZN
 
 
 def AUD2USD(value):
@@ -149,7 +150,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
     casename=model_name+'_%.3f_%.2f'%(RM, t_storage)
     genDZN=GenDZN(model_name, simparams, casename, casedir)
     dzn_fn=genDZN.dzn_fn
-    results = optimise(model_name, dzn_fn, casedir)
+    results = run_minizinc(model_name, dzn_fn, casedir)
 
     output=Outputs(verbose)
 

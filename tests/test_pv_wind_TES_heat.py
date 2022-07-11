@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 import os
-from projdirs import datadir #load the path that contains the data files 
-from master_heat import master
+from greenheatpy.projdirs import datadir #load the path that contains the data files 
+from greenheatpy.master import master
 
 import unittest
 import matplotlib.pyplot as plt
@@ -17,7 +17,7 @@ class TestMasterHeat(unittest.TestCase):
 
         model_name='pv_wind_TES_heat'
         self.casedir='test/'+model_name
-        self.LCOH, CF =master(model_name, location, RM=RM, t_storage=t_storage, P_load_des=500e3, r_pv=0.5, P_heater=1000e3, casedir=self.casedir, verbose=True)
+        self.LCOH, CF, CAPEX =master(model_name, location, RM=RM, t_storage=t_storage, P_load_des=500e3, r_pv=0.5, P_heater=1000e3, casedir=self.casedir, verbose=True)
 
     def test(self):
 

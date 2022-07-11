@@ -3,7 +3,7 @@
 Created on Tue Mar 29 10:28:44 2022 @author: Ahmad Mojiri
 Modified on 18 Jun 2022 by Ye Wang for Green Heat models
 """
-from projdirs import optdir
+from greenheatpy.projdirs import optdir
 import numpy as np
 import platform
 
@@ -83,9 +83,7 @@ L = %s;
 
    
 
-    def data_pv_battery_heat(self, DT, RM, t_storage, bat_pmax, BAT_ETA_in, BAT_ETA_out, P_heater, ETA_heater, 
-                      C_PV, C_BAT_energy, C_BAT_power, C_heater,
-                      PV_ref_capa, PV_ref_out, L):
+    def data_pv_battery_heat(self, DT, RM, t_storage, bat_pmax, BAT_ETA_in, BAT_ETA_out, P_heater, ETA_heater, C_PV, C_BAT_energy, C_BAT_power, C_heater, PV_ref_capa, PV_ref_out, L):
 
 
         textinput="""
@@ -95,7 +93,6 @@ DT = %.2f;      %% time difference between sample points (h)
 
 RM = %.3f;  %% renewable multiple
 t_storage = %.2f;   %% storage hour (h)
-bat_pmax = %.1f;   %% power of the battery (kW)
 BAT_ETA_in = %.2f;   %%charging efficiency of electrochemical battery
 BAT_ETA_out = %.2f;  %%discharging efficiency of electrochemical battery 
 
@@ -114,7 +111,7 @@ pv_ref_out = %s;
  
 %% load timeseries                          
 L = %s;                              
-"""%(len(L), DT, RM, t_storage, bat_pmax, BAT_ETA_in, BAT_ETA_out,
+"""%(len(L), DT, RM, t_storage, BAT_ETA_in, BAT_ETA_out,
         P_heater, ETA_heater,
         C_PV, C_BAT_energy, C_BAT_power, C_heater,
         PV_ref_capa, str(PV_ref_out), str(L)) 

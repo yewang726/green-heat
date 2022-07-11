@@ -122,7 +122,7 @@ else:
     bat_pmax=None
 
 
-from master_heat import master
+from greenheatpy.master import master
 
 try:
     LCOH, CF, CAPEX =master(model_name='%s', location='%s', RM=var_sets['RM'], t_storage=var_sets['t_storage'], P_load_des=%s, r_pv=r_pv, P_heater=P_heater, bat_pmax=bat_pmax, casedir='%s', verbose=False)
