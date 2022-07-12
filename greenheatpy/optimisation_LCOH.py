@@ -5,7 +5,7 @@ import numpy as np
 import os
 
 
-def gen_dakota_input(casedir, var_names, nominals, lbs, ubs):
+def gen_dakota_input(var_names, nominals, lbs, ubs, num_eval=2400):
     
     dkt_in='''
         # Dakota Input File: sample.in
@@ -18,16 +18,16 @@ def gen_dakota_input(casedir, var_names, nominals, lbs, ubs):
 
 		environment
 			tabular_data
-			tabular_data_file = "%s/sample.dat"
+			tabular_data_file = "sample.dat"
 
 		model
 			single
 
 		interface
 			fork
-			analysis_drivers = "%s/interface_bb.py"
-			parameters_file = "%s/params.in"
-			results_file = "%s/results.out"
+			analysis_drivers = "interface_bb.py"
+			parameters_file = "params.in"
+			results_file = "results.out"
 			file_tag 
 			#file_save 	
 
@@ -39,7 +39,7 @@ def gen_dakota_input(casedir, var_names, nominals, lbs, ubs):
 		method
 		    moga
             seed = 10983
-            max_function_evaluations = 2400
+            max_function_evaluations = %s
             initialization_type unique_random
             population_size= 48		
             crossover_type shuffle_random
@@ -58,7 +58,7 @@ def gen_dakota_input(casedir, var_names, nominals, lbs, ubs):
 
 		variables 
 
-        ''' %(casedir, casedir, casedir, casedir) 
+        ''' %(num_eval) 
 
     var_num=int(len(var_names))	    
     m=''		
@@ -82,11 +82,11 @@ def gen_dakota_input(casedir, var_names, nominals, lbs, ubs):
         
     dkt_in+=m
 
-    with open(casedir+'/sample.in', 'w') as f:
+    with open('sample.in', 'w') as f:
         f.write(dkt_in)		
 
 
-def gen_interface_bb(casedir, model_name, location, P_load_des=500e3):
+def gen_interface_bb(model_name, location, P_load_des=500e3):
     '''
     This function generate the interface_bb.py file in the casedir
     which will be excuted by DAKOTA	
@@ -125,7 +125,7 @@ else:
 from greenheatpy.master import master
 
 try:
-    LCOH, CF, CAPEX =master(model_name='%s', location='%s', RM=var_sets['RM'], t_storage=var_sets['t_storage'], P_load_des=%s, r_pv=r_pv, P_heater=P_heater, bat_pmax=bat_pmax, casedir='%s', verbose=False)
+    LCOH, CF, CAPEX =master(model_name='%s', location='%s', RM=var_sets['RM'], t_storage=var_sets['t_storage'], P_load_des=%s, r_pv=r_pv, P_heater=P_heater, bat_pmax=bat_pmax, casedir='.', verbose=False)
 except:
     LCOH=9999
     CF=0
@@ -140,11 +140,10 @@ for i, r in enumerate(results.responses()):
 		r.function = res[i]
 results.write()
 
-'''%(model_name, location, P_load_des, casedir)
+'''%(model_name, location, P_load_des)
 
-    if not os.path.exists(casedir):
-        os.makedirs(casedir)
-    with open(casedir+'/interface_bb.py', 'w') as f:
+
+    with open('interface_bb.py', 'w') as f:
         f.write(bb)  
 
 
