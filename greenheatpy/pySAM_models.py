@@ -12,92 +12,111 @@ import json, io, requests
 import PySAM.Pvwattsv8 as PVWatts, Windpower
 import PySAM.TcsmoltenSalt as CSP
 import platform
+import os
 
 
-def pv_gen(capacity, wea_fn=None):
+def pv_gen(capacity, location, casedir, wea_fn=None):
     """
     Arguments:
         capacity (float): system capacity (kW)
+        location   (str): location of the system
+        casedir    (str): case directory
         wea_fn     (str): directory of the weather data file for the SAM PV model
                 the default 'None' will load the weather file in the 'data' directory
     Return:
         output    (list): energy production (kW) by the PV system in time series in a year 
     
     """
-    module = PVWatts.new()
+    output_fn=casedir+'/pv_gen_%s_%.1fMWe.dat'%(location, capacity/1000)
 
-    if platform.system()=='Windows':
-        json_fn=datadir+'\json_pvWatts\default_pvwattsv8.json' 
-    elif platform.system()=='Linux':
-        json_fn=datadir+'/json_pvWatts/default_pvwattsv8.json'   
-  
-    with open(json_fn, 'r') as f:
-        data = json.load(f)
-    f.close()
-    for k,v in data.items():
-        if k != "number_inputs":
-            module.value(k, v)
+    if not os.path.exists(output_fn):        
+        module = PVWatts.new()
 
-    if wea_fn==None:
-        module.value('solar_resource_file', datadir+'/SolarSource.csv')
-    else:
-        module.value('solar_resource_file', wea_fn)
+        if platform.system()=='Windows':
+            json_fn=datadir+'\json_pvWatts\default_pvwattsv8.json' 
+        elif platform.system()=='Linux':
+            json_fn=datadir+'/json_pvWatts/default_pvwattsv8.json'   
+      
+        with open(json_fn, 'r') as f:
+            data = json.load(f)
+        f.close()
+        for k,v in data.items():
+            if k != "number_inputs":
+                module.value(k, v)
 
+        if wea_fn==None:
+            module.value('solar_resource_file', datadir+'/SolarSource.csv')
+        else:
+            module.value('solar_resource_file', wea_fn)
+
+            
+        module.SystemDesign.system_capacity = capacity
+        module.execute()
+        output = np.array(module.Outputs.gen)
+        output=output.tolist()
         
-    module.SystemDesign.system_capacity = capacity
-    module.execute()
-    output = np.array(module.Outputs.gen)
-    output=output.tolist()
-
-    return output
+        with open(output_fn, "w") as text_file:
+            text_file.write(str(output))
+                  
+    return output_fn
 
 
-def wind_gen(capacity, wea_fn=None):
+def wind_gen(capacity, location, casedir, wea_fn=None):
     """
     Arguments:
         capacity (float): system capacity (kW)
+        location   (str): location of the system
+        casedir    (str): case directory        
         wea_fn     (str): directory of the weather data file for the SAM Wind model
                 the default 'None' will load the weather file in the 'data' directory
     Return:
         output    (list): energy production (kW) by the Wind system in time series in a year 
  
     """
-    module = Windpower.new()
+    output_fn=casedir+'/wind_gen_%s_%.1fMWe.dat'%(location, capacity/1000)
 
-    if platform.system()=='Windows':
-        json_fn=datadir+'\json_windpower\default_windpower.json' 
-    elif platform.system()=='Linux':
-        json_fn=datadir+'/json_windpower/default_windpower.json'   
-    
-    with open(json_fn, 'r') as f:
-        data = json.load(f)
-    f.close()
+    if not os.path.exists(output_fn):  
+            
+        module = Windpower.new()
 
-    for k,v in data.items():
-        if k != "number_inputs":
-            module.value(k, v)
+        if platform.system()=='Windows':
+            json_fn=datadir+'\json_windpower\default_windpower.json' 
+        elif platform.system()=='Linux':
+            json_fn=datadir+'/json_windpower/default_windpower.json'   
+        
+        with open(json_fn, 'r') as f:
+            data = json.load(f)
+        f.close()
 
-    if wea_fn==None:
-        module.value('wind_resource_filename', datadir+'/WindSource.csv')
-    else:
-        module.value('wind_resource_filename', wea_fn)
+        for k,v in data.items():
+            if k != "number_inputs":
+                module.value(k, v)
 
-    module.value('system_capacity', capacity)
-    
-    module.execute()
-    output = np.array(module.Outputs.gen)
-    output=output.tolist()
+        if wea_fn==None:
+            module.value('wind_resource_filename', datadir+'/WindSource.csv')
+        else:
+            module.value('wind_resource_filename', wea_fn)
 
-    return output
+        module.value('system_capacity', capacity)
+        
+        module.execute()
+        output = np.array(module.Outputs.gen)
+        output=output.tolist()
+        with open(output_fn, "w") as text_file:
+            text_file.write(str(output))    
+
+    return output_fn
 
 
 
-def cst_gen(Q_des_th, SM, wea_fn=None):
+def cst_gen(Q_des_th, SM, location, casedir, wea_fn=None):
 
     """
     Arguments:
         Q_des_th (float): system design thermal power (kW)
         SM       (float): solar multiple
+        location   (str): location of the system
+        casedir    (str): case directory            
         wea_fn     (str): directory of the weather data file for the SAM solartower model
                 the default 'None' will load the weather file in the 'data' directory
     Return:
@@ -109,53 +128,65 @@ def cst_gen(Q_des_th, SM, wea_fn=None):
         A_land   (float): the total land area of the optimal field layout designed by SAM (m2)
  
     """
-    module = CSP.new()
 
-    if platform.system()=='Windows':
-        json_fn=datadir+'\json_cst\SAM-CSP-molten-salt_tcsmolten_salt.json' 
-    elif platform.system()=='Linux':
-        #json_fn=datadir+'/json_cst/SAM-CSP-molten-salt_tcsmolten_salt.json'   
-        json_fn=datadir+'/json_cst/SAM-CSP-molten-salt_tcsmolten_salt.json'  
-    
-    with open(json_fn, 'r') as f:
-        data = json.load(f)
-    f.close()
+    output_fn=casedir+'/CST_gen_%s_load%.1fMWth_SM%.1f.dat'%(location, Q_des_th/1000., SM )
 
-    for k,v in data.items():
-        if k != "number_inputs":
-            module.value(k, v)
+    if not os.path.exists(output_fn):      
+      
+        module = CSP.new()
 
-    module.value('field_model_type', 0) # SAM will optimise the field, tower and receiver size 
-    module.value('f_rec_min', 1e-6) # minimal receiver turndown fraction
-    module.value('solarm', SM) # solar multiple
-    module.value('tshours', 100) # because this model only takes the receiver output, a very large storage is set to ignor impact from SAM control 
+        if platform.system()=='Windows':
+            json_fn=datadir+'\json_cst\SAM-CSP-molten-salt_tcsmolten_salt.json' 
+        elif platform.system()=='Linux':
+            #json_fn=datadir+'/json_cst/SAM-CSP-molten-salt_tcsmolten_salt.json'   
+            json_fn=datadir+'/json_cst/SAM-CSP-molten-salt_tcsmolten_salt.json'  
+        
+        with open(json_fn, 'r') as f:
+            data = json.load(f)
+        f.close()
 
-    if wea_fn==None:
-        module.value('solar_resource_file', datadir+'/SolarSource.csv')
-    else:
-        module.value('solar_resource_file', wea_fn)
+        for k,v in data.items():
+            if k != "number_inputs":
+                module.value(k, v)
 
-    P_pb_name=Q_des_th*0.412/1000. # 0.412 is the default PB efficiency, and convert to MW
-    module.value('P_ref', P_pb_name) # this is capacity of electricity, 
+        module.value('field_model_type', 0) # SAM will optimise the field, tower and receiver size 
+        module.value('f_rec_min', 1e-6) # minimal receiver turndown fraction
+        module.value('solarm', SM) # solar multiple
+        module.value('tshours', 100) # because this model only takes the receiver output, a very large storage is set to ignor impact from SAM control 
 
-    module.execute()
+        if wea_fn==None:
+            module.value('solar_resource_file', datadir+'/SolarSource.csv')
+        else:
+            module.value('solar_resource_file', wea_fn)
 
-    H_recv=module.TowerAndReceiver.rec_height #Receiver height [m]
-    D_recv=module.TowerAndReceiver.D_rec #The overall outer diameter of the receiver [m]
-    H_tower=module.TowerAndReceiver.h_tower # Tower height [m]
-    n_helios=module.HeliostatField.N_hel #Number of heliostats
-    A_land=module.Outputs.csp_pt_cost_total_land_area*4046.86 # Total land area [m2] (converted [acre] to m2)
+        P_pb_name=Q_des_th*0.412/1000. # 0.412 is the default PB efficiency, and convert to MW
+        module.value('P_ref', P_pb_name) # this is capacity of electricity, 
 
-    #eta_field=module.Outputs.eta_field # field optical efficiency
-    eta_recv=np.array(module.Outputs.eta_therm) # receiver thermal efficiency
-    Q_recv_in=np.array(module.Outputs.q_dot_rec_inc) # incident thermal power on the receiver [MW_th]
+        module.execute()
 
-    Q_recv_out=Q_recv_in*eta_recv*1000. # kW_th 
-    #np.savetxt('sam_Q_recv_in.csv', Q_recv_in, fmt='%.4f', delimiter=',')
-    #np.savetxt('sam_eta_recv.csv', eta_recv, fmt='%.6f', delimiter=',')
-    Q_rcv_out=Q_recv_out.tolist()
+        H_recv=module.TowerAndReceiver.rec_height #Receiver height [m]
+        D_recv=module.TowerAndReceiver.D_rec #The overall outer diameter of the receiver [m]
+        H_tower=module.TowerAndReceiver.h_tower # Tower height [m]
+        n_helios=module.HeliostatField.N_hel #Number of heliostats
+        A_land=module.Outputs.csp_pt_cost_total_land_area*4046.86 # Total land area [m2] (converted [acre] to m2)
 
-    return Q_rcv_out, H_recv, D_recv, H_tower, n_helios, A_land
+        #eta_field=module.Outputs.eta_field # field optical efficiency
+        eta_recv=np.array(module.Outputs.eta_therm) # receiver thermal efficiency
+        Q_recv_in=np.array(module.Outputs.q_dot_rec_inc) # incident thermal power on the receiver [MW_th]
+
+        Q_recv_out=Q_recv_in*eta_recv*1000. # kW_th 
+        #np.savetxt('sam_Q_recv_in.csv', Q_recv_in, fmt='%.4f', delimiter=',')
+        #np.savetxt('sam_eta_recv.csv', eta_recv, fmt='%.6f', delimiter=',')
+        Q_rcv_out=Q_recv_out.tolist()
+
+        with open(output_fn, "w") as text_file:
+            text_file.write('H_recv,D_recv,H_tower,n_helios,A_land\n')      
+            text_file.write('(m),(m),(m),(-),(m2)\n')   
+            text_file.write('%s,%s,%s,%s,%s\n'%(H_recv, D_recv, H_tower, n_helios, A_land))                         
+            text_file.write(str(Q_rcv_out))          
+        
+
+    return output_fn
 
 
 

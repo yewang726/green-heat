@@ -35,8 +35,8 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         os.makedirs(casedir)
 
     #Lat,Lon = get_location(location)
-    solar_data_fn=SolarResource_solcast_TMY(location)
-    wind_data_fn=WindSource_solcast_TMY(location)
+
+
 
     #TODO the weather data is loaded from the pre-saved data in data dir
     # it is Newman TMY from Solcast, sent by AM on 24 Jun
@@ -46,24 +46,49 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         #if not os.path.exists(casedir+'/SolarSource.epw'):
         #    SolarResource(Lat,Lon, casedir)
         # Get SAM reference system outputs
+        solar_data_fn=SolarResource_solcast_TMY(location, casedir=casedir)        
         pv_ref_capa = 1e3 #(kW)
-        pv_ref_out = pv_gen(pv_ref_capa, wea_fn=solar_data_fn)        
+        output_fn = pv_gen(pv_ref_capa, location=location, casedir=casedir, wea_fn=solar_data_fn)      
 
+        with open(output_fn) as f:
+            output=f.read().splitlines()
+        f.close()          
+            
+        pv_ref_out=list(np.float_(output[0][1:-1].split(',')))     
+         
 
     if 'wind' in model_name:
         # Get wind data
         #if not os.path.exists(casedir+'/WindSource.csv'):
         #    WindSource(Lat, Lon, casedir)
         # Get SAM reference system outputs
+        wind_data_fn=WindSource_solcast_TMY(location, casedir=casedir)        
         wind_ref_capa = 200e3 #(kW)
-        wind_ref_out = wind_gen(wind_ref_capa, wea_fn=wind_data_fn)
-
+        output_fn = wind_gen(wind_ref_capa, location=location, casedir=casedir, wea_fn=wind_data_fn)
+            
+        with open(output_fn) as f:
+            output=f.read().splitlines()
+        f.close()            
+            
+        wind_ref_out=list(np.float_(output[0][1:-1].split(',')))     
+      
+        
 
     if 'CST' in model_name:
         #if not os.path.exists(casedir+'/SolarSource.epw'):
         #    SolarResource(Lat,Lon, casedir)
         # Get SAM output 
-        P_recv_out, H_recv, D_recv, H_tower, n_helios, A_land = cst_gen(Q_des_th=P_load_des, SM=RM, wea_fn=solar_data_fn)
+        solar_data_fn=SolarResource_solcast_TMY(location, casedir=casedir)
+        output_fn= cst_gen(Q_des_th=P_load_des, SM=RM, location=location, casedir=casedir, wea_fn=solar_data_fn)
+
+        with open(output_fn) as f:
+            cst_output=f.read().splitlines()
+        f.close()
+       
+        H_recv, D_recv, H_tower, n_helios, A_land = np.float_(cst_output[2].split(','))
+        P_recv_out = list(np.float_(cst_output[3][1:-1].split(',')))  
+
+        
 
     #solcast_weather(Newman)
     #SolarResource_solcast()

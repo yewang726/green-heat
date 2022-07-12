@@ -10,8 +10,8 @@ import platform
 
 ## TODO
 # setup basedir
-basedir = '/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/repo/'
-
+basedir = '/mnt/data/Software/Green-heat-models/HILT-CRC---Green-Heat/'
+wea_repo='/mnt/data/Software/Green-heat-models/svn-hilt/WEATHER DATA/TMY DATA for H2 HUBS/'
 
 if platform.system()=="Windows":
 	connector = '\\'
