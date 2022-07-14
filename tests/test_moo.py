@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 from greenheatpy.projdirs import datadir #load the path that contains the data files 
-from greenheatpy.optimisation_LCOH import gen_interface_bb, gen_dakota_input
+from greenheatpy.optimisation_mo import gen_interface_bb, gen_dakota_input
 
 import unittest
 import matplotlib.pyplot as plt
