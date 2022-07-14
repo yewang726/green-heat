@@ -99,7 +99,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
     # These inputs are used by make_dzn_file function to create an input text file called hydrogen_plant_data.dzn. 
     pm=Parameters()
     if model_name=='pv_wind_battery_heat':
-        P_heater=P_load_des/pm.eta_heater
+        #P_heater=P_load_des/pm.eta_heater
         simparams = dict(DT = 1.,# [h] time steps
                          RM = RM, # renewable multiple
                          t_storage = t_storage, # [h] storage hour
@@ -119,25 +119,6 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
                          Wind_ref_out = wind_ref_out,        #power output from the reference wind farm (kW)
                          L = [P_load_des for i in range(len(pv_ref_out))],  #[kW] load profile timeseries
                          r_pv= r_pv)  # pv ratio
-
-
-    elif model_name=='pv_battery_heat':
-        P_heater=P_load_des/pm.eta_heater
-        simparams = dict(DT = 1.,# [h] time steps
-                         RM = RM, # renewable multiple
-                         t_storage = t_storage, # [h] storage hour
-						 bat_pmax = bat_pmax, #[kW] battery power
-                         BAT_ETA_in = pm.eta_bat_in,   # charging efficiency of battery
-                         BAT_ETA_out = pm.eta_bat_out,  # discharg efficiency of battery
-                         P_heater = P_heater, # [kW] heater designed power
-                         ETA_heater = pm.eta_heater, # heater efficiency
-                         C_PV = pm.c_pv,  # [USD/kW] unit cost of PV
-                         C_BAT_energy = pm.c_bat_energy, # [USD/kWh] unit cost of battery energy storage
-                         C_BAT_power = pm.c_bat_power,  # [USD/kW] unit cost of battery power capacpity
-                         C_heater = pm.c_heater, # [USD/kW] unit cost of heater
-                         PV_ref_capa = pv_ref_capa,    #capacity of reference PV plant (kW)
-                         PV_ref_out = pv_ref_out,           #power output from reference PV plant (kW)
-                         L = [P_load_des for i in range(len(pv_ref_out))])  #[kW] load profile timeseries
 
 
 
