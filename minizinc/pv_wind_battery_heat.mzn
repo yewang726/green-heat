@@ -50,7 +50,7 @@ constraint r_pv <= 1;
 constraint r_pv >= 0;
 constraint pv_max=r_pv*RM*L[1];
 constraint wind_max=(1-r_pv)*RM*L[1];
-constraint bat_capa=bat_pmax*t_storage;
+constraint bat_capa=P_heater*t_storage;
 constraint CAPEX=C_PV * pv_max + C_Wind * wind_max + C_BAT_energy * bat_capa + C_BAT_power * bat_pmax + C_heater*P_heater;
 
 constraint forall(  i in tint  )(  pv_out[i] = pv_max/pv_ref_capa * pv_ref_out[i]  );
