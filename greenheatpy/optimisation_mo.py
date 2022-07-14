@@ -86,7 +86,7 @@ def gen_dakota_input(var_names, nominals, lbs, ubs, num_eval=2400):
         f.write(dkt_in)		
 
 
-def gen_interface_bb(model_name, location, P_load_des=500e3):
+def gen_interface_bb(model_name, location, P_load_des=500e3, solar_data_fn=None, wind_data_fn=None):
     '''
     This function generate the interface_bb.py file in the casedir
     which will be excuted by DAKOTA	
@@ -125,7 +125,7 @@ else:
 from greenheatpy.master import master
 
 try:
-    LCOH, CF, CAPEX =master(model_name='%s', location='%s', RM=var_sets['RM'], t_storage=var_sets['t_storage'], P_load_des=%s, r_pv=r_pv, P_heater=P_heater, bat_pmax=bat_pmax, casedir='.', verbose=False)
+    LCOH, CF, CAPEX =master(model_name='%s', location='%s', RM=var_sets['RM'], t_storage=var_sets['t_storage'], P_load_des=%s, r_pv=r_pv, P_heater=P_heater, bat_pmax=bat_pmax, casedir='.', solar_data_fn=%s, wind_data_fn=%s, verbose=False)
 except:
     LCOH=9999
     CF=0
@@ -140,7 +140,7 @@ for i, r in enumerate(results.responses()):
 		r.function = res[i]
 results.write()
 
-'''%(model_name, location, P_load_des)
+'''%(model_name, location, P_load_des, solar_data_fn, wind_data_fn)
 
 
     with open('interface_bb.py', 'w') as f:

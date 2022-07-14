@@ -3,7 +3,7 @@ from greenheatpy.master import master
 import functools
 import time
 
-def objective_function(model_name, location, P_load_des, RM, SH, r_pv, P_heater, bat_pmax, casedir, verbose, par_n, par_v):
+def objective_function(model_name, location, P_load_des, RM, SH, r_pv, P_heater, bat_pmax, casedir, solar_data_fn, wind_data_fn, verbose, par_n, par_v):
 
     nv=len(par_n)
     for i in range(nv):
@@ -19,7 +19,7 @@ def objective_function(model_name, location, P_load_des, RM, SH, r_pv, P_heater,
             bat_pmax=par_v[i]
 
     try:
-        LCOH, CF, CAPEX=master(model_name, location, RM=RM, t_storage=SH, P_load_des=P_load_des, r_pv=r_pv, P_heater=P_heater, bat_pmax=bat_pmax, casedir=casedir, verbose=verbose)
+        LCOH, CF, CAPEX=master(model_name, location, RM=RM, t_storage=SH, P_load_des=P_load_des, r_pv=r_pv, P_heater=P_heater, bat_pmax=bat_pmax, casedir=casedir, solar_data_fn=solar_data_fn, wind_data_fn=wind_data_fn, verbose=verbose)
     except:
         LCOH=99999
         CF=0
@@ -28,7 +28,7 @@ def objective_function(model_name, location, P_load_des, RM, SH, r_pv, P_heater,
     return LCOH 
 
 
-def st_sciopt(model_name, location, P_load_des, RM, SH, r_pv, P_heater, bat_pmax, casedir, verbose, method, LB, UB, nominals, names,  maxiter=100):
+def st_sciopt(model_name, location, P_load_des, RM, SH, r_pv, P_heater, bat_pmax, casedir, verbose, method, LB, UB, nominals, names,  maxiter=100, solar_data_fn=None, wind_data_fn=None):
     '''
     Arguments:
         model_name (str)  : minizic model name
@@ -59,7 +59,7 @@ def st_sciopt(model_name, location, P_load_des, RM, SH, r_pv, P_heater, bat_pmax
     for i in range(nv):
         bounds.append([LB[i], UB[i]])        
 
-    objfunc = functools.partial(objective_function, model_name, location, P_load_des, RM, SH, r_pv, P_heater, bat_pmax, casedir, verbose, names)
+    objfunc = functools.partial(objective_function, model_name, location, P_load_des, RM, SH, r_pv, P_heater, bat_pmax, casedir, solar_data_fn, wind_data_fn, verbose, names)
 
 
     res = sciopt.minimize(objfunc, nominals, method=method, bounds=bounds,

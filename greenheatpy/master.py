@@ -14,7 +14,7 @@ from greenheatpy.gen_minizinc_input_data import GenDZN
 def AUD2USD(value):
     return(0.746 * value)
 
-def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_heater=None, bat_pmax=None, casedir=None, verbose=False):
+def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_heater=None, bat_pmax=None, casedir=None, solar_data_fn=None, wind_data_fn=None, verbose=False):
     '''
     Arguments:
         model_name (str)  : minizic model name
@@ -46,7 +46,8 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         #if not os.path.exists(casedir+'/SolarSource.epw'):
         #    SolarResource(Lat,Lon, casedir)
         # Get SAM reference system outputs
-        solar_data_fn=SolarResource_solcast_TMY(location, casedir=casedir)        
+        if solar_data_fn ==None:
+            solar_data_fn=SolarResource_solcast_TMY(location, casedir=casedir)        
         pv_ref_capa = 1e3 #(kW)
         output_fn = pv_gen(pv_ref_capa, location=location, casedir=casedir, wea_fn=solar_data_fn)      
 
@@ -62,7 +63,8 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         #if not os.path.exists(casedir+'/WindSource.csv'):
         #    WindSource(Lat, Lon, casedir)
         # Get SAM reference system outputs
-        wind_data_fn=WindSource_solcast_TMY(location, casedir=casedir)        
+        if wind_data_fn==None:
+            wind_data_fn=WindSource_solcast_TMY(location, casedir=casedir)        
         wind_ref_capa = 200e3 #(kW)
         output_fn = wind_gen(wind_ref_capa, location=location, casedir=casedir, wea_fn=wind_data_fn)
             
@@ -78,7 +80,8 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         #if not os.path.exists(casedir+'/SolarSource.epw'):
         #    SolarResource(Lat,Lon, casedir)
         # Get SAM output 
-        solar_data_fn=SolarResource_solcast_TMY(location, casedir=casedir)
+        if solar_data_fn ==None:
+            solar_data_fn=SolarResource_solcast_TMY(location, casedir=casedir)       
         output_fn= cst_gen(Q_des_th=P_load_des, SM=RM, location=location, casedir=casedir, wea_fn=solar_data_fn)
 
         with open(output_fn) as f:
