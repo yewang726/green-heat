@@ -1,6 +1,7 @@
 from scipy import optimize as sciopt
 from greenheatpy.master import master
 import functools
+import time
 
 def objective_function(model_name, location, P_load_des, RM, SH, r_pv, P_heater, bat_pmax, casedir, verbose, par_n, par_v):
 
@@ -17,7 +18,12 @@ def objective_function(model_name, location, P_load_des, RM, SH, r_pv, P_heater,
         elif par_n[i]=='bat_pmax':
             bat_pmax=par_v[i]
 
-    LCOH, CF, CAPEX=master(model_name, location, RM=RM, t_storage=SH, P_load_des=P_load_des, r_pv=r_pv, P_heater=P_heater, bat_pmax=bat_pmax, casedir=casedir, verbose=verbose)
+    try:
+        LCOH, CF, CAPEX=master(model_name, location, RM=RM, t_storage=SH, P_load_des=P_load_des, r_pv=r_pv, P_heater=P_heater, bat_pmax=bat_pmax, casedir=casedir, verbose=verbose)
+    except:
+        LCOH=99999
+        CF=0
+        CAPEX=9e20
 
     return LCOH 
 
@@ -47,6 +53,7 @@ def st_sciopt(model_name, location, P_load_des, RM, SH, r_pv, P_heater, bat_pmax
         
         
     '''
+    start=time.time()
     bounds=[]
     nv=len(nominals)
     for i in range(nv):
@@ -67,6 +74,9 @@ def st_sciopt(model_name, location, P_load_des, RM, SH, r_pv, P_heater, bat_pmax
     print('-----------')
     print("")
     #cand = [scale[i]*v + offset[i] for i, v in enumerate(res.x)]
+    end=time.time()
+    total_time=end-start # s
+    print('Total time %.2f (s)'%total_time)
 
     return res.fun, res.x
 
