@@ -39,13 +39,14 @@ var float: bat_capa;    % energy capacity of the electrochemical battery (kWh)
 array[tint] of var float: P_bat_in;      % power flow into the battery (kW)
 array[tint] of var float: P_bat_out;     % power flow out of the battery (kW)
 array[tsamp] of var float: bat_e_stored;  % electrical energy stored in the battery (kWh)
+array[tsamp] of var float: SOC; % state of charge
 
 var float: obj; % objective is the capacity factor
 %obj = sum(P_heat);
 obj=sum(i in tint)(P_heat[i]);
 
 %=== CONSTRAINTS ===
-constraint bat_e_stored[1] = 0;
+constraint bat_e_stored[1] = 0.15*bat_capa;
 constraint r_pv <= 1;
 constraint r_pv >= 0;
 constraint pv_max=r_pv*RM*L[1];
@@ -70,8 +71,9 @@ constraint forall(  i in tint  )(  pv_wind_direct[i] >= 0  );
 constraint forall(  i in tint  )(  pv_wind_direct[i] + P_bat_out[i] - P_heater <= 0  );
 
 constraint forall(  i in tint  )(  bat_e_stored[i+1] = bat_e_stored[i] + ( P_bat_in[i] * BAT_ETA_in - P_bat_out[i]/BAT_ETA_out ) * DT  );
-constraint forall(  i in tsamp  )(  bat_e_stored[i] >= 0 );
-constraint forall(  i in tsamp  )(  bat_e_stored[i] - bat_capa <= 0 );  
+constraint forall(  i in tsamp  )(  bat_e_stored[i] >= 0.15*bat_capa );
+constraint forall(  i in tsamp  )(  bat_e_stored[i]<= 0.99*bat_capa);  
+constraint forall(  i in tsamp  )(  SOC[i] = bat_e_stored[i]/bat_capa );
 
 
 solve maximize obj;
@@ -95,6 +97,7 @@ output  ["!"] ++
         ["P_ele="] ++ [show(P_ele)] ++ [";"] ++
         ["P_heat="] ++ [show(P_heat)] ++ [";"] ++
         ["bat_e_stored="] ++ [show(bat_e_stored)] ++ [";"] ++
+        ["SOC="] ++ [show(SOC)] ++ [";"] ++        
         ["L="] ++ [show(L)] ++ [";"] ++
         ["!"];
 
