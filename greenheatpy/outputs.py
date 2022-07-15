@@ -28,6 +28,7 @@ class Outputs:
         bat_pmax=results["bat_pmax"][0]/1.e3 # MW
         pv_out=results["pv_out"]
         wind_out=results["wind_out"]
+        pv_wind_direct=results["pv_wind_direct"]
         P_curt=results["P_curt"]
         P_bat_in=results["P_bat_in"]
         P_bat_out=results["P_bat_out"]
@@ -58,6 +59,7 @@ class Outputs:
         if self.verbose:
             np.savetxt(casedir+'/pv_out.csv', pv_out, fmt='%.4f', delimiter=',')
             np.savetxt(casedir+'/wind_out.csv', wind_out, fmt='%.4f', delimiter=',')
+            np.savetxt(casedir+'/pv_wind_direct.csv', pv_wind_direct, fmt='%.4f', delimiter=',')
             np.savetxt(casedir+'/P_curt.csv', P_curt, fmt='%.4f', delimiter=',')
             np.savetxt(casedir+'/P_bat_in.csv', P_bat_in, fmt='%.4f', delimiter=',')
             np.savetxt(casedir+'/P_bat_out.csv', P_bat_out, fmt='%.4f', delimiter=',')
@@ -66,7 +68,7 @@ class Outputs:
             np.savetxt(casedir+'/bat_e_stored.csv', bat_e_stored, fmt='%.4f', delimiter=',')
             np.savetxt(casedir+'/load.csv', load, fmt='%.4f', delimiter=',')
 
-
+            '''
             time=np.arange(len(pv_out))
             plt.plot(time, pv_out, label='pv out')
             plt.plot(time, wind_out, label='wind out')
@@ -78,99 +80,7 @@ class Outputs:
             plt.legend()
             plt.show()
             plt.close()
-
-
-
-
-    def pv_battery_heat_outputs(self, results, casedir, LCOH, location, solar_data_fn):
-
-        CAPEX=results["CAPEX"][0]/1e6 # M.USD
-        CF=results["CF"][0]
-        RM=results["RM"][0]
-        t_storage=results["t_storage"][0]
-        pv_max=results["pv_max"][0]/1.e3 # MW
-        bat_capa=results["bat_capa"][0]/1.e3 # MWh
-        bat_pmax=results["bat_pmax"][0]/1.e3 # MW
-        pv_out=results["pv_out"]
-        P_curt=results["P_curt"]
-        P_bat_in=results["P_bat_in"]
-        P_bat_out=results["P_bat_out"]
-        P_ele=results["P_ele"]
-        P_heat=results["P_heat"]
-        bat_e_stored=results["bat_e_stored"]
-        load=results["L"]
-
-
-        summary=np.array([
-                ['RM',RM, '-'],
-                ['t_storage', t_storage, 'h'],
-                ['LCOH', LCOH, 'USD/MWh_th'],
-                ['CF', CF, '-'],
-                ['CAPEX', CAPEX, 'M.USD'],
-                ['pv_max', pv_max, 'MW'],
-                ['bat_capa',bat_capa, 'MWh'],
-                ['bat_pmax',bat_pmax, 'MW'],
-                ['location',location, '-'],
-                ['solar_data',solar_data_fn, '-']
-        ])
-
-        np.savetxt(casedir+'/summary_%.3f_%.2f.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
-        
-        if self.verbose:
-            np.savetxt(casedir+'/pv_out.csv', pv_out, fmt='%.4f', delimiter=',')
-            np.savetxt(casedir+'/P_curt.csv', P_curt, fmt='%.4f', delimiter=',')
-            np.savetxt(casedir+'/P_bat_in.csv', P_bat_in, fmt='%.4f', delimiter=',')
-            np.savetxt(casedir+'/P_bat_out.csv', P_bat_out, fmt='%.4f', delimiter=',')
-            np.savetxt(casedir+'/P_ele.csv', P_ele, fmt='%.4f', delimiter=',')
-            np.savetxt(casedir+'/P_heat.csv', P_heat, fmt='%.4f', delimiter=',')
-            np.savetxt(casedir+'/bat_e_stored.csv', bat_e_stored, fmt='%.4f', delimiter=',')
-            np.savetxt(casedir+'/load.csv', load, fmt='%.4f', delimiter=',')
-
-
-
-    def wind_battery_heat_outputs(self, results, casedir, LCOH, location, wind_data_fn):
-
-        CAPEX=results["CAPEX"][0]/1e6 # M.USD
-        CF=results["CF"][0]
-        RM=results["RM"][0]
-        t_storage=results["t_storage"][0]
-        wind_max=results["wind_max"][0]/1.e3 # MW
-        bat_capa=results["bat_capa"][0]/1.e3 # MWh
-        bat_pmax=results["bat_pmax"][0]/1.e3 # MW
-        wind_out=results["wind_out"]
-        P_curt=results["P_curt"]
-        P_bat_in=results["P_bat_in"]
-        P_bat_out=results["P_bat_out"]
-        P_ele=results["P_ele"]
-        P_heat=results["P_heat"]
-        bat_e_stored=results["bat_e_stored"]
-        load=results["L"]
-
-
-        summary=np.array([
-                ['RM',RM, '-'],
-                ['t_storage', t_storage, 'h'],
-                ['LCOH', LCOH, 'USD/MWh_th'],
-                ['CF', CF, '-'],
-                ['CAPEX', CAPEX, 'M.USD'],
-                ['wind_max', wind_max, 'MW'],
-                ['bat_capa',bat_capa, 'MWh'],
-                ['bat_pmax',bat_pmax, 'MW'],
-                ['location',location, '-'],
-                ['wind_data',wind_data_fn, '-']   
-        ])
-
-        np.savetxt(casedir+'/summary_%.3f_%.2f.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
-        
-        if self.verbose:
-            np.savetxt(casedir+'/wind_out.csv', wind_out, fmt='%.4f', delimiter=',')
-            np.savetxt(casedir+'/P_curt.csv', P_curt, fmt='%.4f', delimiter=',')
-            np.savetxt(casedir+'/P_bat_in.csv', P_bat_in, fmt='%.4f', delimiter=',')
-            np.savetxt(casedir+'/P_bat_out.csv', P_bat_out, fmt='%.4f', delimiter=',')
-            np.savetxt(casedir+'/P_ele.csv', P_ele, fmt='%.4f', delimiter=',')
-            np.savetxt(casedir+'/P_heat.csv', P_heat, fmt='%.4f', delimiter=',')
-            np.savetxt(casedir+'/bat_e_stored.csv', bat_e_stored, fmt='%.4f', delimiter=',')
-            np.savetxt(casedir+'/load.csv', load, fmt='%.4f', delimiter=',')
+            '''
 
 
     def pv_wind_TES_heat_outputs(self, results, casedir, LCOH, location, solar_data_fn, wind_data_fn):

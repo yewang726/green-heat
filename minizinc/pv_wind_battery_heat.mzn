@@ -88,6 +88,7 @@ output  ["!"] ++
         ["bat_pmax="] ++ [show(bat_pmax)] ++ [";"]++
         ["pv_out="] ++ [show(pv_out)] ++ [";"]++
         ["wind_out="] ++ [show(wind_out)] ++ [";"]++
+        ["pv_wind_direct="] ++ [show(pv_wind_direct)] ++ [";"]++
         ["P_curt="] ++ [show(P_curt)] ++ [";"] ++
         ["P_bat_in="] ++ [show(P_bat_in)] ++ [";"] ++
         ["P_bat_out="] ++ [show(P_bat_out)] ++ [";"] ++
