@@ -57,8 +57,9 @@ class Parameters:
         self.c_om_var_wind=0
 
     def bat_params(self):
-        self.eta_bat_in=0.95
-        self.eta_bat_out=0.95
+        # 0.82 round trip: https://www.eia.gov/todayinenergy/detail.php?id=46756 
+        self.eta_bat_in=0.906
+        self.eta_bat_out=0.906
         self.c_bat_energy=196.76 # USD/kWh
         self.c_bat_power=405.56 # USD/kW
 

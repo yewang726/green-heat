@@ -46,7 +46,7 @@ var float: obj; % objective is the capacity factor
 obj=sum(i in tint)(P_heat[i]);
 
 %=== CONSTRAINTS ===
-constraint bat_e_stored[1] = 0.15*bat_capa;
+constraint bat_e_stored[1] = 0.5*bat_capa;
 constraint r_pv <= 1;
 constraint r_pv >= 0;
 constraint pv_max=r_pv*RM*L[1];
