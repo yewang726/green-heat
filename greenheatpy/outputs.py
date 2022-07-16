@@ -93,7 +93,7 @@ class Outputs:
         pv_max=results["pv_max"][0]/1.e3 # MW
         wind_max=results["wind_max"][0]/1.e3 # MW
         TES_capa=results["TES_capa"][0]/1.e3 # MWh
-        TES_pmax=results["TES_pmax"][0]/1.e3 # MW
+        #TES_pmax=results["TES_pmax"][0]/1.e3 # MW
         P_heater=results["P_heater"][0]/1.e3 # MW
         pv_out=results["pv_out"]
         wind_out=results["wind_out"]
@@ -118,7 +118,7 @@ class Outputs:
                 ['pv_max', pv_max, 'MW'],
                 ['wind_max', wind_max, 'MW'],
                 ['TES_capa',TES_capa, 'MWh'],
-                ['TES_pmax',TES_pmax, 'MW'],
+                #['TES_pmax',TES_pmax, 'MW'],
                 ['P_heater',P_heater, 'MW'],
                 ['location',location, '-'],
                 ['solar_data',solar_data_fn, '-'],

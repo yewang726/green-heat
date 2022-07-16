@@ -34,8 +34,8 @@ class GenDZN:
 
 
 
-    def data_pv_wind_battery_heat(self, DT, RM, t_storage, bat_pmax, BAT_ETA_in, BAT_ETA_out, P_heater, ETA_heater, 
-                      C_PV, C_Wind, C_BAT_energy, C_BAT_power, C_heater,
+    def data_pv_wind_battery_heat(self, DT, RM, t_storage, bat_pmax, eta_BAT_in, eta_BAT_out, P_heater, eta_heater, 
+                      c_PV, c_Wind, c_BAT_energy, c_BAT_power, c_heater,
                       PV_ref_capa, PV_ref_out, Wind_ref_capa, Wind_ref_out, L, r_pv=None):
 
         textinput="""
@@ -46,17 +46,17 @@ DT = %.2f;      %% time difference between sample points (s)
 RM = %.3f;  %% renewable multiple
 t_storage = %.2f;   %% storage hour (h)
 bat_pmax = %.1f;   %% power of the battery (kW)
-BAT_ETA_in = %.2f;   %%charging efficiency of electrochemical battery
-BAT_ETA_out = %.2f;  %%discharging efficiency of electrochemical battery 
+eta_BAT_in = %.2f;   %%charging efficiency of electrochemical battery
+eta_BAT_out = %.2f;  %%discharging efficiency of electrochemical battery 
 
 P_heater = %.1f;    %% design power of the heater (kW)
-ETA_heater = %.4f;  %% efficiency of the heater
+eta_heater = %.4f;  %% efficiency of the heater
 
-C_PV = %.4f;    %% unit cost of PV (USD/kW)
-C_Wind =  %.4f;    %% unit cost of Wind farm (USD/kW)
-C_BAT_energy = %.6f;   %% unit cost of electrochemical battery energy (USD/kWh)
-C_BAT_power = %.6f;   %% unit cost of electrochemical battery power (USD/kW)
-C_heater = %.6f;   %% unit cost of heater (USD/kW)
+c_PV = %.4f;    %% unit cost of PV (USD/kW)
+c_Wind =  %.4f;    %% unit cost of Wind farm (USD/kW)
+c_BAT_energy = %.6f;   %% unit cost of electrochemical battery energy (USD/kWh)
+c_BAT_power = %.6f;   %% unit cost of electrochemical battery power (USD/kW)
+c_heater = %.6f;   %% unit cost of heater (USD/kW)
 
 pv_ref_capa = %.4f;       %%the capacity of the reference PV plant (kW)
 
@@ -70,9 +70,9 @@ wind_ref_out = %s;
 
 %% load timeseries                          
 L = %s;                              
-"""%(len(L), DT, RM, t_storage, bat_pmax, BAT_ETA_in, BAT_ETA_out,
-        P_heater, ETA_heater,
-        C_PV, C_Wind, C_BAT_energy, C_BAT_power, C_heater,
+"""%(len(L), DT, RM, t_storage, bat_pmax, eta_BAT_in, eta_BAT_out,
+        P_heater, eta_heater,
+        c_PV, c_Wind, c_BAT_energy, c_BAT_power, c_heater,
         PV_ref_capa, str(PV_ref_out), Wind_ref_capa,
         str(Wind_ref_out), str(L)) 
 
@@ -82,44 +82,6 @@ L = %s;
         return textinput
 
    
-
-    def data_pv_battery_heat(self, DT, RM, t_storage, bat_pmax, BAT_ETA_in, BAT_ETA_out, P_heater, ETA_heater, C_PV, C_BAT_energy, C_BAT_power, C_heater, PV_ref_capa, PV_ref_out, L):
-
-
-        textinput="""
-N = %i;
-
-DT = %.2f;      %% time difference between sample points (h)
-
-RM = %.3f;  %% renewable multiple
-t_storage = %.2f;   %% storage hour (h)
-BAT_ETA_in = %.2f;   %%charging efficiency of electrochemical battery
-BAT_ETA_out = %.2f;  %%discharging efficiency of electrochemical battery 
-
-P_heater = %.1f;    %% design power of the heater (kW)
-ETA_heater = %.4f;  %% efficiency of the heater
-
-C_PV = %.4f;    %% unit cost of PV (USD/kW)
-C_BAT_energy = %.6f;   %% unit cost of electrochemical battery energy (USD/kWh)
-C_BAT_power = %.6f;   %% unit cost of electrochemical battery power (USD/kW)
-C_heater = %.6f;   %% unit cost of heater (USD/kW)
-
-pv_ref_capa = %.4f;       %%the capacity of the reference PV plant (kW)
-
-%% Power output time series from reference PV plant (kW)
-pv_ref_out = %s;                                  
- 
-%% load timeseries                          
-L = %s;                              
-"""%(len(L), DT, RM, t_storage, BAT_ETA_in, BAT_ETA_out,
-        P_heater, ETA_heater,
-        C_PV, C_BAT_energy, C_BAT_power, C_heater,
-        PV_ref_capa, str(PV_ref_out), str(L)) 
-
-
-        return textinput
-
-  
 
     def data_pv_wind_TES_heat(self, DT, RM, t_storage, eta_TES_in, eta_TES_out, P_heater, eta_heater, 
                       c_PV, c_Wind, c_TES, c_heater,

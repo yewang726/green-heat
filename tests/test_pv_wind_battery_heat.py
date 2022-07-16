@@ -33,7 +33,7 @@ class TestMasterHeat(unittest.TestCase):
         check=sum(pv_out+ wind_out - P_curt - pv_wind_direct - P_bat_in)
         print('check=', check)
         self.assertTrue(check<1e-2)
-        self.assertTrue(abs(self.LCOH-143.22)<0.1)
+        self.assertTrue(abs(self.LCOH-143.55)/143.55<0.05)
         #os.system('rm *.csv')
 
         
