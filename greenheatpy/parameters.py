@@ -51,14 +51,19 @@ class Parameters:
         
 
     def pv_params(self):
-        self.c_pv=1122.73 # USD/kW
-        self.c_om_fixed_pv=12.68 # USD/kW
-        self.c_om_var_pv=0
+        self.c_pv_system=1074.99 # USD/kW
+        self.c_om_pv_fix=12.68 # USD/kW
+        self.c_om_pv_var=0
+        self.r_conting_pv=0.03 
+        self.t_constr_pv=1
+
 
     def wind_params(self):
-        self.c_wind=1455.45 # USD/kW
-        self.c_om_fixed_wind=18.65 # USD/kW
-        self.c_om_var_wind=0
+        self.c_wind_system=1462.16# USD/kW
+        self.c_om_wind_fix=18.65 # USD/kW
+        self.c_om_wind_var=0
+        self.r_conting_wind=0.03 
+        self.t_constr_wind=1
 
     def bat_params(self):
         # 0.82 round trip: https://www.eia.gov/todayinenergy/detail.php?id=46756 
@@ -68,22 +73,23 @@ class Parameters:
         self.c_bat_power=405.56 # USD/kW
 
     def TES_params(self):
-        self.eta_TES_in=0.95
-        self.eta_TES_out=0.95
+        self.eff_rdtrip_TES=0.99
         self.c_TES=22 # USD/kWh
 
 
     def heater_params(self):
-        self.eta_heater=0.99
+        self.eff_heater=0.99
         self.c_heater=206. # USD/kW
+        self.t_life_heater =10 # heater lifetime
+        self.c_replace_heater=123.6 # replacement cost after lifetime
 
 
     def finance_system_params(self):
-        self.r_conting = 0.07 # contingency cost
+        #self.r_conting = 0.07 # contingency cost
         self.r_disc_real = 0.064 # real discount rate
-        self.r_EPC = 0.13 # ratio of EPC and owner cost to the direct cost, 13% default in SAM
+        #self.r_EPC = 0.13 # ratio of EPC and owner cost to the direct cost, 13% default in SAM
         self.t_life = 25 # int, life time of systems
-        self.t_cons = 0 # construction time
+        #self.t_cons = 0 # construction time
     
 
 

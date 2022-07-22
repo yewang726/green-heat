@@ -83,7 +83,7 @@ class Outputs:
             '''
 
 
-    def pv_wind_TES_heat_outputs(self, results, casedir, LCOH, location, solar_data_fn, wind_data_fn):
+    def pv_wind_TES_heat_outputs(self, results, casedir, LCOH, location, solar_data_fn, wind_data_fn, epy, OM_total, C_cap, CAPEX, C_pv, C_wind, C_TES, C_heater, C_replace_NPV, r_disc_real, t_life, t_cons):
 
         CAPEX=results["CAPEX"][0]/1e6 # M.USD
         CF=results["CF"][0]
@@ -113,13 +113,24 @@ class Outputs:
                 ['t_storage', t_storage, 'h'],
                 ['LCOH', LCOH, 'USD/MWh_th'],
                 ['CF', CF, '-'],
-                ['CAPEX', CAPEX, 'M.USD'],
                 ['r_pv', r_pv, '-'],
                 ['pv_max', pv_max, 'MW'],
                 ['wind_max', wind_max, 'MW'],
                 ['TES_capa',TES_capa, 'MWh'],
                 #['TES_pmax',TES_pmax, 'MW'],
                 ['P_heater',P_heater, 'MW'],
+                ['EPY', epy, 'MWh'],
+                ['C_cap_tot', C_cap, 'USD'],
+                ['OM_tot', OM_total, 'USD'],
+                ['C_equipment', CAPEX, 'USD'],
+                ['C_pv', C_pv, 'USD'],            
+                ['C_wind', C_wind, 'USD'],  
+                ['C_TES', C_TES, 'USD'],  
+                ['C_heater', C_heater, 'USD'],  
+                ['C_replace_NPV', C_replace_NPV, 'USD'],  
+                ['r_real_discount', r_disc_real, '-'],
+                ['t_construction', t_cons, 'year'],
+                ['t_life', t_life, 'year'],
                 ['location',location, '-'],
                 ['solar_data',solar_data_fn, '-'],
                 ['wind_data',wind_data_fn, '-']   
@@ -141,7 +152,7 @@ class Outputs:
             np.savetxt(casedir+'/load.csv', load, fmt='%.4f', delimiter=',')
 
 
-    def CST_TES_heat_outputs(self, results, casedir, SM, H_recv, D_recv, H_tower, n_helios, A_land, LCOH, location, solar_data_fn, epy, OM_total, C_cap, C_indirect, C_direct, CAPEX, C_recv, C_tower, C_field, C_site, C_TES, C_land):
+    def CST_TES_heat_outputs(self, results, casedir, SM, H_recv, D_recv, H_tower, n_helios, A_land, LCOH, location, solar_data_fn, epy, OM_total, C_cap, C_indirect, C_direct, CAPEX, C_recv, C_tower, C_field, C_site, C_TES, C_land, r_disc_real, t_life, t_cons):
 
         CF=results["CF"][0]
         t_storage=results["t_storage"][0]
@@ -181,6 +192,9 @@ class Outputs:
                 ['C_equipment', CAPEX, 'USD'],
                 ['C_direct', C_direct, 'USD'],
                 ['C_indirect', C_indirect, 'USD'],
+                ['r_real_discount', r_disc_real, '-'],
+                ['t_construction', t_cons, 'year'],
+                ['t_life', t_life, 'year'],
                 ['location',location, '-'],
                 ['solar_data',solar_data_fn, '-']
         ])
