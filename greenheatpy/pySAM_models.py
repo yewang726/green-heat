@@ -154,6 +154,15 @@ def cst_gen(Q_des_th, SM, location, casedir, wea_fn=None):
         module.value('solarm', SM) # solar multiple
         module.value('tshours', 100) # because this model only takes the receiver output, a very large storage is set to ignor impact from SAM control 
 
+        # add initial guess of tower and receiver design
+        H_recv_guess=3.603*SM+16.64
+        D_recv_guess=3.05*SM+14.63
+        H_tower_guess=32.21*SM+179.4
+        module.value('rec_height', H_recv_guess) 
+        module.value('D_rec', D_recv_guess) 
+        module.value('h_tower', H_tower_guess) 
+
+
         if wea_fn==None:
             module.value('solar_resource_file', datadir+'/SolarSource.csv')
         else:
@@ -185,7 +194,9 @@ def cst_gen(Q_des_th, SM, location, casedir, wea_fn=None):
             text_file.write('%s,%s,%s,%s,%s\n'%(H_recv, D_recv, H_tower, n_helios, A_land))                         
             text_file.write(str(Q_rcv_out))          
         
-
+        print('H_recv, guess: %.2f, actuall: %.2f'%(H_recv_guess, H_recv)) 
+        print('D_recv, guess: %.2f, actuall: %.2f'%(D_recv_guess, D_recv)) 
+        print('H_tower, guess: %.2f, actuall: %.2f'%(H_tower_guess, H_tower)) 
     return output_fn
 
 
