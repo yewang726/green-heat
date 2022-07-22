@@ -49,7 +49,7 @@ var float: obj; % objective is the capacity factor
 obj=sum(i in tint)(P_heat[i]);
 
 %=== CONSTRAINTS ===
-constraint TES_e_stored[1] = 0;
+constraint TES_e_stored[1] = 0.01*TES_capa;
 constraint r_pv <= 1;
 constraint r_pv >= 0;
 constraint pv_max=r_pv*RM*L[1];
@@ -77,8 +77,8 @@ constraint forall(  i in tint  )(  P_heater_out[i] <= P_heater  );
 constraint forall(  i in tint  )(  P_heat_direct[i] + P_TES_out[i] - L[i] <= 0  );
 
 constraint forall(  i in tint  )(  TES_e_stored[i+1] = TES_e_stored[i] + ( P_TES_in[i] * eta_TES_in - P_TES_out[i]/eta_TES_out ) * DT  );
-constraint forall(  i in tsamp  )(  TES_e_stored[i] >=  0.01*TES_capa  );
-constraint forall(  i in tsamp  )(  TES_e_stored[i] <=  0.99*TES_capa  );  
+constraint forall(  i in tsamp  )(  TES_e_stored[i] >=  0  );
+constraint forall(  i in tsamp  )(  TES_e_stored[i] <=  TES_capa );  
 
 
 solve maximize obj;
