@@ -67,10 +67,11 @@ class Parameters:
 
     def bat_params(self):
         # 0.82 round trip: https://www.eia.gov/todayinenergy/detail.php?id=46756 
-        self.eta_bat_in=0.906
-        self.eta_bat_out=0.906
-        self.c_bat_energy=196.76 # USD/kWh
-        self.c_bat_power=405.56 # USD/kW
+        self.eff_rdtrip_bt=0.82
+        self.c_bt_energy=250. # USD/kWh
+        self.c_bt_power=230. # USD/kW
+        self.t_life_bt =10 # heater lifetime
+        self.c_replace_bt=self.c_bt_energy # replacement cost after lifetime
 
     def TES_params(self):
         self.eff_rdtrip_TES=0.99
@@ -81,7 +82,7 @@ class Parameters:
         self.eff_heater=0.99
         self.c_heater=206. # USD/kW
         self.t_life_heater =10 # heater lifetime
-        self.c_replace_heater=123.6 # replacement cost after lifetime
+        self.c_replace_heater=0.6*self.c_heater # replacement cost after lifetime
 
 
     def finance_system_params(self):

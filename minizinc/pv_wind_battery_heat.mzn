@@ -93,6 +93,7 @@ output  ["!"] ++
         ["wind_max="] ++ [show(wind_max)] ++ [";"] ++
         ["bat_capa="] ++ [show(bat_capa)] ++ [";"]++
         ["bat_pmax="] ++ [show(bat_pmax)] ++ [";"]++
+        ["P_heater="] ++ [show(P_heater)] ++ [";"]++
         ["pv_out="] ++ [show(pv_out)] ++ [";"]++
         ["wind_out="] ++ [show(wind_out)] ++ [";"]++
         ["pv_wind_direct="] ++ [show(pv_wind_direct)] ++ [";"]++

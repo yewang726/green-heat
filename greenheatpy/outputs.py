@@ -14,10 +14,9 @@ class Outputs:
         '''
         self.verbose=verbose
         
+    def pv_wind_battery_heat_outputs(self, results, casedir, LCOH, location, solar_data_fn, wind_data_fn, epy, OM_total, C_cap, CAPEX, C_pv, C_wind, C_bat, C_heater,  C_replc_heater_NPV, C_replc_bt_NPV, C_replace_NPV, r_disc_real, t_life, t_cons, eta_storage):
 
-    def pv_wind_battery_heat_outputs(self, results, casedir, LCOH, location, solar_data_fn, wind_data_fn):
-
-        CAPEX=results["CAPEX"][0]/1e6 # M.USD
+        #CAPEX=results["CAPEX"][0]/1e6 # M.USD
         CF=results["CF"][0]
         RM=results["RM"][0]
         t_storage=results["t_storage"][0]
@@ -26,6 +25,7 @@ class Outputs:
         wind_max=results["wind_max"][0]/1.e3 # MW
         bat_capa=results["bat_capa"][0]/1.e3 # MWh
         bat_pmax=results["bat_pmax"][0]/1.e3 # MW
+        P_heater=results["P_heater"][0]/1.e3 # MW
         pv_out=results["pv_out"]
         wind_out=results["wind_out"]
         pv_wind_direct=results["pv_wind_direct"]
@@ -37,18 +37,32 @@ class Outputs:
         bat_e_stored=results["bat_e_stored"]
         load=results["L"]
 
-
         summary=np.array([
                 ['RM',RM, '-'],
                 ['t_storage', t_storage, 'h'],
                 ['LCOH', LCOH, 'USD/MWh_th'],
                 ['CF', CF, '-'],
-                ['CAPEX', CAPEX, 'M.USD'],
                 ['r_pv', r_pv, '-'],
                 ['pv_max', pv_max, 'MW'],
                 ['wind_max', wind_max, 'MW'],
+                ['P_heater',P_heater, 'MW'],
                 ['bat_capa',bat_capa, 'MWh'],
                 ['bat_pmax',bat_pmax, 'MW'],
+                ['storage in/out efficiency', eta_storage, '-'],
+                ['EPY', epy, 'MWh'],
+                ['C_cap_tot', C_cap/1e6, 'M.USD'],
+                ['OM_tot', OM_total/1e6, 'M.USD'],
+                ['C_equipment', CAPEX/1e6, 'M.USD'],
+                ['C_pv', C_pv/1e6, 'M.USD'],            
+                ['C_wind', C_wind/1e6, 'M.USD'],  
+                ['C_bat', C_bat/1e6, 'M.USD'],  
+                ['C_heater', C_heater/1e6, 'M.USD'],  
+                ['C_replace_heater_NPV', C_replc_heater_NPV/1e6, 'M.USD'],  
+                ['C_replace_bt_NPV', C_replc_bt_NPV/1e6, 'M.USD'],  
+                ['C_replace_NPV', C_replace_NPV/1e6, 'M.USD'],  
+                ['r_real_discount', r_disc_real, '-'],
+                ['t_construction', t_cons, 'year'],
+                ['t_life', t_life, 'year'],
                 ['location',location, '-'],
                 ['solar_data',solar_data_fn, '-'],
                 ['wind_data',wind_data_fn, '-']                
@@ -83,9 +97,9 @@ class Outputs:
             '''
 
 
-    def pv_wind_TES_heat_outputs(self, results, casedir, LCOH, location, solar_data_fn, wind_data_fn, epy, OM_total, C_cap, CAPEX, C_pv, C_wind, C_TES, C_heater, C_replace_NPV, r_disc_real, t_life, t_cons):
+    def pv_wind_TES_heat_outputs(self, results, casedir, LCOH, location, solar_data_fn, wind_data_fn, epy, OM_total, C_cap, CAPEX, C_pv, C_wind, C_TES, C_heater, C_replace_NPV, r_disc_real, t_life, t_cons, eta_storage):
 
-        CAPEX=results["CAPEX"][0]/1e6 # M.USD
+        #CAPEX=results["CAPEX"][0]/1e6 # M.USD
         CF=results["CF"][0]
         RM=results["RM"][0]
         t_storage=results["t_storage"][0]
@@ -116,18 +130,19 @@ class Outputs:
                 ['r_pv', r_pv, '-'],
                 ['pv_max', pv_max, 'MW'],
                 ['wind_max', wind_max, 'MW'],
+                ['P_heater',P_heater, 'MW'],
                 ['TES_capa',TES_capa, 'MWh'],
                 #['TES_pmax',TES_pmax, 'MW'],
-                ['P_heater',P_heater, 'MW'],
+                ['storage in/out efficiency', eta_storage, '-'],
                 ['EPY', epy, 'MWh'],
-                ['C_cap_tot', C_cap, 'USD'],
-                ['OM_tot', OM_total, 'USD'],
-                ['C_equipment', CAPEX, 'USD'],
-                ['C_pv', C_pv, 'USD'],            
-                ['C_wind', C_wind, 'USD'],  
-                ['C_TES', C_TES, 'USD'],  
-                ['C_heater', C_heater, 'USD'],  
-                ['C_replace_NPV', C_replace_NPV, 'USD'],  
+                ['C_cap_tot', C_cap/1e6, 'M.USD'],
+                ['OM_tot', OM_total/1e6, 'M.USD'],
+                ['C_equipment', CAPEX/1e6, 'M.USD'],
+                ['C_pv', C_pv/1e6, 'M.USD'],            
+                ['C_wind', C_wind/1e6, 'M.USD'],  
+                ['C_TES', C_TES/1e6, 'M.USD'],  
+                ['C_heater', C_heater/1e6, 'M.USD'],  
+                ['C_replace_heater_NPV', C_replace_NPV/1e6, 'M.USD'],  
                 ['r_real_discount', r_disc_real, '-'],
                 ['t_construction', t_cons, 'year'],
                 ['t_life', t_life, 'year'],
@@ -152,7 +167,7 @@ class Outputs:
             np.savetxt(casedir+'/load.csv', load, fmt='%.4f', delimiter=',')
 
 
-    def CST_TES_heat_outputs(self, results, casedir, SM, H_recv, D_recv, H_tower, n_helios, A_land, LCOH, location, solar_data_fn, epy, OM_total, C_cap, C_indirect, C_direct, CAPEX, C_recv, C_tower, C_field, C_site, C_TES, C_land, r_disc_real, t_life, t_cons):
+    def CST_TES_heat_outputs(self, results, casedir, SM, H_recv, D_recv, H_tower, n_helios, A_land, LCOH, location, solar_data_fn, epy, OM_total, C_cap, C_indirect, C_direct, CAPEX, C_recv, C_tower, C_field, C_site, C_TES, C_land, r_disc_real, t_life, t_cons, eta_storage):
 
         CF=results["CF"][0]
         t_storage=results["t_storage"][0]
@@ -180,18 +195,19 @@ class Outputs:
                 ['A_land', A_land, 'm2'],
                 ['TES_capa',TES_capa, 'MWh'],
                 ['TES_pmax',TES_pmax, 'MW'],
+                ['storage in/out efficiency', eta_storage, '-'],
                 ['EPY', epy, 'MWh'],
-                ['C_cap_tot', C_cap, 'USD'],
-                ['OM_tot', OM_total, 'USD'],
-                ['C_recv', C_recv, 'USD'],
-                ['C_tower', C_tower, 'USD'],
-                ['C_field', C_field, 'USD'],
-                ['C_site', C_site, 'USD'],
-                ['C_TES', C_TES, 'USD'],
-                ['C_land', C_land, 'USD'],
-                ['C_equipment', CAPEX, 'USD'],
-                ['C_direct', C_direct, 'USD'],
-                ['C_indirect', C_indirect, 'USD'],
+                ['C_cap_tot', C_cap/1e6, 'M.USD'],
+                ['OM_tot', OM_total/1e6, 'M.USD'],
+                ['C_recv', C_recv/1e6, 'M.USD'],
+                ['C_tower', C_tower/1e6, 'M.USD'],
+                ['C_field', C_field/1e6, 'M.USD'],
+                ['C_site', C_site/1e6, 'M.USD'],
+                ['C_TES', C_TES/1e6, 'M.USD'],
+                ['C_land', C_land/1e6, 'M.USD'],
+                ['C_equipment', CAPEX/1e6, 'M.USD'],
+                ['C_direct', C_direct/1e6, 'M.USD'],
+                ['C_indirect', C_indirect/1e6, 'USD'],
                 ['r_real_discount', r_disc_real, '-'],
                 ['t_construction', t_cons, 'year'],
                 ['t_life', t_life, 'year'],

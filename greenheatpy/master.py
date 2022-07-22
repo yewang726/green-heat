@@ -103,18 +103,19 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
     pm=Parameters()
     if model_name=='pv_wind_battery_heat':
         #P_heater=P_load_des/pm.eta_heater
+        eta_storage=pm.eff_rdtrip_bt**0.5
         simparams = dict(DT = 1.,# [h] time steps
                          RM = RM, # renewable multiple
                          t_storage = t_storage, # [h] storage hour
 						 bat_pmax = bat_pmax, #[kW] battery power
-                         eta_BAT_in = pm.eta_bat_in,   # charging efficiency of battery
-                         eta_BAT_out = pm.eta_bat_out,  # discharg efficiency of battery
+                         eta_BAT_in = eta_storage,   # charging efficiency of battery
+                         eta_BAT_out = eta_storage,  # discharg efficiency of battery
                          P_heater = P_heater, # [kW] heater designed power
                          eta_heater = pm.eff_heater, # heater efficiency
                          c_PV = pm.c_pv_system,  # [USD/kW] unit cost of PV
                          c_Wind = pm.c_wind_system, # [USD/kW] unit cost of W
-                         c_BAT_energy = pm.c_bat_energy, # [USD/kWh] unit cost of battery energy storage
-                         c_BAT_power = pm.c_bat_power,  # [USD/kW] unit cost of battery power capacpity
+                         c_BAT_energy = pm.c_bt_energy, # [USD/kWh] unit cost of battery energy storage
+                         c_BAT_power = pm.c_bt_power,  # [USD/kW] unit cost of battery power capacpity
                          c_heater = pm.c_heater, # [USD/kW] unit cost of heater
                          PV_ref_capa = pv_ref_capa,    #capacity of reference PV plant (kW)
                          PV_ref_out = pv_ref_out,           #power output from reference PV plant (kW)
@@ -126,12 +127,12 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
 
 
     elif model_name=='pv_wind_TES_heat':
-        eta_TES_in=pm.eff_rdtrip_TES**0.5
+        eta_storage=pm.eff_rdtrip_TES**0.5
         simparams = dict(DT = 1.,# [h] time steps
                          RM = RM, # renewable multiple
                          t_storage = t_storage, # [h] storage hour
-                         eta_TES_in = eta_TES_in,   # charging efficiency of battery
-                         eta_TES_out = eta_TES_in,  # discharg efficiency of battery
+                         eta_TES_in = eta_storage,   # charging efficiency of battery
+                         eta_TES_out = eta_storage,  # discharg efficiency of battery
                          P_heater = P_heater, # [kW] heater designed power
                          eta_heater = pm.eff_heater, # heater efficiency
                          c_PV = pm.c_pv_system,  # [USD/kW] unit cost of PV
@@ -147,11 +148,11 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
 
 
     elif model_name=='CST_TES_heat':
-        eta_TES_in=pm.eff_rdtrip_TES**0.5
+        eta_storage=pm.eff_rdtrip_TES**0.5
         simparams = dict(DT = 1.,# [h] time steps
                          t_storage = t_storage, # [h] storage hour
-                         eta_TES_in = eta_TES_in,   # charging efficiency of battery
-                         eta_TES_out = eta_TES_in,  # discharg efficiency of battery
+                         eta_TES_in = eta_storage,   # charging efficiency of battery
+                         eta_TES_out = eta_storage,  # discharg efficiency of battery
                          P_recv_out = P_recv_out,        #power output from the reference wind farm (kW)
                          L = [P_load_des for i in range(len(P_recv_out))])  #[kW] load profile timeseries
 
@@ -167,16 +168,45 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
     CF=results['CF'][0]
     if 'pv_wind_battery_heat' in model_name:
 
-        CAPEX=results['CAPEX'][0]
         pv_max = results['pv_max'][0]
         wind_max = results['wind_max'][0]
-        OM_fixed=pm.c_om_fixed_pv*pv_max+pm.c_om_fixed_wind*wind_max
+        P_heater=results["P_heater"][0]
+        bat_capa=results["bat_capa"][0]
+        bat_pmax=results["bat_pmax"][0]
+        C_pv=pm.c_pv_system*pv_max
+        C_wind=pm.c_wind_system*wind_max
+        C_heater=P_heater*pm.c_heater
+        C_bat=bat_capa*pm.c_bt_energy+bat_pmax*pm.c_bt_power
+    
+        CAPEX=results['CAPEX'][0]
+
+       # heater replacement
+        C_replace_heater=P_heater*pm.c_replace_heater
+        n_replace_heater=int(pm.t_life/pm.t_life_heater)
+
+       # battery replacement
+        C_replace_bt=bat_capa*pm.c_replace_bt
+        n_replace_bt=int(pm.t_life/pm.t_life_bt)
+
+        C_replc_heater_NPV=0
+        for i in range(n_replace_heater):
+            t=(i+1)*pm.t_life_heater+pm.t_constr_pv
+            C_replc_heater_NPV+=C_replace_heater/(1+pm.r_disc_real)**t
+
+        C_replc_bt_NPV=0
+        for i in range(n_replace_bt):
+            t=(i+1)*pm.t_life_bt+pm.t_constr_pv
+            C_replc_bt_NPV+=C_replace_bt/(1+pm.r_disc_real)**t
+
+        C_replace_NPV=C_replc_heater_NPV+C_replc_bt_NPV
+
+        C_cap=CAPEX*(1+pm.r_conting_pv)+C_replace_NPV
+
+        OM_fixed=pm.c_om_pv_fix*pv_max+pm.c_om_wind_fix*wind_max
         c_OM_var = 0.
-        C_direct= CAPEX*(1.+pm.r_conting)
-        C_indirect = (pm.r_EPC+pm.r_tax)*C_direct #TODO and C_land
-        C_cap=C_direct + C_indirect
-        LCOH, epy, OM_total=cal_LCOH(CF,  P_load_des, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_cons)
-        output.pv_wind_battery_heat_outputs(results, casedir, LCOH, location, solar_data_fn, wind_data_fn)
+
+        LCOH, epy, OM_total=cal_LCOH(CF,  P_load_des, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_constr_pv)
+        output.pv_wind_battery_heat_outputs(results, casedir, LCOH, location, solar_data_fn, wind_data_fn, epy, OM_total, C_cap, CAPEX, C_pv, C_wind, C_bat, C_heater, C_replc_heater_NPV, C_replc_bt_NPV, C_replace_NPV,  pm.r_disc_real, pm.t_life, pm.t_constr_pv, eta_storage)
 
 
     elif model_name=='pv_wind_TES_heat':
@@ -205,7 +235,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
 
         LCOH, epy, OM_total = cal_LCOH(CF, P_load_des, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_constr_pv)
 
-        output.pv_wind_TES_heat_outputs(results, casedir, LCOH, location, solar_data_fn, wind_data_fn, epy, OM_total, C_cap, CAPEX, C_pv, C_wind, C_TES, C_heater, C_replace_NPV,  pm.r_disc_real, pm.t_life, pm.t_constr_pv)
+        output.pv_wind_TES_heat_outputs(results, casedir, LCOH, location, solar_data_fn, wind_data_fn, epy, OM_total, C_cap, CAPEX, C_pv, C_wind, C_TES, C_heater, C_replace_NPV,  pm.r_disc_real, pm.t_life, pm.t_constr_pv, eta_storage)
 
 
     elif model_name=='CST_TES_heat':
@@ -227,7 +257,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
 
         LCOH, epy, OM_total=cal_LCOH(CF,  P_load_des, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_constr_cst)
 
-        output.CST_TES_heat_outputs(results, casedir, RM, H_recv, D_recv, H_tower, n_helios, A_land, LCOH, location, solar_data_fn, epy, OM_total, C_cap, C_indirect, C_direct, CAPEX, C_recv, C_tower, C_field, C_site, C_TES,  C_land, r_disc_real, t_life, t_cons)
+        output.CST_TES_heat_outputs(results, casedir, RM, H_recv, D_recv, H_tower, n_helios, A_land, LCOH, location, solar_data_fn, epy, OM_total, C_cap, C_indirect, C_direct, CAPEX, C_recv, C_tower, C_field, C_site, C_TES,  C_land, pm.r_disc_real, pm.t_life, pm.t_constr_cst, eta_storage)
 
 
     print('LCOH', LCOH)
