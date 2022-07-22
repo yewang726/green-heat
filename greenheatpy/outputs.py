@@ -141,7 +141,7 @@ class Outputs:
             np.savetxt(casedir+'/load.csv', load, fmt='%.4f', delimiter=',')
 
 
-    def CST_TES_heat_outputs(self, results, casedir, SM, H_recv, D_recv, H_tower, n_helios, A_land, LCOH, location, solar_data_fn):
+    def CST_TES_heat_outputs(self, results, casedir, SM, H_recv, D_recv, H_tower, n_helios, A_land, LCOH, location, solar_data_fn, epy, OM_total, C_cap, C_indirect, C_direct, CAPEX, C_recv, C_tower, C_field, C_site, C_TES, C_land):
 
         CF=results["CF"][0]
         t_storage=results["t_storage"][0]
@@ -169,6 +169,18 @@ class Outputs:
                 ['A_land', A_land, 'm2'],
                 ['TES_capa',TES_capa, 'MWh'],
                 ['TES_pmax',TES_pmax, 'MW'],
+                ['EPY', epy, 'MWh'],
+                ['C_cap_tot', C_cap, 'USD'],
+                ['OM_tot', OM_total, 'USD'],
+                ['C_recv', C_recv, 'USD'],
+                ['C_tower', C_tower, 'USD'],
+                ['C_field', C_field, 'USD'],
+                ['C_site', C_site, 'USD'],
+                ['C_TES', C_TES, 'USD'],
+                ['C_land', C_land, 'USD'],
+                ['C_equipment', CAPEX, 'USD'],
+                ['C_direct', C_direct, 'USD'],
+                ['C_indirect', C_indirect, 'USD'],
                 ['location',location, '-'],
                 ['solar_data',solar_data_fn, '-']
         ])

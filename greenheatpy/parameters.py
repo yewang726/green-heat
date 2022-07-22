@@ -24,26 +24,30 @@ class Parameters:
         self.A_helio = 12.2*12.2 # m2, default heliostat size
         self.H_helio = 12.2 # heilisotat height
         self.c_helio = 127. # USD/m2
-        self.c_helio_LB = 96. # USD/m2
-        self.c_helio_UB = 140. # USD/m2
-        self.c_helio_2030 = 75. # USD/m2
+        #self.c_helio_LB = 96. # USD/m2
+        #self.c_helio_UB = 140. # USD/m2
+        #self.c_helio_2030 = 75. # USD/m2
 
         self.c_site_cst = 16 # USD/m2 per area of heliostats        
-        self.c_land=2.471 # USD/m2, 10,000 USD/acre
+        self.c_land_cst=2.471 # USD/m2, 10,000 USD/acre
 
         # SAM:
         # Receiver Cost = Receiver Reference Cost x ( Receiver Area / Receiver Reference Area ) ^ Receiver Cost Scaling Exponent
         self.C_recv_ref = 103.e6 # USD, reference receiver cost
         self.A_recv_ref = 1571 # m2, reference receiver area
-        self.f_recv_scale = 0.7 # receiver cost scaling exponent
+        self.f_recv_exp = 0.7 # receiver cost scaling exponent
 
         # SAM: 
         # Total Tower Cost = Fixed Tower Costs x e ^ ( Tower Cost Scaling Exponent x ( Tower Height - Receiver Height ÷ 2 + Heliostat Height ÷ 2 ) )
-        self.C_tower_fixed = 3.e6 # USD, fixed tower cost
-        self.f_tower_scale = 0.0113 # tower cost scaling exponent
+        self.C_tower_fix = 3.e6 # USD, fixed tower cost
+        self.f_tower_exp = 0.0113 # tower cost scaling exponent
 
-        self.c_om_fixed_cst = 66 # USD/kW per year
-        self.c_om_var_cst = 3.5 # USD/MWh per year
+        self.c_om_cst_fix = 66 # USD/kW per year
+        self.c_om_cst_var = 3.5 # USD/MWh per year
+
+        self.r_EPC_owner=0.2 # rate of EPC and owner cost
+        self.r_conting_cst = 0.1 # contingency rate
+        self.t_constr_cst=3 # year of construction
         
 
     def pv_params(self):
@@ -78,7 +82,6 @@ class Parameters:
         self.r_conting = 0.07 # contingency cost
         self.r_disc_real = 0.064 # real discount rate
         self.r_EPC = 0.13 # ratio of EPC and owner cost to the direct cost, 13% default in SAM
-        self.r_tax = 0.8*0.05 # sale tax, 80% of the direct cost with 5% tax rate in SAM
         self.t_life = 25 # int, life time of systems
         self.t_cons = 0 # construction time
     
