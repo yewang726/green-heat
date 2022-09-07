@@ -8,7 +8,7 @@ from projdirs import datadir
 
 import numpy as np
 import pandas as pd
-import json, io, requests
+import json
 import PySAM.Pvwattsv8 as PVWatts, Windpower
 
 ################################################################
@@ -67,37 +67,6 @@ def wind_gen(hub_height=150):
     return(output.tolist())
 
 #################################################################
-def solcast_weather(location):
-    """
-    The function download tmy weather data from Solcast under a research
-    account.
-
-    Parameters
-    ----------
-    location : List object
-         includes [latitude,longitude] of the location
-
-    Returns a savd csv file in the format that can be used with SAM for PV
-    modelling.
-    """
-    base_url = 'https://api.solcast.com.au/'
-    tool = 'tmy_hourly?api_key='
-    key = 'YNEmGUM8_CfnWlNPinB9d3EnlGVpFwWV'
-    Parameters = {}
-    Parameters = dict(zip(['api_key','format','latitude','longitude'],
-                          [key,'x-sam+csv']+ location,
-                          ))
-    
-    response = requests.get(base_url+tool,params=Parameters)
-    print('Connection Status:', response.status_code)
-    response.close()
-    
-    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\WEATHER_DATA'
-    text_file = open(path + "\weather_data_solcast.csv", "w")
-    text_file.write(response.text)
-    text_file.close()
-    print('Weather data was downloaded from Solcast database!')
-
  #################################################################
 def SolarResource(Location):
     """

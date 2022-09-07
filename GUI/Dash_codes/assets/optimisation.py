@@ -6,7 +6,7 @@ Created on Tue Mar 29 10:28:44 2022
 """
 from projdirs import optdir
 import numpy as np
-from PACKAGE.component_model import pv_gen, wind_gen
+from assets.component_model import pv_gen, wind_gen
 import os
 
 def make_dzn_file(DT, EL_ETA, BAT_ETA_in, BAT_ETA_out,
@@ -174,3 +174,5 @@ def Cost_hs(size,storage_type):
     else:
         cost = 516
     return(cost)
+
+#######################################################################
