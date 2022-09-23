@@ -14,7 +14,8 @@ import dash_bootstrap_components as dbc
 import os
 from assets.component_model import SolarResource, WindSource
 from assets.optimisation import Optimise
-from assets.plotting import prep_results_to_print
+from assets.plotting import prep_results_to_print, prep_results_to_plot
+import pdb
 
 colors = {'background': 'whitesmoke',
           'text': 'black'}
@@ -28,6 +29,24 @@ locations = [{'label':'Newman','value':'Newman'},
              {'label':'Pinjara','value':'Pinjara'},
              {'label':'Port Agusta','value':'Port_Augusta'},
              {'label':'Burnie','value':'Burnie'},]
+
+results_var = [{'label':'PV output', 'value':'pv_pout'},
+               {'label':'Wind output', 'value':'wind_pout'},
+               {'label':'Curtailed power', 'value':'curtail_p'},
+               {'label':'Battery input power', 'value':'bat_pin'},
+               {'label':'Battery output power', 'value':'bat_pout'},
+               {'label':'Electrolyser input power', 'value':'el_pin'},
+               {'label':'Compressor 1 H2 flow', 'value':'comp1_hflow'},
+               {'label':'Compressor 2 H2 flow', 'value':'comp2_hflow'},
+               {'label':'Compressor 2 input power', 'value':'comp2_pin'},
+               {'label':'Reduced H2 output', 'value':'res_hout'},
+               {'label':'Pipe H2 output', 'value':'pipe_storage_hout'},
+               {'label':'UG H2 output', 'value':'ug_storage_hout'},
+               {'label':'UG storage level', 'value':'ug_storage_level'},
+               {'label':'Pipe storage level', 'value':'pipe_storage_level'},
+               {'label':'Shutdown allowance level', 'value':'reserve_h_level'},
+               {'label':'Battery charge level', 'value':'bat_e'},
+               {'label':'Load', 'value':'LOAD'},]
 
 storage_types = [{'label':'Salt Cavern','value':'Salt Cavern'},
                  {'label':'Lined Rock Cavern','value':'Lined Rock'}]
@@ -309,6 +328,8 @@ app.layout = html.Div([
                              ),
                      ]),
             
+            
+            
 #Load            
             dbc.Row([
                     dbc.Col(children= html.Div('Load:',
@@ -326,15 +347,19 @@ app.layout = html.Div([
                              width={'size':1, 'offset':1}
                              ),
                      ]),
-
-
             
+            
+           
+
+
+#Run optimisation
             dbc.Row([dbc.Col(html.Button('Optimise!',
                                          id='Optimise',
                                          n_clicks=0),
                                 width={'size':1, 'offset':1}
                                    ),
- #print results
+                     
+#print results
                     
                      dbc.Col(dcc.Loading(
                                     id="OPTIMISATION_TEXT",
@@ -344,25 +369,232 @@ app.layout = html.Div([
                                  width={'size':1, 'offset':0}
                                  ),
             
-            dbc.Col(dcc.Textarea(id='Output',
-                                 value='',
-                                 readOnly=True,
-                                 style={'width':'100%','height':200}
+                    dbc.Col(dcc.Textarea(id='Output',
+                                         value='',
+                                         readOnly=True,
+                                         style={'width':'100%','height':200}
+                                         ),
+                                         width={'size':3, 'offset':2}
+                            
+                            ),
+            
+                     ]),
+            
+#Export output
+            dbc.Row([
+                
+                dbc.Col([html.Button('Export!', id='export', n_clicks=0),
+                        dcc.Download(id='download_csv')],
+                                width={'size':1, 'offset':5}
+                                   )
+                     ]),
+            
+             
+#Choose plotting variabe
+           
+            dbc.Row(dbc.Col(dcc.Dropdown( id='variable_selector',
+                                          options=results_var,
+                                          multi=True,
+                                          searchable=True,
+                                          placeholder='Choose a variable!'
+                                    ),width={'size':2, 'offset':1}
                                  ),
-                                 width={'size':3, 'offset':2}
-                    
                     ),
             
-                     ]),  
-             
+#Download timeseries
+            dbc.Row([
+                
+                dbc.Col([html.Button('Download data!', id='download', n_clicks=0),
+                        dcc.Download(id='download_data_csv')],
+                                width={'size':1, 'offset':1}
+                                   )
+                     ]),
+            
             
             dbc.Row(dbc.Col(dcc.Graph(id='GraphI',figure={'data':[]}),
                             width={'size':10, 'offset':1}
                         )),
             
+
+            
+#Interest rate            
+            dbc.Row([
+                    dbc.Col(children= html.Div('Interest rate:',
+                                                style={'textAlign': 'right'}),
+                             width={'size':2, 'offset':0}
+                             ),
+                     dbc.Col(dcc.Input(id="interest_rate", type="number",
+                                       min=0.0,
+                                       value=7.8,
+                                       step=0.1, style={}),
+                             width={'size':1, 'offset':0}
+                             ),
+                     dbc.Col(children= html.Div('Percent [%]',
+                                                style={'textAlign': 'left'}),
+                             width={'size':1, 'offset':1}
+                             ),
+                     ]),
             
             
+#Lifetime            
+            dbc.Row([
+                    dbc.Col(children= html.Div('Lifetime:',
+                                                style={'textAlign': 'right'}),
+                             width={'size':2, 'offset':0}
+                             ),
+                     dbc.Col(dcc.Input(id="lifetime", type="number",
+                                       min=0.0,
+                                       value=25,
+                                       step=1, style={}),
+                             width={'size':1, 'offset':0}
+                             ),
+                     dbc.Col(children= html.Div('Years',
+                                                style={'textAlign': 'left'}),
+                             width={'size':1, 'offset':1}
+                             ),
+                     ]),
+
+#FOM PV            
+            dbc.Row([
+                    dbc.Col(children= html.Div('FOM PV:',
+                                                style={'textAlign': 'right'}),
+                             width={'size':2, 'offset':0}
+                             ),
+                     dbc.Col(dcc.Input(id="pv_fom", type="number",
+                                       min=0.0,
+                                       value=12.7,
+                                       step=0.1, style={}),
+                             width={'size':1, 'offset':0}
+                             ),
+                     dbc.Col(children= html.Div('USD/kW',
+                                                style={'textAlign': 'left'}),
+                             width={'size':1, 'offset':1}
+                             ),
+                     ]),
+
+
+
+#FOM WIND            
+            dbc.Row([
+                    dbc.Col(children= html.Div('FOM Wind:',
+                                                style={'textAlign': 'right'}),
+                             width={'size':2, 'offset':0}
+                             ),
+                     dbc.Col(dcc.Input(id="wind_fom", type="number",
+                                       min=0.0,
+                                       value=18.7,
+                                       step=0.1, style={}),
+                             width={'size':1, 'offset':0}
+                             ),
+                     dbc.Col(children= html.Div('USD/kW',
+                                                style={'textAlign': 'left'}),
+                             width={'size':1, 'offset':1}
+                             ),
+                     ]),
+            
+            
+
+#FOM Electrolyser            
+            dbc.Row([
+                    dbc.Col(children= html.Div('FOM Electrolyser:',
+                                                style={'textAlign': 'right'}),
+                             width={'size':2, 'offset':0}
+                             ),
+                     dbc.Col(dcc.Input(id="elec_fom", type="number",
+                                       min=0.0,
+                                       value=37.3,
+                                       step=0.1, style={}),
+                             width={'size':1, 'offset':0}
+                             ),
+                     dbc.Col(children= html.Div('USD/kW',
+                                                style={'textAlign': 'left'}),
+                             width={'size':1, 'offset':1}
+                             ),
+                     ]),
+
+
+#VOM PV            
+            dbc.Row([
+                    dbc.Col(children= html.Div('VOM PV:',
+                                                style={'textAlign': 'right'}),
+                             width={'size':2, 'offset':0}
+                             ),
+                     dbc.Col(dcc.Input(id="pv_vom", type="number",
+                                       min=0.0,
+                                       value=0,
+                                       step=0.001, style={}),
+                             width={'size':1, 'offset':0}
+                             ),
+                     dbc.Col(children= html.Div('USD/kWh',
+                                                style={'textAlign': 'left'}),
+                             width={'size':1, 'offset':1}
+                             ),
+                     ]),
+
+
+
+#VOM WIND            
+            dbc.Row([
+                    dbc.Col(children= html.Div('VOM Wind:',
+                                                style={'textAlign': 'right'}),
+                             width={'size':2, 'offset':0}
+                             ),
+                     dbc.Col(dcc.Input(id="wind_vom", type="number",
+                                       min=0.0,
+                                       value=0,
+                                       step=0.001, style={}),
+                             width={'size':1, 'offset':0}
+                             ),
+                     dbc.Col(children= html.Div('USD/kWh',
+                                                style={'textAlign': 'left'}),
+                             width={'size':1, 'offset':1}
+                             ),
+                     ]),
+            
+            
+
+#VOM Electrolyser            
+            dbc.Row([
+                    dbc.Col(children= html.Div('VOM Electrolyser:',
+                                                style={'textAlign': 'right'}),
+                             width={'size':2, 'offset':0}
+                             ),
+                     dbc.Col(dcc.Input(id="elec_vom", type="number",
+                                       min=0.0,
+                                       value=0.075,
+                                       step=0.001, style={}),
+                             width={'size':1, 'offset':0}
+                             ),
+                     dbc.Col(children= html.Div('USD/kWh',
+                                                style={'textAlign': 'left'}),
+                             width={'size':1, 'offset':1}
+                             ),
+                     ]),
+            
+            
+#Calculate LCOH2
+            dbc.Row([dbc.Col(html.Button('Calculate LCOH2!',
+                                         id='LCOH2',
+                                         n_clicks=0),
+                                width={'size':1, 'offset':2}
+                                   )
+                     ]),
+            
+            
+#plot LCOH2            
+            dbc.Row(dbc.Col(dcc.Graph(id='graph_LCOH2',figure={'data':[]}),
+                            width={'size':5, 'offset':1}
+                        )),
+
+
             ])
+
+
+
+
+
+
+
 
 
               
@@ -414,14 +646,20 @@ def optimise(click, el_eta, bat_eta_in, bat_eta_out, c_pv, c_wind, c_el,
                              ) 
           text = 'Completed!'
           results = Optimise(load, cf, storage_type, simparams)
-          results_to_print = prep_results_to_print(results,simparams)
+          global RESULTS
+          RESULTS = prep_results_to_print(results,simparams)
           
-      return ([text,results_to_print])
+          OUTPUT = str(RESULTS).replace(', ',',\n ').replace('{', '').replace('}', '').replace("'",'').replace(',','')
+          
+          global data_to_plot
+          data_to_plot = prep_results_to_plot(results, simparams, location)
+          
+      return ([text,OUTPUT])
 
 
 
 
-
+#Choose the location and update weather data
 @app.callback(
             [Output('location_status','children')],
             [Input('location_selector','value')],
@@ -438,8 +676,55 @@ def update_weather_data(location):
         text = 'Weather data updated!'
     return([text])
             
+
+
+#Export the results
+@app.callback(Output("download_csv", "data"),
+              Input("export", "n_clicks"),
+              prevent_initial_call=True,
+              )
+def export(n_clicks):
+    data = pd.DataFrame(RESULTS,index=[0])
+    return dcc.send_data_frame(data.to_csv, "Results.csv")
+
+
+
+
+#Download Timeseries
+@app.callback(Output("download_data_csv", "data"),
+              Input("download", "n_clicks"),
+              State('variable_selector','value'),
+              prevent_initial_call=True,
+              )
+def download(n_clicks,variables):
+    cols = ['time'] + variables
+    data = data_to_plot[cols]
+    return dcc.send_data_frame(data.to_csv, "Timeseries.csv")
+
+
+
+
+#plot the selected variables
+@app.callback(
+            [Output('GraphI', 'figure')],
+            [Input('variable_selector','value')],
+            prevent_initial_call=True
+             )
+def update_graph(variables):
+      plot_data=[]
+      chart={'data': plot_data}            
+      for col in variables:
+          plot_data = plot_data + [go.Scatter(x=data_to_plot.time,
+                                              y=data_to_plot[col],
+                                              name=col)]
+          layoutI = Layout.copy()
+          chart={'data': plot_data,
+                 'layout': layoutI }
+      
+      return([chart])
+
             
 
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run_server(debug=False)
