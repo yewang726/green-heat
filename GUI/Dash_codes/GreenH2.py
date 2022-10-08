@@ -661,7 +661,7 @@ def optimise(click, el_eta, bat_eta_in, bat_eta_out, c_pv, c_wind, c_el,
           
           global data_to_plot
           data_to_plot = prep_results_to_plot(results, simparams, location)
-          
+      SolarResource(location)    
       return ([text,OUTPUT])
 
 
