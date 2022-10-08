@@ -5,10 +5,15 @@ Created on Tue Mar 29 10:32:04 2022
 @author: Ahmad Mojiri
 """
 
-import os
+import os,platform
  
-connector = '\\'
-basedir = os.path.realpath('..') + connector
+connector = ['\\','/'][platform.system()=='Linux']
+
+if platform.system()=='Linux':
+    basedir = '/home/ahmadmojiri/GreenH2/'
+else:
+    basedir = os.path.realpath('..') + connector
+    
     
 
 datadir = basedir + "DATA%s" %connector

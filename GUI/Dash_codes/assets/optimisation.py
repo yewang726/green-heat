@@ -7,7 +7,7 @@ Created on Tue Mar 29 10:28:44 2022
 from projdirs import optdir
 import numpy as np
 from assets.component_model import pv_gen, wind_gen
-import os
+import os, platform
 
 def make_dzn_file(DT, EL_ETA, BAT_ETA_in, BAT_ETA_out,
                   C_PV, C_WIND, C_EL, C_UG_STORAGE,UG_STORAGE_CAPA_MAX,
@@ -77,7 +77,9 @@ def Minizinc(simparams):
 
     """
     make_dzn_file(**simparams)
-    mzdir = r'C:\\Program Files\\MiniZinc\\'
+    mzdir = [r'C:\\Program Files\\MiniZinc\\',
+             '/home/ahmadmojiri/MiniZincIDE-2.6.4-bundle-linux-x86_64/bin/'][platform.system()=='Linux']
+     
     minizinc_data_file_name = "hydrogen_plant_data_%s.dzn"%(str(simparams['CF']))
     
     from subprocess import check_output
