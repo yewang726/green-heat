@@ -10,7 +10,7 @@ import os,platform
 connector = ['\\','/'][platform.system()=='Linux']
 
 if platform.system()=='Linux':
-    basedir = '/home/ahmadmojiri/GreenH2/'
+    basedir = r'/home/ahmadmojiri/GreenH2/'
 else:
     basedir = os.path.realpath('..') + connector
     

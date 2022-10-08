@@ -83,7 +83,7 @@ def SolarResource(Location):
     WD_file = 'weather_data_%s.csv'%(Location)
     
     if platform.system()=='Linux':
-        path = '/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/WEATHER_DATA/'
+        path = r'/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/WEATHER_DATA/'
     else:
         path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\WEATHER_DATA\\'
     data = pd.read_csv(path +"%s"%(WD_file))
@@ -94,7 +94,7 @@ def SolarResource(Location):
     
     #write solare data
     if platform.system()=='Linux':
-        path = '/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/SOLAR/'
+        path = r'/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/SOLAR/'
     else:
         path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\Solar\\'
     
