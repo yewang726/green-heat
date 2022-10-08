@@ -667,6 +667,7 @@ def optimise(click, el_eta, bat_eta_in, bat_eta_out, c_pv, c_wind, c_el,
 
 
 
+
 #Choose the location and update weather data
 @app.callback(
             [Output('location_status','children')],
