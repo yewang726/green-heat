@@ -118,7 +118,7 @@ def WindSource(Location):
     WD_file = 'weather_data_%s.csv'%(Location)
     
     if platform.system()=='Linux':
-        path = '/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/WEATHER_DATA/'
+        path = r'/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/WEATHER_DATA/'
     else:
         path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\WEATHER_DATA\\'
     
@@ -137,7 +137,9 @@ def WindSource(Location):
                                'S':["Speed", 'm/s',10],
                                'D':["Direction",'degrees',10],
                                'P':['Pressure','atm',10]})
+    
     data_10 = heading_10.append(data_10).reset_index(drop=True)
+    
     data = data_10.copy()
     Z_anem = 10
     
@@ -145,7 +147,7 @@ def WindSource(Location):
     data_40 = data_10.copy()
     data_40.iloc[2,:]=Z
     data_temp = data_40.iloc[3:].copy()
-    S = data_temp.apply(lambda x:speed(Z, Z_anem, data_temp['S']) )
+    S = data_temp['S'].apply(lambda x:speed(40, 10, x) )
     data_temp.S = S
     data_40 = data_40.iloc[0:3].append(data_temp,ignore_index=True)
     data = pd.concat([data , data_40],axis=1)
@@ -154,7 +156,7 @@ def WindSource(Location):
     data_70 = data_10.copy()
     data_70.iloc[2,:]=Z
     data_temp = data_70.iloc[3:].copy()
-    S = data_temp.apply(lambda x:speed(Z, Z_anem, data_temp['S']) )
+    S = data_temp['S'].apply(lambda x:speed(70, 10, x) )
     data_temp.S = S
     data_70 = data_70.iloc[0:3].append(data_temp,ignore_index=True)
     data = pd.concat([data , data_70],axis=1)
@@ -163,7 +165,7 @@ def WindSource(Location):
     data_100 = data_10.copy()
     data_100.iloc[2,:]=Z
     data_temp = data_100.iloc[3:].copy()
-    S = data_temp.apply(lambda x:speed(Z, Z_anem, data_temp['S']) )
+    S = data_temp['S'].apply(lambda x:speed(100, 10, x) )
     data_temp.S = S
     data_100 = data_100.iloc[0:3].append(data_temp,ignore_index=True)
     data = pd.concat([data , data_100],axis=1)
@@ -172,7 +174,7 @@ def WindSource(Location):
     data_130 = data_10.copy()
     data_130.iloc[2,:]=Z
     data_temp = data_130.iloc[3:].copy()
-    S = data_temp.apply(lambda x:speed(Z, Z_anem, data_temp['S']) )
+    S = data_temp['S'].apply(lambda x:speed(130, 10, x) )
     data_temp.S = S
     data_130 = data_130.iloc[0:3].append(data_temp,ignore_index=True)
     data = pd.concat([data , data_130],axis=1)
@@ -181,7 +183,7 @@ def WindSource(Location):
     data_160 = data_10.copy()
     data_160.iloc[2,:]=Z
     data_temp = data_160.iloc[3:].copy()
-    S = data_temp.apply(lambda x:speed(Z, Z_anem, data_temp['S']) )
+    S = data_temp['S'].apply(lambda x:speed(160, 10, x) )
     data_temp.S = S
     data_160 = data_160.iloc[0:3].append(data_temp,ignore_index=True)
     data = pd.concat([data , data_160],axis=1)
@@ -198,7 +200,7 @@ def WindSource(Location):
     
     #write wind data
     if platform.system()=='Linux':
-        path = '/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/WIND/'
+        path = r'/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/WIND/'
     else:
         path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\WIND\\'
     
