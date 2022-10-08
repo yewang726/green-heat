@@ -19,7 +19,7 @@ import pdb
 
 colors = {'background': 'whitesmoke',
           'text': 'black'}
-folder = (r'\\piso.cecs.anu.edu.au\fealab\SodiumLabData')
+# folder = (r'\\piso.cecs.anu.edu.au\fealab\SodiumLabData')
 #folder = (r'C:\Users\z3337922\Downloads\sodium_lab_data')
 
 locations = [{'label':'Newman','value':'Newman'},
@@ -64,7 +64,15 @@ Layout= {'xaxis':{'showline':True, 'linewidth':1.25,
            'font': {'color': colors['text']}  }
 
 
-app = dash.Dash(__name__)
+
+app = dash.Dash(__name__,requests_pathname_prefix='/app/')
+
+app.css.config.serve_locally = True
+app.scripts.config.serve_locally = True
+
+server=app.server
+
+
 
 app.layout = html.Div([
             dbc.Row(dbc.Col(html.H1('Green H2'),
@@ -727,4 +735,4 @@ def update_graph(variables):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+     app.run_server(debug=False,host='0.0.0.0')
