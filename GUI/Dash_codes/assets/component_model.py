@@ -99,7 +99,7 @@ def SolarResource(Location):
         path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\Solar\\'
     
        
-    text_file = open(path + "\SolarSource.csv", "w")
+    text_file = open(path + "SolarSource.csv", "w")
     text_file.write(data_text)
     text_file.close()
     print('Solar data file was generated from Solcast database!')
