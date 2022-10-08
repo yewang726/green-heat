@@ -94,7 +94,7 @@ def SolarResource(Location):
     
     #write solare data
     if platform.system()=='Linux':
-        path = r'/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/SOLAR/'
+        path = r'home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/SOLAR/'
     else:
         path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\Solar\\'
     
