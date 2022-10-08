@@ -8,7 +8,7 @@ from projdirs import datadir
 
 import numpy as np
 import pandas as pd
-import json
+import json, platform
 import PySAM.Pvwattsv8 as PVWatts, Windpower
 
 ################################################################
@@ -23,7 +23,8 @@ def pv_gen(capacity):
     """
     pv = PVWatts.new()
     
-    dir = datadir + '\SAM INPUTS\SOLAR\\'
+    
+    dir = datadir + ['\SAM INPUTS\SOLAR\\', '/SAM INPUTS/SOLAR/'][platform.system()=='Linux']
     file_name = 'pvfarm_pvwattsv8'
     module = pv
     
@@ -50,7 +51,7 @@ def wind_gen(hub_height=150):
     """
     wind = Windpower.new()
     
-    dir = datadir + '\SAM INPUTS\WIND\\'
+    dir = datadir + ['\SAM INPUTS\WIND\\', '/SAM INPUTS/WIND/'][platform.system()=='Linux']
     file_name = 'windfarm_windpower'
     module = wind
     
@@ -80,12 +81,24 @@ def SolarResource(Location):
 
     """
     WD_file = 'weather_data_%s.csv'%(Location)
-    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\WEATHER_DATA'
-    data = pd.read_csv(path + "\%s"%(WD_file))
+    
+    if platform.system()=='Linux':
+        path = '/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/WEATHER_DATA/'
+    else:
+        path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\WEATHER_DATA\\'
+    data = pd.read_csv(path +"%s"%(WD_file))
     
     data_text = data.to_csv(index=False, line_terminator='\n')
-    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\SOLAR'
     
+    
+    
+    #write solare data
+    if platform.system()=='Linux':
+        path = '/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/SOLAR/'
+    else:
+        path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\Solar\\'
+    
+       
     text_file = open(path + "\SolarSource.csv", "w")
     text_file.write(data_text)
     text_file.close()
@@ -103,7 +116,12 @@ def WindSource(Location):
     
     """
     WD_file = 'weather_data_%s.csv'%(Location)
-    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\WEATHER_DATA'
+    
+    if platform.system()=='Linux':
+        path = '/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/WEATHER_DATA/'
+    else:
+        path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\WEATHER_DATA\\'
+    
     data = pd.read_csv(path + "\%s"%(WD_file), skiprows=0)
     Lat = data.lat[0]
     Lon = data.lon[0]
@@ -177,9 +195,15 @@ def WindSource(Location):
     data.sort_index(inplace=True)
     
     data_text = data.to_csv(header=False, index=False, line_terminator='\n')
-    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM INPUTS\WIND'
     
-    text_file = open(path + "\WindSource.csv", "w")
+    #write wind data
+    if platform.system()=='Linux':
+        path = '/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/WIND/'
+    else:
+        path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\WIND\\'
+    
+    
+    text_file = open(path + "WindSource.csv", "w")
     text_file.write(data_text)
     text_file.close()
     print("Wind source data file was generated from Solcast database!")
