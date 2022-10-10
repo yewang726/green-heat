@@ -1,5 +1,5 @@
 {
-	"solar_resource_file" : "C:/Nextcloud/HILT-CRC---Green-Hydrogen/DATA/SAM INPUTS/SOLAR/SolarSource.csv",
+	"solar_resource_file" : "C:/Nextcloud/HILT-CRC---Green-Hydrogen/DATA/SAM_INPUTS/SOLAR/SolarSource.csv",
 	"albedo" : [ 0.20000000000000001 ],
 	"use_wf_albedo" : 1,
 	"system_use_lifetime_output" : 0,
