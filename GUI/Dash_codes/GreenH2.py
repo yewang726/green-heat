@@ -19,8 +19,6 @@ import pdb
 
 colors = {'background': 'whitesmoke',
           'text': 'black'}
-# folder = (r'\\piso.cecs.anu.edu.au\fealab\SodiumLabData')
-#folder = (r'C:\Users\z3337922\Downloads\sodium_lab_data')
 
 locations = [{'label':'Newman','value':'Newman'},
              {'label':'Tom Price','value':'Tom_Price'},
