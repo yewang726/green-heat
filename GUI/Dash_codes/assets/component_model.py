@@ -24,7 +24,7 @@ def pv_gen(capacity):
     pv = PVWatts.new()
     
     
-    dir = datadir + ['\SAM INPUTS\SOLAR\\', '/SAM INPUTS/SOLAR/'][platform.system()=='Linux']
+    dir = datadir + ['\SAM_INPUTS\SOLAR\\', '/SAM_INPUTS/SOLAR/'][platform.system()=='Linux']
     file_name = 'pvfarm_pvwattsv8'
     module = pv
     
@@ -51,7 +51,7 @@ def wind_gen(hub_height=150):
     """
     wind = Windpower.new()
     
-    dir = datadir + ['\SAM INPUTS\WIND\\', '/SAM INPUTS/WIND/'][platform.system()=='Linux']
+    dir = datadir + ['\SAM_INPUTS\WIND\\', '/SAM_INPUTS/WIND/'][platform.system()=='Linux']
     file_name = 'windfarm_windpower'
     module = wind
     
