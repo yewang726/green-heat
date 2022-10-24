@@ -6,13 +6,15 @@ Created on Tue Mar 29 10:32:04 2022
 """
 
 import os,platform
+
  
 connector = ['\\','/'][platform.system()=='Linux']
 
 if platform.system()=='Linux':
     basedir = r'/home/ahmadmojiri/GreenH2/'
 else:
-    basedir = os.path.realpath('..') + connector
+    # basedir = os.path.realpath('..') + connector
+    basedir = r'C:\\Nextcloud\\HILT-CRC---Green-Hydrogen\\'
     
     
 
