@@ -12,7 +12,7 @@ from datetime import datetime
 import plotly.graph_objs as go
 import dash_bootstrap_components as dbc
 import os
-from assets.component_model import SolarResource, WindSource
+from assets.component_model import SolarResource, WindSource_windlab
 from assets.optimisation import Optimise
 from assets.plotting import prep_results_to_print, prep_results_to_plot
 import pdb
@@ -20,13 +20,34 @@ import pdb
 colors = {'background': 'whitesmoke',
           'text': 'black'}
 
-locations = [{'label':'Newman','value':'Newman'},
-             {'label':'Tom Price','value':'Tom_Price'},
-             {'label':'Whyalla','value':'Whyalla'},
-             {'label':'Gladstone','value':'Gladstone'},
-             {'label':'Pinjara','value':'Pinjara'},
-             {'label':'Port Agusta','value':'Port_Augusta'},
-             {'label':'Burnie','value':'Burnie'},]
+# locations = [{'label':'Newman','value':'Newman'},
+#              {'label':'Tom Price','value':'Tom_Price'},
+#              {'label':'Whyalla','value':'Whyalla'},
+#              {'label':'Gladstone','value':'Gladstone'},
+#              {'label':'Pinjara','value':'Pinjara'},
+#              {'label':'Port Agusta','value':'Port_Augusta'},
+#              {'label':'Burnie','value':'Burnie'},]
+
+
+locations = [{'label':'Burnie 1', 'value':'Burnie 1'},
+             {'label':'Burnie 2', 'value':'Burnie 2'},
+             {'label':'Burnie 3','value':'Burnie 3'},
+             {'label':'Burnie 4','value':'Burnie 4'},
+             {'label':'Gladstone 1','value':'Gladstone 1'},
+             {'label':'Gladstone 2','value':'Gladstone 2'},
+             {'label':'Gladstone 3','value':'Gladstone 3'},
+             {'label':'Pilbara 1','value':'Pilbara 1'},
+             {'label':'Pilbara 2','value':'Pilbara 2'},
+             {'label':'Pilbara 3','value':'Pilbara 3'},
+             {'label':'Pilbara 4','value':'Pilbara 4'},
+             {'label':'Pinjara 1','value':'Pinjara 1'},
+             {'label':'Pinjara 2','value':'Pinjara 2'},
+             {'label':'Pinjara 3','value':'Pinjara 3'},
+             {'label':'Pinjara 4','value':'Pinjara 4'},
+             {'label':'Upper Spencer Gulf 1','value':'Upper Spencer Gulf 1'},
+             {'label':'Upper Spencer Gulf 2','value':'Upper Spencer Gulf 2'},
+             {'label':'Upper Spencer Gulf 3','value':'Upper Spencer Gulf 3'},
+             {'label':'Upper Spencer Gulf 4','value':'Upper Spencer Gulf 4'}]
 
 results_var = [{'label':'PV output', 'value':'pv_pout'},
                {'label':'Wind output', 'value':'wind_pout'},
@@ -637,7 +658,7 @@ def optimise(click, el_eta, bat_eta_in, bat_eta_out, c_pv, c_wind, c_el,
           results_to_print = 'None'
       else:
           SolarResource(location)
-          WindSource(location)
+          WindSource_windlab(location)
           simparams = dict(EL_ETA = el_eta,       
                            BAT_ETA_in = bat_eta_in, 
                            BAT_ETA_out = bat_eta_out,  
@@ -679,7 +700,7 @@ def update_weather_data(location):
         text = '%s has been selected'%(location)
     else:
         SolarResource(location)
-        WindSource(location)
+        WindSource_windlab(location)
         text = 'Weather data updated!'
     return([text])
             

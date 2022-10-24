@@ -67,7 +67,6 @@ def wind_gen(hub_height=150):
     output = np.array(wind.Outputs.gen)
     return(output.tolist())
 
-#################################################################
  #################################################################
 def SolarResource(Location):
     """
@@ -105,10 +104,11 @@ def SolarResource(Location):
     print('Solar data file was generated from Solcast database!')
 
  #################################################################
-def WindSource(Location):
+def WindSource_windlab(Location):
     """
     Generates the wind source data for SAM based on the weather data 
-    that is stored in WEATHER folder
+    that is sourced from windlab stored in WEATHER folder
+    This data is based on 150m hub height
     
     Returns
     -------
@@ -127,72 +127,35 @@ def WindSource(Location):
     Lon = data.lon[0]
     data = pd.read_csv(path + "%s"%(WD_file), skiprows=2)
     
-    data_10 = data.iloc[:,[5,14,15,16]].copy()
-    data_10.Pressure=data_10.Pressure/1013.25
-    data_10 = data_10.rename(columns = {'Temperature':'T',
+       
+    data_150 = data.iloc[:,[5,14,15,16]].copy()
+    data_150.Pressure=data_150.Pressure/1013.25
+    data_150 = data_150.rename(columns = {'Temperature':'T',
                                         'Wind Speed':'S',
                                         'Wind Direction':'D',
                                         'Pressure':'P'})
-    heading_10 = pd.DataFrame({'T':['Temperature','C',10],
-                               'S':["Speed", 'm/s',10],
-                               'D':["Direction",'degrees',10],
-                               'P':['Pressure','atm',10]})
+    heading_150 = pd.DataFrame({'T':['Temperature','C',150],
+                               'S':["Speed", 'm/s',150],
+                               'D':["Direction",'degrees',150],
+                               'P':['Pressure','atm',150]})
+    data_150 = heading_150.append(data_150).reset_index(drop=True)
+    data = data_150.copy()
+    Z_anem = 150
     
-    data_10 = heading_10.append(data_10).reset_index(drop=True)
-    
-    data = data_10.copy()
-    Z_anem = 10
-    
-    Z = 40
-    data_40 = data_10.copy()
-    data_40.iloc[2,:]=Z
-    data_temp = data_40.iloc[3:].copy()
-    S = data_temp['S'].apply(lambda x:speed(40, 10, x) )
+    Z = 10
+    data_10 = data_150.copy()
+    data_10.iloc[2,:]=Z
+    data_temp = data_10.iloc[3:].copy()
+    S = data_temp.apply(lambda x:speed(Z, Z_anem, data_temp['S']) )
     data_temp.S = S
-    data_40 = data_40.iloc[0:3].append(data_temp,ignore_index=True)
-    data = pd.concat([data , data_40],axis=1)
+    data_10 = data_10.iloc[0:3].append(data_temp,ignore_index=True)
+    data = pd.concat([data , data_10],axis=1)
     
-    Z = 70
-    data_70 = data_10.copy()
-    data_70.iloc[2,:]=Z
-    data_temp = data_70.iloc[3:].copy()
-    S = data_temp['S'].apply(lambda x:speed(70, 10, x) )
-    data_temp.S = S
-    data_70 = data_70.iloc[0:3].append(data_temp,ignore_index=True)
-    data = pd.concat([data , data_70],axis=1)
-    
-    Z = 100
-    data_100 = data_10.copy()
-    data_100.iloc[2,:]=Z
-    data_temp = data_100.iloc[3:].copy()
-    S = data_temp['S'].apply(lambda x:speed(100, 10, x) )
-    data_temp.S = S
-    data_100 = data_100.iloc[0:3].append(data_temp,ignore_index=True)
-    data = pd.concat([data , data_100],axis=1)
-    
-    Z = 130
-    data_130 = data_10.copy()
-    data_130.iloc[2,:]=Z
-    data_temp = data_130.iloc[3:].copy()
-    S = data_temp['S'].apply(lambda x:speed(130, 10, x) )
-    data_temp.S = S
-    data_130 = data_130.iloc[0:3].append(data_temp,ignore_index=True)
-    data = pd.concat([data , data_130],axis=1)
-    
-    Z = 160
-    data_160 = data_10.copy()
-    data_160.iloc[2,:]=Z
-    data_temp = data_160.iloc[3:].copy()
-    S = data_temp['S'].apply(lambda x:speed(160, 10, x) )
-    data_temp.S = S
-    data_160 = data_160.iloc[0:3].append(data_temp,ignore_index=True)
-    data = pd.concat([data , data_160],axis=1)
-    
-    
-    data.loc[-1] = 24*['Latitude:%s'%(Lat)]
+        
+    data.loc[-1] = 8*['Latitude:%s'%(Lat)]
     data.index = data.index+1
     data.sort_index(inplace=True)
-    data.loc[-1] = 24*['Longitude:%s'%(Lon)]
+    data.loc[-1] = 8*['Longitude:%s'%(Lon)]
     data.index = data.index+1
     data.sort_index(inplace=True)
     
@@ -208,7 +171,9 @@ def WindSource(Location):
     text_file = open(path + "WindSource.csv", "w")
     text_file.write(data_text)
     text_file.close()
-    print("Wind source data file was generated from Solcast database!")
+    print("Wind source data file was generated from Solcast database!") 
+    
+    
    
  #################################################################
 def speed(Z,Z_anem,U_anem):
