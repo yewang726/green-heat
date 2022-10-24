@@ -146,12 +146,12 @@ def WindSource_windlab(Location):
     data_10 = data_150.copy()
     data_10.iloc[2,:]=Z
     data_temp = data_10.iloc[3:].copy()
-    S = data_temp.apply(lambda x:speed(Z, Z_anem, data_temp['S']) )
+    S = data_temp['S'].apply(lambda x:speed(10, 150, x) )
     data_temp.S = S
     data_10 = data_10.iloc[0:3].append(data_temp,ignore_index=True)
     data = pd.concat([data , data_10],axis=1)
     
-        
+    
     data.loc[-1] = 8*['Latitude:%s'%(Lat)]
     data.index = data.index+1
     data.sort_index(inplace=True)
@@ -172,6 +172,8 @@ def WindSource_windlab(Location):
     text_file.write(data_text)
     text_file.close()
     print("Wind source data file was generated from Solcast database!") 
+    
+    
     
     
    
