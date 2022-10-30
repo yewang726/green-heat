@@ -1,5 +1,9 @@
 This code was primarily written by Ahmad Mojiri, for the [HILTCRC](https://www.hiltcrc.com.au/) project HILT.RP2.001 "Green hydrogen supply modelling for industry".
 
+## Running stand-alone via Jupyter
+
+Add instructions here.
+
 ## Server-based installation
 
 To install the Dash-based GUI for this project on a new server or virtual machine, using the following steps:
