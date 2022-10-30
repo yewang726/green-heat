@@ -9,10 +9,14 @@ Add instructions here.
 To install the Dash-based GUI for this project on a new server or virtual machine, using the following steps:
 
 1. Install needed system packages:
-   `sudo apt install htop byobu apache2 libapache2-mod-wsgi-py3 git man minizinc python3-pip`
+   ```
+   sudo apt install htop byobu apache2 libapache2-mod-wsgi-py3 git man minizinc python3-pip
+   ```
 
 2. Install needed python packages (for the root user)
+   ```
    sudo pip3 install dash pandas
+   ```
 
 3. Install NREL's [System Advisor Model, version 2021-12-01](https://sam.nrel.gov/download/version-2021-12-01.html)
    ```
