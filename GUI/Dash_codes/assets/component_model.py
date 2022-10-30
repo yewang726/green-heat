@@ -24,14 +24,18 @@ def pv_gen(capacity):
     pv = PVWatts.new()
     
     
-    dir = datadir + ['\SAM_INPUTS\SOLAR\\', '/SAM_INPUTS/SOLAR/'][platform.system()=='Linux']
-    file_name = ['pvfarm_pvwattsv8_win','pvfarm_pvwattsv8_linux'][platform.system()=='Linux']
+    file_name = datadir /'SAM_INPUTS'/'SOLAR'/'pvfarm_pvwattsv8_{}.json'.format('linux' if platform.system()=='Linux' else 'win')
+#    file_name = ['pvfarm_pvwattsv8_win','pvfarm_pvwattsv8_linux'][platform.system()=='Linux']
     module = pv
     
-    with open(dir + file_name + ".json", 'r') as file:
+    with open(file_name, 'r') as file:
         data = json.load(file)
         for k,v in data.items():
-            if k != "number_inputs":
+            if k == 'solar_resource_file':
+                module.value(k,str(datadir/'SAM_INPUTS'/'SOLAR'/'SolarSource.csv'))
+            elif k == "number_inputs":
+                pass
+            else:
                 module.value(k, v)
     
     # module.SystemDesign.system_capacity = capacity
@@ -51,14 +55,18 @@ def wind_gen(hub_height=150):
     """
     wind = Windpower.new()
     
-    dir = datadir + ['\SAM_INPUTS\WIND\\', '/SAM_INPUTS/WIND/'][platform.system()=='Linux']
-    file_name = ['windfarm_windpower_win','windfarm_windpower_linux'][platform.system()=='Linux']
+    #dir = datadir + ['\SAM_INPUTS\WIND\\', '/SAM_INPUTS/WIND/'][platform.system()=='Linux']
+    file_name = datadir/'SAM_INPUTS'/'WIND'/'windfarm_windpower_linux.json' #,'windfarm_windpower_linux'][platform.system()=='Linux']
     module = wind
     
-    with open(dir + file_name + ".json", 'r') as file:
+    with open(file_name, 'r') as file:
         data = json.load(file)
         for k,v in data.items():
-            if k != "number_inputs":
+            if k=='wind_resource_filename':
+                module.value(k,str(datadir/'SAM_INPUTS'/'WIND'/'WindSource.csv'))
+            elif k == "number_inputs":
+                pass
+            else:
                 module.value(k, v)
     file.close()
     # module.SystemDesign.system_capacity = capacity
@@ -79,26 +87,26 @@ def SolarResource(Location):
     copies the weather data into SOLAR folder for SAM.
 
     """
-    WD_file = 'weather_data_%s.csv'%(Location)
+    path = datadir/'SAM_INPUTS'/'WEATHER_DATA'/'weather_data_{}.csv'.format(Location)
+#    if platform.system()=='Linux':
+#        path = r'/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/WEATHER_DATA/'
+#    else:
+#        path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\WEATHER_DATA\\'
+    data = pd.read_csv(path)
     
-    if platform.system()=='Linux':
-        path = r'/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/WEATHER_DATA/'
-    else:
-        path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\WEATHER_DATA\\'
-    data = pd.read_csv(path +"%s"%(WD_file))
-    
-    data_text = data.to_csv(index=False, line_terminator='\n')
+    data_text = data.to_csv(index=False, lineterminator='\n')
     
     
     
     #write solare data
-    if platform.system()=='Linux':
-        path = r'/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/SOLAR/'
-    else:
-        path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\Solar\\'
+    path = datadir/'SAM_INPUTS'/'SOLAR'/'SolarSource.csv'
+#    if platform.system()=='Linux':
+#        path = r'/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/SOLAR/'
+#    else:
+#        path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\Solar\\'
     
        
-    text_file = open(path + "SolarSource.csv", "w")
+    text_file = open(path, "w")
     text_file.write(data_text)
     text_file.close()
     print('Solar data file was generated from Solcast database!')
@@ -115,17 +123,17 @@ def WindSource_windlab(Location):
     None.
     
     """
-    WD_file = 'weather_data_%s.csv'%(Location)
     
-    if platform.system()=='Linux':
-        path = r'/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/WEATHER_DATA/'
-    else:
-        path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\WEATHER_DATA\\'
+    path=datadir/'SAM_INPUTS'/'WEATHER_DATA'/'weather_data_{}.csv'.format(Location)
+#    if platform.system()=='Linux':
+#        path = r'/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/WEATHER_DATA/'
+#    else:
+#        path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\WEATHER_DATA\\'
     
-    data = pd.read_csv(path + "%s"%(WD_file), skiprows=0)
+    data = pd.read_csv(path, skiprows=0)
     Lat = data.lat[0]
     Lon = data.lon[0]
-    data = pd.read_csv(path + "%s"%(WD_file), skiprows=2)
+    data = pd.read_csv(path, skiprows=2)
     
        
     data_150 = data.iloc[:,[5,14,15,16]].copy()
@@ -159,16 +167,17 @@ def WindSource_windlab(Location):
     data.index = data.index+1
     data.sort_index(inplace=True)
     
-    data_text = data.to_csv(header=False, index=False, line_terminator='\n')
+    data_text = data.to_csv(header=False, index=False, lineterminator='\n')
     
     #write wind data
-    if platform.system()=='Linux':
-        path = r'/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/WIND/'
-    else:
-        path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\WIND\\'
+    path = datadir/'SAM_INPUTS'/'WIND'/'WindSource.csv'
+#    if platform.system()=='Linux':
+#        path = r'/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/WIND/'
+#    else:
+#        path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\WIND\\'
     
     
-    text_file = open(path + "WindSource.csv", "w")
+    text_file = open(path, "w")
     text_file.write(data_text)
     text_file.close()
     print("Wind source data file was generated from Solcast database!") 

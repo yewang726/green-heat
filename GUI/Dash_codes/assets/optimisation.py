@@ -7,7 +7,8 @@ Created on Tue Mar 29 10:28:44 2022
 from projdirs import optdir
 import numpy as np
 from assets.component_model import pv_gen, wind_gen
-import os, platform
+import os, platform,shutil
+import subprocess
 
 def make_dzn_file(DT, EL_ETA, BAT_ETA_in, BAT_ETA_out,
                   C_PV, C_WIND, C_EL, C_UG_STORAGE,UG_STORAGE_CAPA_MAX,
@@ -57,7 +58,7 @@ def make_dzn_file(DT, EL_ETA, BAT_ETA_in, BAT_ETA_out,
       C_BAT_POWER,(1-CF/100)*sum(LOAD)*DT*3600, PV_REF, str(PV_REF_POUT), WIND_REF,
       str(WIND_REF_POUT), str(LOAD))
 
-    with open(optdir + "hydrogen_plant_data_%s.dzn"%(str(CF)), "w") as text_file:
+    with open(optdir/"hydrogen_plant_data_{}.dzn".format(str(CF)), "w") as text_file:
         text_file.write(string)
         
         
@@ -77,18 +78,21 @@ def Minizinc(simparams):
 
     """
     make_dzn_file(**simparams)
-    mzdir = [r'C:\\Program Files\\MiniZinc\\',
-             '/home/ahmadmojiri/MiniZincIDE-2.6.4-bundle-linux-x86_64/bin/'][platform.system()=='Linux']
+    #mzdir = [r'C:\\Program Files\\MiniZinc\\',
+    #         '/home/ahmadmojiri/MiniZincIDE-2.6.4-bundle-linux-x86_64/bin/'][platform.system()=='Linux']
+
+    mzbin = shutil.which('minizinc')
      
-    minizinc_data_file_name = "hydrogen_plant_data_%s.dzn"%(str(simparams['CF']))
+    minizinc_data_file_name = "hydrogen_plant_data_{}.dzn".format(str(simparams['CF']))
     
-    from subprocess import check_output
-    output = str(check_output([mzdir + 'minizinc', "--soln-sep", '""',
+    res = subprocess.run([mzbin, "--soln-sep", '""',
                                "--search-complete-msg", '""', "--solver",
-                               "COIN-BC", optdir + "hydrogen_plant.mzn",
-                               optdir + minizinc_data_file_name]))
-    
-    output = output.replace('[','').replace(']','').split('!')
+                               "COIN-BC", optdir / "hydrogen_plant.mzn",
+                               optdir / minizinc_data_file_name],capture_output=True,encoding='utf8')
+    if res.returncode:
+        raise RuntimeError("Running minizinc, error was: {}".format(res.stderr))
+    output = res.stdout.replace('[','').replace(']','').split('!')
+
     for string in output:
         if 'CAPEX' in string:
             results = string.split(';')
@@ -101,7 +105,7 @@ def Minizinc(simparams):
     
     #remove the minizinc data file after running the minizinc model
     
-    mzfile = optdir + minizinc_data_file_name
+    mzfile = optdir / minizinc_data_file_name
     if os.path.exists(mzfile):
         os.remove(mzfile)
     
