@@ -5,7 +5,7 @@ Created on Tue Sep  6 18:54:47 2022
 @author: Ahmad Mojiri
 """
 
-from projdirs import optdir
+from projdirs import optdir, datadir
 import numpy as np
 import pandas as pd
 import platform
@@ -53,14 +53,13 @@ def prep_results_to_plot(results,simparams,Location):
     del results['CF']
     del results['C_UG_STORAGE']
     
-    if platform.system()=='Linux':
-        path = r'/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/WEATHER_DATA/'
-    else:
-        path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\WEATHER_DATA\\'
+    path = datadir/'SAM_INPUTS'/'WEATHER_DATA'/'weather_data_{}.csv'.format(Location)
+    #if platform.system()=='Linux':
+    #    path = r'/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/WEATHER_DATA/'
+    #else:
+    #    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\WEATHER_DATA\\'
         
-    weather_data = pd.read_csv(path + 'weather_data_%s.csv'%(Location),skiprows=2)
-    
-    
+    weather_data = pd.read_csv(path,skiprows=2)
     
     
     data_plot = read_data_for_plotting(results)

@@ -24,3 +24,14 @@ optdir = basedir/'MINIZINC'# + "MINIZINC%s" %(connector)
 # figdir = basedir + "modelling%sfigures%s" %(connector, connector)
 # paperdir = basedir + "Publications%spaper_1%s" %(connector, connector)
 # resultsdir = datadir + "arbitrage%s" %connector
+
+if platform.system()=='Linux':
+    minizincbase = Path('/opt/MiniZincIDE-2.6.4')
+    minizinc = minizincbase/'bin'/'minizinc'
+    if not minizinc.is_file():
+        raise RuntimeError("MiniZinc executable {} not found".format(minizinc))
+  
+else:
+    minizincbase = Path('c:\\Program Files\\MiniZinc')
+    minizinc = minizincbase/'minizinc.exe'
+    

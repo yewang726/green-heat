@@ -4,7 +4,7 @@ Created on Tue Mar 29 10:28:44 2022
 
 @author: Ahmad Mojiri
 """
-from projdirs import optdir
+from projdirs import optdir,minizinc
 import numpy as np
 from assets.component_model import pv_gen, wind_gen
 import os, platform,shutil
@@ -78,14 +78,15 @@ def Minizinc(simparams):
 
     """
     make_dzn_file(**simparams)
+
     #mzdir = [r'C:\\Program Files\\MiniZinc\\',
     #         '/home/ahmadmojiri/MiniZincIDE-2.6.4-bundle-linux-x86_64/bin/'][platform.system()=='Linux']
 
-    mzbin = shutil.which('minizinc')
+    #mzbin = shutil.which('minizinc')
      
     minizinc_data_file_name = "hydrogen_plant_data_{}.dzn".format(str(simparams['CF']))
     
-    res = subprocess.run([mzbin, "--soln-sep", '""',
+    res = subprocess.run([str(minizinc), "--soln-sep", '""',
                                "--search-complete-msg", '""', "--solver",
                                "COIN-BC", optdir / "hydrogen_plant.mzn",
                                optdir / minizinc_data_file_name],capture_output=True,encoding='utf8')
