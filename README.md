@@ -30,7 +30,7 @@ To install the Dash-based GUI for this project on a new server or virtual machin
 
 5. Edit the file `apache2/indust.re.conf` to indicate the locations where the repository is located on your machine (we used `/srv/indust.re`)
 
-6. Create a symlink to the above file, via 
+6. Create a symlink to the above file, then enable the site, via
    ```
    cd /etc/apache/sites-available
    sudo ln -s /path/to/apache2/indust.re.conf
