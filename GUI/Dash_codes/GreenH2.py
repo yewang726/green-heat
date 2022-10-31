@@ -82,7 +82,7 @@ Layout= {'xaxis':{'showline':True, 'linewidth':1.25,
            'title':'',
            'font': {'color': colors['text']}  }
 
-
+data_to_plot = None
 
 app = dash.Dash(__name__,requests_pathname_prefix='/app/')
 
