@@ -788,7 +788,7 @@ def update_graph_LCOH2(click,i, life,
                                             y = LCOH2_items[col],
                                             name=col)]
     layout_LCOH2_I = layout_LCOH2.copy()
-    layout_LCOH2_I['title'] = 'LCOH2 = %s USD/kg'%(LCOH2_items.sum(axis=1).values[0])
+    layout_LCOH2_I['title'] = 'LCOH2 = %0.2f USD/kg'%(LCOH2_items.sum(axis=1).values[0])
     LCOH2_chart={'data': plot_data_LCOH2,
                  'layout': layout_LCOH2_I }
       
