@@ -458,7 +458,7 @@ app.layout = html.Div([
                              ),
                      dbc.Col(dcc.Input(id="interest_rate", type="number",
                                        min=0.0,
-                                       value=7.8,
+                                       value=6,
                                        step=0.1, style={}),
                              width={'size':1, 'offset':0}
                              ),
@@ -788,6 +788,7 @@ def update_graph_LCOH2(click,i, life,
                                             y = LCOH2_items[col],
                                             name=col)]
     layout_LCOH2_I = layout_LCOH2.copy()
+    layout_LCOH2_I['title'] = 'LCOH2 = %s USD/kg'%(LCOH2_items.sum(axis=1).values[0])
     LCOH2_chart={'data': plot_data_LCOH2,
                  'layout': layout_LCOH2_I }
       
