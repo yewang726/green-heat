@@ -87,6 +87,7 @@ layout_LCOH2 = {'xaxis':{'showline':True, 'linewidth':1.25,
 
 
 data_to_plot = None
+RESULTS = None
 
 app = dash.Dash(__name__,requests_pathname_prefix='/app/')
 

@@ -102,8 +102,8 @@ def LCOH2(RESULTS, data_to_plot, i, life,
     wind_CAPEX = RESULTS['Wind Cost [USD]'] * CFR / H2_total
     elec_CAPEX = RESULTS['Electrolyser Cost [USD]'] * CFR / H2_total
     
-    storage_CAPEX = (  RESULTS['UG H2 Capacity [kgH2]'] + 
-                       RESULTS['Pipe Storage Capacity [kgH2]'] ) * CFR / H2_total
+    storage_CAPEX = (  RESULTS['UG Storage Cost [USD]'] + 
+                       RESULTS['Pipe Storage Cost [USD]'] ) * CFR / H2_total
     
     LCOH2_items = pd.DataFrame({
                               'Capex PV': [pv_CAPEX],
@@ -120,3 +120,4 @@ def LCOH2(RESULTS, data_to_plot, i, life,
                               })
                   
     return(LCOH2_items)
+
