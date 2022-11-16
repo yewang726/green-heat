@@ -40,6 +40,8 @@ To install the Dash-based GUI for this project on a new server or virtual machin
 7. Restart apache, `systemctl restart apache2`
 
 8. Open the (ServerAlias as listed in `apache2/indust.re.conf`) site in your browser.
+
+9. Chek `apache2/indust.re.conf` for the location of the error log files. In case of the presence of `{APACHE_LOG_DIR}` in the path to error log file, the location is configured using APACHE_LOG_DIR environment variable, which is defined in /etc/apache2/envvars.
    
 
 
