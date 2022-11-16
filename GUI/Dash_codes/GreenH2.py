@@ -783,7 +783,7 @@ def update_graph_LCOH2(click,i, life,
     plot_data_LCOH2=[]
     for col in LCOH2_items.columns.tolist():
         plot_data_LCOH2 = plot_data_LCOH2 + [go.Bar(x=[1],
-                                            y = plot_data_LCOH2[col],
+                                            y = LCOH2_items[col],
                                             name=col)]
     layout_LCOH2_I = layout_LCOH2.copy()
     LCOH2_chart={'data': plot_data_LCOH2,
