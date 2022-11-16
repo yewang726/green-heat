@@ -82,6 +82,7 @@ layout_LCOH2 = {'xaxis':{'showline':True, 'linewidth':1.25,
                    'xanchor':"left",'x':1.1,'orientation':'v'},
                    'plot_bgcolor': colors['background'],
            'title':'',
+           'barmode':'stack',
            'font': {'color': colors['text']}  }
 
 
