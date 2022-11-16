@@ -74,10 +74,11 @@ Layout= {'xaxis':{'showline':True, 'linewidth':1.25,
            'font': {'color': colors['text']}  }
 
 layout_LCOH2 = {'xaxis':{'showline':True, 'linewidth':1.25,
-                  'mirror':False,'linecolor':'black',
-                  'gridcolor':'LightPink'},
+                  'mirror':True,'linecolor':'black',
+                  'gridcolor':'LightPink', 'showticklabels':False},
          'yaxis':{'showline':True, 'linewidth':1.25,
-                  'mirror':False,'gridcolor':'LightPink'},
+                  'mirror':True,'gridcolor':'LightPink',
+                  'title': 'USD per kg of H<sub>2</sub>'},
          'legend':{'yanchor':"bottom", 'y':0,
                    'xanchor':"left",'x':1.1,'orientation':'v'},
                    'plot_bgcolor': colors['background'],
@@ -598,7 +599,7 @@ app.layout = html.Div([
                                        step=0.001, style={}),
                              width={'size':1, 'offset':0}
                              ),
-                     dbc.Col(children= html.Div('USD/kWh',
+                     dbc.Col(children= html.Div('USD/kg of H2',
                                                 style={'textAlign': 'left'}),
                              width={'size':1, 'offset':1}
                              ),
