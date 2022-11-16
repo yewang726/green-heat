@@ -180,7 +180,7 @@ def WindSource_windlab(Location):
     text_file = open(path, "w")
     text_file.write(data_text)
     text_file.close()
-    print("Wind source data file was generated from Solcast database!") 
+    print("Wind source data file was generated from Windlab database!") 
     
     
     
