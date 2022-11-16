@@ -652,37 +652,37 @@ app.layout = html.Div([
 def optimise(click, el_eta, bat_eta_in, bat_eta_out, c_pv, c_wind, c_el,
              ug_storage_capa_max, c_pipe_stprage, pipe_storage_capa_min,
              c_bat_energy, c_bat_power, load, cf, location, storage_type):
-      try:
-          SolarResource(location)
-      except:
-          text = 'Error: Choose a location!'
-          results_to_print = 'None'
-      else:
-          SolarResource(location)
-          WindSource_windlab(location)
-          simparams = dict(EL_ETA = el_eta,       
-                           BAT_ETA_in = bat_eta_in, 
-                           BAT_ETA_out = bat_eta_out,  
-                           C_PV = c_pv,          
-                           C_WIND = c_wind,        
-                           C_EL = c_el,          
-                           UG_STORAGE_CAPA_MAX = ug_storage_capa_max, 
-                           C_PIPE_STORAGE = c_pipe_stprage,
-                           PIPE_STORAGE_CAPA_MIN = pipe_storage_capa_min, 
-                           C_BAT_ENERGY = c_bat_energy,        
-                           C_BAT_POWER = c_bat_power,        
-                             ) 
-          text = 'Completed!'
-          results = Optimise(load, cf, storage_type, simparams)
-          global RESULTS
-          RESULTS = prep_results_to_print(results,simparams)
-          
-          OUTPUT = str(RESULTS).replace(', ',',\n ').replace('{', '').replace('}', '').replace("'",'').replace(',','')
-          
-          global data_to_plot
-          data_to_plot = prep_results_to_plot(results, simparams, location)
-      SolarResource(location)    
-      return ([text,OUTPUT])
+    # try:
+    #     SolarResource(location)
+    # except:
+    #     text = 'Error: Choose a location!'
+    #     results_to_print = 'None'
+    # else:
+    SolarResource(location)
+    WindSource_windlab(location)
+    simparams = dict(EL_ETA = el_eta,       
+                     BAT_ETA_in = bat_eta_in, 
+                     BAT_ETA_out = bat_eta_out,  
+                     C_PV = c_pv,          
+                     C_WIND = c_wind,        
+                     C_EL = c_el,          
+                     UG_STORAGE_CAPA_MAX = ug_storage_capa_max, 
+                     C_PIPE_STORAGE = c_pipe_stprage,
+                     PIPE_STORAGE_CAPA_MIN = pipe_storage_capa_min, 
+                     C_BAT_ENERGY = c_bat_energy,        
+                     C_BAT_POWER = c_bat_power,        
+                     ) 
+    text = 'Completed!'
+    results = Optimise(load, cf, storage_type, simparams)
+    global RESULTS
+    RESULTS = prep_results_to_print(results,simparams)
+    
+    OUTPUT = str(RESULTS).replace(', ',',\n ').replace('{', '').replace('}', '').replace("'",'').replace(',','')
+    
+    global data_to_plot
+    data_to_plot = prep_results_to_plot(results, simparams, location)
+    SolarResource(location)    
+    return ([text,OUTPUT])
 
 
 
