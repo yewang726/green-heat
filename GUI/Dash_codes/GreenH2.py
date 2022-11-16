@@ -768,8 +768,7 @@ def update_graph(variables):
              ],
             prevent_initial_call=True
              )
-def update_graph_LCOH2(RESULTS, data_to_plot,
-                       click,i, life,
+def update_graph_LCOH2(click,i, life,
                        pv_fom, wind_fom, elec_fom,
                        pv_vom, wind_vom, elec_vom):
     
