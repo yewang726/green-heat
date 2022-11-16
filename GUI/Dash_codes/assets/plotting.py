@@ -24,7 +24,7 @@ def read_data_for_plotting(results):
 
 def prep_results_to_print(results,simparams):
     
-    RESULTS =  {'Capacity Factor': results['CF'],
+    RESULTS =  {'Capacity Factor [%]': results['CF'],
                 'CAPEX [USD]':results['CAPEX'][0],
                 'PV Rated Power[kW]': results['pv_max'][0],
                 'Wind Rated Power [kW]': results['wind_max'][0],
@@ -42,7 +42,6 @@ def prep_results_to_print(results,simparams):
                 'Load [kg/s]':results['LOAD'][0],
                 'UG Storage Unit Price [USD/kgH2]':results['C_UG_STORAGE']
                  }
-    # output = str(RESULTS).replace(', ',',\n ').replace('{', '').replace('}', '').replace("'",'').replace(',','')   
     return(RESULTS)
 
 
@@ -54,10 +53,6 @@ def prep_results_to_plot(results,simparams,Location):
     del results['C_UG_STORAGE']
     
     path = datadir/'SAM_INPUTS'/'WEATHER_DATA'/'weather_data_{}.csv'.format(Location)
-    #if platform.system()=='Linux':
-    #    path = r'/home/ahmadmojiri/GreenH2/DATA/SAM_INPUTS/WEATHER_DATA/'
-    #else:
-    #    path = r'C:\Nextcloud\HILT-CRC---Green-Hydrogen\DATA\SAM_INPUTS\WEATHER_DATA\\'
         
     weather_data = pd.read_csv(path,skiprows=2)
     
@@ -90,11 +85,37 @@ def crf(rate,years):
 
 
 
-# def LCOH2(rate, life, cf, load, pv_fom, wind_fom, elec_fom,
-#           pv_vom, wind_vom, elec_vom):
+def LCOH2(RESULTS, data_to_plot, i, life,
+          pv_fom, wind_fom, elec_fom,
+          pv_vom, wind_vom, elec_vom):
     
-
-
-
-
+    H2_total = data_to_plot.LOAD.sum()*RESULTS['Capacity Factor [%]']/100
     
+    CFR = i*(1+i)**life / ( (1+i)**life-1  )
+    
+    pv_FOM = pv_fom * RESULTS['PV Rated Power[kW]'] / H2_total     
+    wind_FOM = wind_fom * RESULTS['Wind Rated Power[kW]'] / H2_total
+    elec_FOM = elec_fom * RESULTS['Electrolyser rated Power [kW]'] / H2_total
+    
+    pv_CAPEX = RESULTS['PV Cost [USD]'] * CFR / H2_total
+    wind_CAPEX = RESULTS['Wind Cost [USD]'] * CFR / H2_total
+    elec_CAPEX = RESULTS['Electrolyser Cost [USD]'] * CFR / H2_total
+    
+    storage_CAPEX = (  RESULTS['UG H2 Capacity [kgH2]'] + 
+                       RESULTS['Pipe Storage Capacity [kgH2]'] ) * CFR / H2_total
+    
+    LCOH2_items = pd.DataFrame({
+                              'Capex PV': [pv_CAPEX],
+                              'Capex Wind': [wind_CAPEX],
+                              'Capex Electrolyser': [elec_CAPEX],
+                              'CAPEX Storage': [storage_CAPEX],
+                              'FOM PV': [pv_FOM],
+                              'FOM Wind': [wind_FOM],
+                              'FOM Electrolyser': [elec_FOM],
+                              'VOM PV': [pv_vom],
+                              'VOM Wind': [wind_vom],
+                              'VOM Electrlyser': [elec_vom]
+                              
+                              })
+                  
+    return(LCOH2_items)

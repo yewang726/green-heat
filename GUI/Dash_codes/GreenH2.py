@@ -14,20 +14,11 @@ import dash_bootstrap_components as dbc
 import os
 from assets.component_model import SolarResource, WindSource_windlab
 from assets.optimisation import Optimise
-from assets.plotting import prep_results_to_print, prep_results_to_plot
+from assets.plotting import prep_results_to_print, prep_results_to_plot,LCOH2
 import pdb
 
 colors = {'background': 'whitesmoke',
           'text': 'black'}
-
-# locations = [{'label':'Newman','value':'Newman'},
-#              {'label':'Tom Price','value':'Tom_Price'},
-#              {'label':'Whyalla','value':'Whyalla'},
-#              {'label':'Gladstone','value':'Gladstone'},
-#              {'label':'Pinjara','value':'Pinjara'},
-#              {'label':'Port Agusta','value':'Port_Augusta'},
-#              {'label':'Burnie','value':'Burnie'},]
-
 
 locations = [{'label':'Burnie 1', 'value':'Burnie 1'},
              {'label':'Burnie 2', 'value':'Burnie 2'},
@@ -81,6 +72,19 @@ Layout= {'xaxis':{'showline':True, 'linewidth':1.25,
                    'plot_bgcolor': colors['background'],
            'title':'',
            'font': {'color': colors['text']}  }
+
+layout_LCOH2 = {'xaxis':{'showline':True, 'linewidth':1.25,
+                  'mirror':False,'linecolor':'black',
+                  'gridcolor':'LightPink'},
+         'yaxis':{'showline':True, 'linewidth':1.25,
+                  'mirror':False,'gridcolor':'LightPink'},
+         'legend':{'yanchor':"bottom", 'y':0,
+                   'xanchor':"left",'x':1.1,'orientation':'v'},
+                   'plot_bgcolor': colors['background'],
+           'title':'',
+           'font': {'color': colors['text']}  }
+
+
 
 data_to_plot = None
 
@@ -621,9 +625,6 @@ app.layout = html.Div([
 
 
 
-
-
-
               
 
 #-------------------------------------
@@ -751,7 +752,45 @@ def update_graph(variables):
       
       return([chart])
 
-            
+
+#Calulcate LCOH2
+@app.callback(
+            [Output('graph_LCOH2', 'figure')],
+            [Input('LCOH2','n_clicks'),
+             State('interest_rate', 'value'),
+             State('lifetime', 'value'),
+             State('pv_fom', 'value'),
+             State('wind_fom', 'value'),
+             State('elec_fom', 'value'),
+             State('pv_vom', 'value'),
+             State('wind_vom', 'value'),
+             State('elec_vom', 'value'),
+             ],
+            prevent_initial_call=True
+             )
+def update_graph_LCOH2(RESULTS, data_to_plot,
+                       click,i, life,
+                       pv_fom, wind_fom, elec_fom,
+                       pv_vom, wind_vom, elec_vom):
+    
+    
+    
+    LCOH2_items = LCOH2(RESULTS, data_to_plot, i, life,
+                          pv_fom, wind_fom, elec_fom,
+                          pv_vom, wind_vom, elec_vom)
+    
+    
+    
+    plot_data_LCOH2=[]
+    for col in LCOH2_items.columns.tolist():
+        plot_data_LCOH2 = plot_data_LCOH2 + [go.Bar(x=[1],
+                                            y = plot_data_LCOH2[col],
+                                            name=col)]
+    layout_LCOH2_I = layout_LCOH2.copy()
+    LCOH2_chart={'data': plot_data_LCOH2,
+                 'layout': layout_LCOH2_I }
+      
+    return([LCOH2_chart])            
 
 
 if __name__ == '__main__':
