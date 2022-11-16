@@ -26,7 +26,7 @@ def prep_results_to_print(results,simparams):
     
     RESULTS =  {'Capacity Factor [%]': results['CF'],
                 'CAPEX [USD]':results['CAPEX'][0],
-                'PV Rated Power[kW]': results['pv_max'][0],
+                'PV Rated Power [kW]': results['pv_max'][0],
                 'Wind Rated Power [kW]': results['wind_max'][0],
                 'Electrolyser rated Power [kW]': results['el_max'][0],
                 'UG H2 Capacity [kgH2]': results['ug_storage_capa'][0],
@@ -93,8 +93,8 @@ def LCOH2(RESULTS, data_to_plot, i, life,
     
     CFR = i*(1+i)**life / ( (1+i)**life-1  )
     
-    pv_FOM = pv_fom * RESULTS['PV Rated Power[kW]'] / H2_total     
-    wind_FOM = wind_fom * RESULTS['Wind Rated Power[kW]'] / H2_total
+    pv_FOM = pv_fom * RESULTS['PV Rated Power [kW]'] / H2_total     
+    wind_FOM = wind_fom * RESULTS['Wind Rated Power [kW]'] / H2_total
     elec_FOM = elec_fom * RESULTS['Electrolyser rated Power [kW]'] / H2_total
     
     pv_CAPEX = RESULTS['PV Cost [USD]'] * CFR / H2_total
