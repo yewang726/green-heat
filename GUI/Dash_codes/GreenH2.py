@@ -260,7 +260,7 @@ app.layout = html.Div([
                              ),
                      dbc.Col(dcc.Input(id="UG_STORAGE_CAPA_MAX", type="number",
                                        min=0.0,
-                                       value=1e8,
+                                       value=0,
                                        step=1, style={}),
                              width={'size':1, 'offset':0}
                              ),
