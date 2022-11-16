@@ -261,7 +261,7 @@ app.layout = html.Div([
                      dbc.Col(dcc.Input(id="UG_STORAGE_CAPA_MAX", type="number",
                                        min=0.0,
                                        value=0,
-                                       step=1, style={}),
+                                       step=1000, style={}),
                              width={'size':1, 'offset':0}
                              ),
                      dbc.Col(children= html.Div('kg of H2',
@@ -296,7 +296,7 @@ app.layout = html.Div([
                              ),
                      dbc.Col(dcc.Input(id="PIPE_STORAGE_CAPA_MIN", type="number",
                                        min=0.0,
-                                       value=1e5,
+                                       value=0,
                                        step=1000, style={}),
                              width={'size':1, 'offset':0}
                              ),
