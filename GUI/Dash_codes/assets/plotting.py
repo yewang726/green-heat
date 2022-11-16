@@ -89,7 +89,7 @@ def LCOH2(RESULTS, data_to_plot, i, life,
           pv_fom, wind_fom, elec_fom,
           pv_vom, wind_vom, elec_vom):
     
-    H2_total = 3600*data_to_plot.LOAD.sum()*RESULTS['Capacity Factor [%]']/100
+    H2_total = data_to_plot.LOAD.sum()*3600*RESULTS['Capacity Factor [%]']/100
     i = i/100
     
     CFR = i*(1+i)**life / ( (1+i)**life-1  )
