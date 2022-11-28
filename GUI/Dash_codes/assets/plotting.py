@@ -89,6 +89,7 @@ def crf(rate,years):
 def LCOH2(RESULTS, data_to_plot, i, life,
           pv_fom, wind_fom, elec_fom,
           pv_vom, wind_vom, elec_vom):
+    print(data_to_plot)
     
     H2_total = data_to_plot.LOAD.sum()*3600*RESULTS['Capacity Factor [%]']/100
     i = i/100
