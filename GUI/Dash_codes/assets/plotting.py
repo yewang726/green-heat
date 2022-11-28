@@ -24,23 +24,24 @@ def read_data_for_plotting(results):
 
 def prep_results_to_print(results,simparams):
     
-    RESULTS =  {'Capacity Factor [%]': results['CF'],
-                'CAPEX [USD]':results['CAPEX'][0],
-                'PV Rated Power [kW]': results['pv_max'][0],
-                'Wind Rated Power [kW]': results['wind_max'][0],
-                'Electrolyser rated Power [kW]': results['el_max'][0],
-                'UG H2 Capacity [kgH2]': results['ug_storage_capa'][0],
-                'Pipe Storage Capacity [kgH2]': results['pipe_storage_capa'][0],
-                'Battery Energy Capacity [kWh]': results['bat_e_capa'][0],
-                'Battery Power Capacity [kW]': results['bat_p_max'][0],
-                'PV Cost [USD]': results['pv_max'][0]*simparams['C_PV'],
-                'Wind Cost [USD]': results['wind_max'][0]*simparams['C_WIND'],
-                'Electrolyser Cost [USD]': results['el_max'][0]*simparams['C_EL'],
-                'UG Storage Cost [USD]': results['ug_storage_capa'][0]*results['C_UG_STORAGE'],
-                'Pipe Storage Cost [USD]':results['pipe_storage_capa'][0]*simparams['C_PIPE_STORAGE'],
-                'Battery Cost [USD]': results['bat_p_max'][0]*simparams['C_BAT_ENERGY'],
+    RESULTS =  {'Capacity Factor [%]': round(results['CF']),
+                'CAPEX [USD]':round(results['CAPEX'][0]),
+                'PV Rated Power [kW]': round(results['pv_max'][0]),
+                'Wind Rated Power [kW]': round(results['wind_max'][0]),
+                'Electrolyser rated Power [kW]': round(results['el_max'][0]),
+                'UG H2 Capacity [kgH2]': round(results['ug_storage_capa'][0]),
+                'Pipe Storage Capacity [kgH2]': round(results['pipe_storage_capa'][0]),
+                'Battery Energy Capacity [kWh]': round(results['bat_e_capa'][0]),
+                'Battery Power Capacity [kW]': round(results['bat_p_max'][0]),
+                'PV Cost [USD]': round(results['pv_max'][0]*simparams['C_PV']),
+                'Wind Cost [USD]': round(results['wind_max'][0]*simparams['C_WIND']),
+                'Electrolyser Cost [USD]': round(results['el_max'][0]*simparams['C_EL']),
+                'UG Storage Cost [USD]': round(results['ug_storage_capa'][0]*results['C_UG_STORAGE']),
+                'Pipe Storage Cost [USD]':round(results['pipe_storage_capa'][0]*simparams['C_PIPE_STORAGE']),
+                'Battery Cost [USD]': round(results['bat_p_max'][0]*simparams['C_BAT_POWER'] +
+                                       results['bat_e_capa'][0]*simparams['C_BAT_ENERGY']),
                 'Load [kg/s]':results['LOAD'][0],
-                'UG Storage Unit Price [USD/kgH2]':results['C_UG_STORAGE']
+                'UG Storage Unit Price [USD/kgH2]':round(results['C_UG_STORAGE'])
                  }
     return(RESULTS)
 
@@ -101,6 +102,7 @@ def LCOH2(RESULTS, data_to_plot, i, life,
     pv_CAPEX = RESULTS['PV Cost [USD]'] * CFR / H2_total
     wind_CAPEX = RESULTS['Wind Cost [USD]'] * CFR / H2_total
     elec_CAPEX = RESULTS['Electrolyser Cost [USD]'] * CFR / H2_total
+    batter_capex = RESULTS['Battery Cost [USD]'] * CFR / H2_total
     
     storage_CAPEX = (  RESULTS['UG Storage Cost [USD]'] + 
                        RESULTS['Pipe Storage Cost [USD]'] ) * CFR / H2_total
@@ -109,7 +111,8 @@ def LCOH2(RESULTS, data_to_plot, i, life,
                               'Capex PV': [pv_CAPEX],
                               'Capex Wind': [wind_CAPEX],
                               'Capex Electrolyser': [elec_CAPEX],
-                              'CAPEX Storage': [storage_CAPEX],
+                              'Capex Storage': [storage_CAPEX],
+                              'Capex battery': [batter_capex],
                               'FOM PV': [pv_FOM],
                               'FOM Wind': [wind_FOM],
                               'FOM Electrolyser': [elec_FOM],

@@ -1,0 +1,11 @@
+
+sudo tail -f /var/log/apache2$SUFFIX/indust.re-error.log
+
+
+sudo rsync -r green-hydrogen-supply/ /srv/indust.re
+
+systemctl restart apache2
+
+
+
+
