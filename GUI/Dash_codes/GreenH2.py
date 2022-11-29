@@ -106,7 +106,15 @@ app.layout = html.Div([
                             width={'size':6, 'offset':5}
                       )),
             
-            dbc.Row(dbc.Col(html.H2('Solar Thermal Group - Australian National University'),
+            dbc.Row(dbc.Col(html.H2('Australian National University'),
+                            width={'size':7, 'offset':3}
+                      )),
+            
+            dbc.Row(dbc.Col(html.H3('The work has been supported by the Heavy\
+                                    Industry Low-carbon Transition Cooperative\
+                                    Research Centre whose activities are funded\
+                                    by the Australian Governments Cooperative\
+                                    Research Centre Program.'),
                             width={'size':7, 'offset':3}
                       )),
             
