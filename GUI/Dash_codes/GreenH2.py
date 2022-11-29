@@ -630,16 +630,24 @@ app.layout = html.Div([
                                     by the Australian Governments Cooperative\
                                     Research Centre Program.',
                                     style={'textAlign': 'left'}),
-                            width={'size':7, 'offset':1}
+                            width={'size':4, 'offset':1}
                       )),
                 
-             dbc.Row(dbc.Col(children= html.Div('For more information please contact:\
-                                                Dr Ahmad Mojiri (ahmad.mojiri@anu.edu.au)\
-                                                A/Professor Joe Coventry (joe.coventry@anu.edu.au)',
+             dbc.Row(dbc.Col(children= html.Div('For more information please contact:',
+                                    style={'textAlign': 'left'}),
+                            width={'size':3, 'offset':1}
+                      )),
+             
+             dbc.Row(dbc.Col(children= html.Div('Dr Ahmad Mojiri (ahmad.mojiri@anu.edu.au))',
                                     style={'textAlign': 'left'}),
                             width={'size':3, 'offset':1}
                       )),
 
+             
+             dbc.Row(dbc.Col(children= html.Div('A/Professor Joe Coventry (joe.coventry@anu.edu.au',
+                                    style={'textAlign': 'left'}),
+                            width={'size':3, 'offset':1}
+                      )),
 
             ])
 
