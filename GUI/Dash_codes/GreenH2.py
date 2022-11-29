@@ -633,11 +633,11 @@ app.layout = html.Div([
                             width={'size':7, 'offset':1}
                       )),
                 
-             dbc.Row(dbc.Col(children= html.Div('For more information please contact:<br>\
-                                                Dr Ahmad Mojiri (ahmad.mojiri@anu.edu.au)<br>\
+             dbc.Row(dbc.Col(children= html.Div('For more information please contact:\
+                                                Dr Ahmad Mojiri (ahmad.mojiri@anu.edu.au)\
                                                 A/Professor Joe Coventry (joe.coventry@anu.edu.au)',
                                     style={'textAlign': 'left'}),
-                            width={'size':7, 'offset':1}
+                            width={'size':3, 'offset':1}
                       )),
 
 
