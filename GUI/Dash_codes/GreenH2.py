@@ -110,15 +110,6 @@ app.layout = html.Div([
                             width={'size':7, 'offset':4}
                       )),
             
-            dbc.Row(dbc.Col(children= html.Div('The work has been supported by the Heavy\
-                                    Industry Low-carbon Transition Cooperative\
-                                    Research Centre whose activities are funded\
-                                    by the Australian Governments Cooperative\
-                                    Research Centre Program.',
-                                    style={'textAlign': 'left'}),
-                            width={'size':7, 'offset':3}
-                      )),
-            
             
             dbc.Row([
                      dbc.Col(children= html.Div('Electrolyser efficiency:',
@@ -629,6 +620,25 @@ app.layout = html.Div([
             dbc.Row(dbc.Col(dcc.Graph(id='graph_LCOH2',figure={'data':[]}),
                             width={'size':5, 'offset':1}
                         )),
+            
+            
+            
+#Signiture secrtion
+            dbc.Row(dbc.Col(children= html.Div('The work has been supported by the Heavy\
+                                    Industry Low-carbon Transition Cooperative\
+                                    Research Centre whose activities are funded\
+                                    by the Australian Governments Cooperative\
+                                    Research Centre Program.',
+                                    style={'textAlign': 'left'}),
+                            width={'size':7, 'offset':1}
+                      )),
+                
+             dbc.Row(dbc.Col(children= html.Div('For more information please contact:<br>\
+                                                Dr Ahmad Mojiri (ahmad.mojiri@anu.edu.au)<br>\
+                                                A/Professor Joe Coventry (joe.coventry@anu.edu.au)',
+                                    style={'textAlign': 'left'}),
+                            width={'size':7, 'offset':1}
+                      )),
 
 
             ])
