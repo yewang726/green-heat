@@ -107,14 +107,15 @@ app.layout = html.Div([
                       )),
             
             dbc.Row(dbc.Col(html.H2('Australian National University'),
-                            width={'size':7, 'offset':3}
+                            width={'size':7, 'offset':4}
                       )),
             
-            dbc.Row(dbc.Col(html.H3('The work has been supported by the Heavy\
+            dbc.Row(dbc.Col(children= html.Div('The work has been supported by the Heavy\
                                     Industry Low-carbon Transition Cooperative\
                                     Research Centre whose activities are funded\
                                     by the Australian Governments Cooperative\
-                                    Research Centre Program.'),
+                                    Research Centre Program.',
+                                    style={'textAlign': 'right'}),
                             width={'size':7, 'offset':3}
                       )),
             
