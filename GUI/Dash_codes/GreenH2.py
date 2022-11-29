@@ -632,19 +632,21 @@ app.layout = html.Div([
                                     style={'textAlign': 'left'}),
                             width={'size':4, 'offset':1}
                       )),
+             
+            html.Br(),
                 
              dbc.Row(dbc.Col(children= html.Div('For more information please contact:',
                                     style={'textAlign': 'left'}),
                             width={'size':3, 'offset':1}
                       )),
              
-             dbc.Row(dbc.Col(children= html.Div('Dr Ahmad Mojiri (ahmad.mojiri@anu.edu.au))',
+             dbc.Row(dbc.Col(children= html.Div('Dr Ahmad Mojiri (ahmad.mojiri@anu.edu.au)',
                                     style={'textAlign': 'left'}),
                             width={'size':3, 'offset':1}
                       )),
 
              
-             dbc.Row(dbc.Col(children= html.Div('A/Professor Joe Coventry (joe.coventry@anu.edu.au',
+             dbc.Row(dbc.Col(children= html.Div('A/Professor Joe Coventry (joe.coventry@anu.edu.au)',
                                     style={'textAlign': 'left'}),
                             width={'size':3, 'offset':1}
                       )),
