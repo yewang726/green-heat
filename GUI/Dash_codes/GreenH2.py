@@ -115,7 +115,7 @@ app.layout = html.Div([
                                     Research Centre whose activities are funded\
                                     by the Australian Governments Cooperative\
                                     Research Centre Program.',
-                                    style={'textAlign': 'right'}),
+                                    style={'textAlign': 'left'}),
                             width={'size':7, 'offset':3}
                       )),
             
