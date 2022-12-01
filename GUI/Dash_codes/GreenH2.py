@@ -38,7 +38,8 @@ locations = [{'label':'Burnie 1', 'value':'Burnie 1'},
              {'label':'Upper Spencer Gulf 1','value':'Upper Spencer Gulf 1'},
              {'label':'Upper Spencer Gulf 2','value':'Upper Spencer Gulf 2'},
              {'label':'Upper Spencer Gulf 3','value':'Upper Spencer Gulf 3'},
-             {'label':'Upper Spencer Gulf 4','value':'Upper Spencer Gulf 4'}]
+             {'label':'Upper Spencer Gulf 4','value':'Upper Spencer Gulf 4'},
+             {'label':'Darwin','value':'Darwin'}]
 
 results_var = [{'label':'PV output [kW]', 'value':'pv_pout'},
                {'label':'Wind output [kW]', 'value':'wind_pout'},
