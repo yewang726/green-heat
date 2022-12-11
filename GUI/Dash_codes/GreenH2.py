@@ -119,9 +119,9 @@ app.layout = html.Div([
 
         html.Div(
 
-            children=[dbc.Col(children=html.Div('Electrolyser efficiency:',
+            children=[dbc.Col(html.Div('Electrolyser efficiency:',
                                                 style={'textAlign': 'right'}),
-                              width={'size': 1, 'offset': 0}
+                              width={ 'offset': 0}
                               ), dbc.Col(dcc.Input(id="EL_ETA", type="number",
                                                    value=0.7,
                                                    min=0.5,
@@ -129,32 +129,28 @@ app.layout = html.Div([
                                                    step=0.1,
                                                    style={}),
                                          width={'size': 1, 'offset': 0}
-                                         ), ]
-
-
-
-        ),
-
-        html.Div(
-
-            # Location
-            children=[dbc.Col(dcc.Loading(
+                                         ),
+                                                   #Location
+                                                   dbc.Col(dcc.Loading(
                 id="Lolcation_Status",
                 type="default",
                 children=html.Div('None has been selected!',
                               id='location_status',
                               style={'textAlign': 'right'})),
                               width={'size': 2, 'offset': 1}
-                              ), dbc.Col(dcc.Dropdown(id='location_selector',
+                              ),dbc.Col(dcc.Dropdown(id='location_selector',
                                                       options=locations,
                                                       multi=False,
                                                       searchable=True,
                                                       placeholder='Select a location!'
                                                       ), width={'size': 2, 'offset': 0}
-                                         ), ]
+                                         ),]
 
 
-        )])),
+
+        ),
+
+     ])),
 
 
 
