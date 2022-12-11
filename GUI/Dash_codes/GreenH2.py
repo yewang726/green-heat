@@ -138,510 +138,510 @@ app.layout = html.Div(
 
 
         ),
-html.Div([
-    dbc.Row(dbc.Col(html.H1('Green H2'),
-                    width={'size': 6, 'offset': 5}
-                    )),
+# html.Div([
+#     dbc.Row(dbc.Col(html.H1('Green H2'),
+#                     width={'size': 6, 'offset': 5}
+#                     )),
 
-    dbc.Row(dbc.Col(html.H2('Australian National University'),
-                    width={'size': 7, 'offset': 4}
-                    )),
+#     dbc.Row(dbc.Col(html.H2('Australian National University'),
+#                     width={'size': 7, 'offset': 4}
+#                     )),
 
-    dbc.Row(dbc.Col(children=[
+#     dbc.Row(dbc.Col(children=[
 
       
 
-     ])),
-
-
-
-
-    #Battery charging efficiency
-    dbc.Row([dbc.Col(children=html.Div('Battery charging efficiency:',
-                                       style={'textAlign': 'right'}),
-                     width={'size': 2, 'offset': 0}
-                     ),
-
-             dbc.Col(dcc.Input(id="BAT_ETA_IN", type="number",
-                               value=0.95,
-                               min=0.1, max=1.0,
-                               step=0.05, style={}),
-                     width={'size': 1, 'offset': 0}
-                     ),
-             #Storage type
-             dbc.Col(children=html.Div('UG Storage type:',
-                                       style={'textAlign': 'right'}),
-                     width={'size': 2, 'offset': 1}
-                     ),
-
-             dbc.Col(dcc.Dropdown(id='storage_selector',
-                                  options=storage_types,
-                                  multi=False,
-                                  searchable=True,
-                                  placeholder='Select UG storage'
-                                  ), width={'size': 2, 'offset': 0}
-                     ),
-             ]),
-
-
-    #Battery discharging efficiency
-    dbc.Row([
-        dbc.Col(children=html.Div('Battery discharging efficiency:',
-                                  style={'textAlign': 'right'}),
-                width={'size': 2, 'offset': 0}
-                ),
-
-        dbc.Col(dcc.Input(id="BAT_ETA_OUT", type="number",
-                          min=0.1, max=1.0,
-                          value=0.95,
-                          step=0.05, style={}),
-                width={'size': 1, 'offset': 0}
-                ),
-
-
-    ]),
-
-
-    #Cost of PV
-    dbc.Row([
-        dbc.Col(children=html.Div('Unit cost of PV:',
-                                  style={'textAlign': 'right'}),
-                width={'size': 2, 'offset': 0}
-                ),
-        dbc.Col(dcc.Input(id="C_PV", type="number",
-                          min=0.0,
-                          value=1122,
-                          step=1, style={}),
-                width={'size': 1, 'offset': 0}
-                ),
-        dbc.Col(children=html.Div('USD/kW',
-                                  style={'textAlign': 'left'}),
-                width={'size': 1, 'offset': 1})
-    ]),
-
-
-    #Cost of Wind
-    dbc.Row([
-        dbc.Col(children=html.Div('Unit cost of Wind:',
-                                  style={'textAlign': 'right'}),
-                width={'size': 2, 'offset': 0}
-                ),
-        dbc.Col(dcc.Input(id="C_WIND", type="number",
-                          min=0.0,
-                          value=1455,
-                          step=1, style={}),
-                width={'size': 1, 'offset': 0}
-                ),
-        dbc.Col(children=html.Div('USD/kW',
-                                  style={'textAlign': 'left'}),
-                width={'size': 1, 'offset': 1})
-    ]),
-
-
-    #Cost of Electrolyser
-    dbc.Row([
-        dbc.Col(children=html.Div('Unit cost of Electrolyser:',
-                                  style={'textAlign': 'right'}),
-                width={'size': 2, 'offset': 0}
-                ),
-        dbc.Col(dcc.Input(id="C_EL", type="number",
-                          min=0.0,
-                          value=1067,
-                          step=1, style={}),
-                width={'size': 1, 'offset': 0}
-                ),
-        dbc.Col(children=html.Div('USD/kW',
-                                  style={'textAlign': 'left'}),
-                width={'size': 1, 'offset': 1})
-    ]),
-
-    #UG_STORAGE_CAPA_MAX
-    dbc.Row([
-        dbc.Col(children=html.Div('UG storage max capacity:',
-                                  style={'textAlign': 'right'}),
-                width={'size': 2, 'offset': 0}
-                ),
-        dbc.Col(dcc.Input(id="UG_STORAGE_CAPA_MAX", type="number",
-                          min=0.0,
-                          value=0,
-                          step=1000, style={}),
-                width={'size': 1, 'offset': 0}
-                ),
-        dbc.Col(children=html.Div('kg of H2',
-                                  style={'textAlign': 'left'}),
-                width={'size': 1, 'offset': 1})
-    ]),
-
-
-    #C_PIPE_STORAGE
-    dbc.Row([
-        dbc.Col(children=html.Div('Unit cost of pipe storage:',
-                                  style={'textAlign': 'right'}),
-                width={'size': 2, 'offset': 0}
-                ),
-        dbc.Col(dcc.Input(id="C_PIPE_STORAGE", type="number",
-                          min=0.0,
-                          value=516,
-                          step=1, style={}),
-                width={'size': 1, 'offset': 0}
-                ),
-        dbc.Col(children=html.Div('USD/kg of H2',
-                                  style={'textAlign': 'left'}),
-                width={'size': 1, 'offset': 1})
-    ]),
-
-
-    #PIPE_STORAGE_CAPA_MIN
-    dbc.Row([
-        dbc.Col(children=html.Div('Pipe storage min capacity:',
-                                  style={'textAlign': 'right'}),
-                width={'size': 2, 'offset': 0}
-                ),
-        dbc.Col(dcc.Input(id="PIPE_STORAGE_CAPA_MIN", type="number",
-                          min=0.0,
-                          value=0,
-                          step=1000, style={}),
-                width={'size': 1, 'offset': 0}
-                ),
-        dbc.Col(children=html.Div('kg of H2',
-                                  style={'textAlign': 'left'}),
-                width={'size': 1, 'offset': 1})
-    ]),
-
-
-    #C_BAT_ENERGY
-    dbc.Row([
-        dbc.Col(children=html.Div('Battery energy unit price:',
-                                  style={'textAlign': 'right'}),
-                width={'size': 2, 'offset': 0}
-                ),
-        dbc.Col(dcc.Input(id="C_BAT_ENERGY", type="number",
-                          min=0.0,
-                          value=196,
-                          step=1, style={}),
-                width={'size': 1, 'offset': 0}
-                ),
-        dbc.Col(children=html.Div('USD/kWh',
-                                  style={'textAlign': 'left'}),
-                width={'size': 1, 'offset': 1})
-    ]),
-
-
-    #C_BAT_POWER
-    dbc.Row([
-        dbc.Col(children=html.Div('Battery power unit price:',
-                                  style={'textAlign': 'right'}),
-                width={'size': 2, 'offset': 0}
-                ),
-        dbc.Col(dcc.Input(id="C_BAT_POWER", type="number",
-                          min=0,
-                          value=405,
-                          step=1, style={}),
-                width={'size': 1, 'offset': 0}
-                ),
-        dbc.Col(children=html.Div('USD/kW',
-                                  style={'textAlign': 'left'}),
-                width={'size': 1, 'offset': 1}
-                ),
-    ]),
-
-    #CF
-    dbc.Row([
-        dbc.Col(children=html.Div('Capcaity factor:',
-                                  style={'textAlign': 'right'}),
-                width={'size': 2, 'offset': 0}
-                ),
-        dbc.Col(dcc.Input(id="CF", type="number",
-                          min=1, max=100,
-                          value=100,
-                          step=1, style={}),
-                width={'size': 1, 'offset': 0}
-                ),
-        dbc.Col(children=html.Div('Percent[%]',
-                                  style={'textAlign': 'left'}),
-                width={'size': 1, 'offset': 1}
-                ),
-    ]),
-
-
-    #Load
-    dbc.Row([
-        dbc.Col(children=html.Div('Load:',
-                                  style={'textAlign': 'right'}),
-                width={'size': 2, 'offset': 0}
-                ),
-        dbc.Col(dcc.Input(id="LOAD", type="number",
-                          min=0.0,
-                          value=5.0,
-                          step=0.05, style={}),
-                width={'size': 1, 'offset': 0}
-                ),
-        dbc.Col(children=html.Div('kgH2/s',
-                                  style={'textAlign': 'left'}),
-                width={'size': 1, 'offset': 1}
-                ),
-    ]),
-
-
-    #Run optimisation
-    dbc.Row([dbc.Col(html.Button('Optimise!',
-                                 id='Optimise',
-                                 n_clicks=0),
-                     width={'size': 1, 'offset': 1}
-                     ),
-
-             #print results
-
-             dbc.Col(dcc.Loading(
-                 id="OPTIMISATION_TEXT",
-                 type="default",
-                 children=html.Div('Progress!',
-                                   id='optimisation_text')),
-                     width={'size': 1, 'offset': 0}
-                     ),
-
-             dbc.Col(dcc.Textarea(id='Output',
-                                  value='',
-                                  readOnly=True,
-                                  style={'width': '100%', 'height': 200}
-                                  ),
-                     width={'size': 3, 'offset': 2}
-
-                     ),
-
-             ]),
-
-    #Export output
-    dbc.Row([
-
-        dbc.Col([html.Button('Export!', id='export', n_clicks=0),
-                 dcc.Download(id='download_csv')],
-                width={'size': 1, 'offset': 5}
-                )
-    ]),
-
-
-    #Choose plotting variabe
-
-    dbc.Row(dbc.Col(dcc.Dropdown(id='variable_selector',
-                                 options=results_var,
-                                 multi=True,
-                                 searchable=True,
-                                 placeholder='Choose a variable!'
-                                 ), width={'size': 2, 'offset': 1}
-                    ),
-            ),
-
-    #Download timeseries
-    dbc.Row([
-
-        dbc.Col([html.Button('Download data!', id='download', n_clicks=0),
-                 dcc.Download(id='download_data_csv')],
-                width={'size': 1, 'offset': 1}
-                )
-    ]),
-
-
-    dbc.Row(dbc.Col(dcc.Graph(id='GraphI', figure={'data': []}),
-                    width={'size': 10, 'offset': 1}
-                    )),
-
-
-    #Interest rate
-    dbc.Row([
-        dbc.Col(children=html.Div('Interest rate:',
-                                  style={'textAlign': 'right'}),
-                width={'size': 2, 'offset': 0}
-                ),
-        dbc.Col(dcc.Input(id="interest_rate", type="number",
-                          min=0.0,
-                          value=6,
-                          step=0.1, style={}),
-                width={'size': 1, 'offset': 0}
-                ),
-        dbc.Col(children=html.Div('Percent [%]',
-                                  style={'textAlign': 'left'}),
-                width={'size': 1, 'offset': 1}
-                ),
-    ]),
-
-
-    #Lifetime
-    dbc.Row([
-        dbc.Col(children=html.Div('Lifetime:',
-                                  style={'textAlign': 'right'}),
-                width={'size': 2, 'offset': 0}
-                ),
-        dbc.Col(dcc.Input(id="lifetime", type="number",
-                          min=0.0,
-                          value=25,
-                          step=1, style={}),
-                width={'size': 1, 'offset': 0}
-                ),
-        dbc.Col(children=html.Div('Years',
-                                  style={'textAlign': 'left'}),
-                width={'size': 1, 'offset': 1}
-                ),
-    ]),
-
-    #FOM PV
-    dbc.Row([
-        dbc.Col(children=html.Div('FOM PV:',
-                                  style={'textAlign': 'right'}),
-                width={'size': 2, 'offset': 0}
-                ),
-        dbc.Col(dcc.Input(id="pv_fom", type="number",
-                          min=0.0,
-                          value=12.7,
-                          step=0.1, style={}),
-                width={'size': 1, 'offset': 0}
-                ),
-        dbc.Col(children=html.Div('USD/kW',
-                                  style={'textAlign': 'left'}),
-                width={'size': 1, 'offset': 1}
-                ),
-    ]),
-
-
-    #FOM WIND
-    dbc.Row([
-        dbc.Col(children=html.Div('FOM Wind:',
-                                  style={'textAlign': 'right'}),
-                width={'size': 2, 'offset': 0}
-                ),
-        dbc.Col(dcc.Input(id="wind_fom", type="number",
-                          min=0.0,
-                          value=18.7,
-                          step=0.1, style={}),
-                width={'size': 1, 'offset': 0}
-                ),
-        dbc.Col(children=html.Div('USD/kW',
-                                  style={'textAlign': 'left'}),
-                width={'size': 1, 'offset': 1}
-                ),
-    ]),
-
-
-    #FOM Electrolyser
-    dbc.Row([
-        dbc.Col(children=html.Div('FOM Electrolyser:',
-                                  style={'textAlign': 'right'}),
-                width={'size': 2, 'offset': 0}
-                ),
-        dbc.Col(dcc.Input(id="elec_fom", type="number",
-                          min=0.0,
-                          value=37.3,
-                          step=0.1, style={}),
-                width={'size': 1, 'offset': 0}
-                ),
-        dbc.Col(children=html.Div('USD/kW',
-                                  style={'textAlign': 'left'}),
-                width={'size': 1, 'offset': 1}
-                ),
-    ]),
-
-
-    #VOM PV
-    dbc.Row([
-        dbc.Col(children=html.Div('VOM PV:',
-                                  style={'textAlign': 'right'}),
-                width={'size': 2, 'offset': 0}
-                ),
-        dbc.Col(dcc.Input(id="pv_vom", type="number",
-                          min=0.0,
-                          value=0,
-                          step=0.001, style={}),
-                width={'size': 1, 'offset': 0}
-                ),
-        dbc.Col(children=html.Div('USD/kWh',
-                                  style={'textAlign': 'left'}),
-                width={'size': 1, 'offset': 1}
-                ),
-    ]),
-
-
-    #VOM WIND
-    dbc.Row([
-        dbc.Col(children=html.Div('VOM Wind:',
-                                  style={'textAlign': 'right'}),
-                width={'size': 2, 'offset': 0}
-                ),
-        dbc.Col(dcc.Input(id="wind_vom", type="number",
-                          min=0.0,
-                          value=0,
-                          step=0.001, style={}),
-                width={'size': 1, 'offset': 0}
-                ),
-        dbc.Col(children=html.Div('USD/kWh',
-                                  style={'textAlign': 'left'}),
-                width={'size': 1, 'offset': 1}
-                ),
-    ]),
-
-
-    #VOM Electrolyser
-    dbc.Row([
-        dbc.Col(children=html.Div('VOM Electrolyser:',
-                                  style={'textAlign': 'right'}),
-                width={'size': 2, 'offset': 0}
-                ),
-        dbc.Col(dcc.Input(id="elec_vom", type="number",
-                          min=0.0,
-                          value=0.075,
-                          step=0.001, style={}),
-                width={'size': 1, 'offset': 0}
-                ),
-        dbc.Col(children=html.Div('USD/kg of H2',
-                                  style={'textAlign': 'left'}),
-                width={'size': 1, 'offset': 1}
-                ),
-    ]),
-
-
-    #Calculate LCOH2
-    dbc.Row([dbc.Col(html.Button('Calculate LCOH2!',
-                                 id='LCOH2',
-                                 n_clicks=0),
-                     width={'size': 1, 'offset': 2}
-                     )
-             ]),
-
-
-    #plot LCOH2
-    dbc.Row(dbc.Col(dcc.Graph(id='graph_LCOH2', figure={'data': []}),
-                    width={'size': 5, 'offset': 1}
-                    )),
-
-
-    #Signiture secrtion
-    dbc.Row(dbc.Col(children=html.Div('The work has been supported by the Heavy\
-                                    Industry Low-carbon Transition Cooperative\
-                                    Research Centre whose activities are funded\
-                                    by the Australian Governments Cooperative\
-                                    Research Centre Program.',
-                                      style={'textAlign': 'left'}),
-                    width={'size': 4, 'offset': 1}
-                    )),
-
-    html.Br(),
-
-    dbc.Row(dbc.Col(children=html.Div('For more information please contact:',
-                                      style={'textAlign': 'left'}),
-                    width={'size': 3, 'offset': 1}
-                    )),
-
-    dbc.Row(dbc.Col(children=html.Div('Dr Ahmad Mojiri (ahmad.mojiri@anu.edu.au)',
-                                      style={'textAlign': 'left'}),
-                    width={'size': 3, 'offset': 1}
-                    )),
-
-
-    dbc.Row(dbc.Col(children=html.Div('A/Professor Joe Coventry (joe.coventry@anu.edu.au)',
-                                      style={'textAlign': 'left'}),
-                    width={'size': 3, 'offset': 1}
-                    )),
-
-])
+#      ])),
+
+
+
+
+#     #Battery charging efficiency
+#     dbc.Row([dbc.Col(children=html.Div('Battery charging efficiency:',
+#                                        style={'textAlign': 'right'}),
+#                      width={'size': 2, 'offset': 0}
+#                      ),
+
+#              dbc.Col(dcc.Input(id="BAT_ETA_IN", type="number",
+#                                value=0.95,
+#                                min=0.1, max=1.0,
+#                                step=0.05, style={}),
+#                      width={'size': 1, 'offset': 0}
+#                      ),
+#              #Storage type
+#              dbc.Col(children=html.Div('UG Storage type:',
+#                                        style={'textAlign': 'right'}),
+#                      width={'size': 2, 'offset': 1}
+#                      ),
+
+#              dbc.Col(dcc.Dropdown(id='storage_selector',
+#                                   options=storage_types,
+#                                   multi=False,
+#                                   searchable=True,
+#                                   placeholder='Select UG storage'
+#                                   ), width={'size': 2, 'offset': 0}
+#                      ),
+#              ]),
+
+
+#     #Battery discharging efficiency
+#     dbc.Row([
+#         dbc.Col(children=html.Div('Battery discharging efficiency:',
+#                                   style={'textAlign': 'right'}),
+#                 width={'size': 2, 'offset': 0}
+#                 ),
+
+#         dbc.Col(dcc.Input(id="BAT_ETA_OUT", type="number",
+#                           min=0.1, max=1.0,
+#                           value=0.95,
+#                           step=0.05, style={}),
+#                 width={'size': 1, 'offset': 0}
+#                 ),
+
+
+#     ]),
+
+
+#     #Cost of PV
+#     dbc.Row([
+#         dbc.Col(children=html.Div('Unit cost of PV:',
+#                                   style={'textAlign': 'right'}),
+#                 width={'size': 2, 'offset': 0}
+#                 ),
+#         dbc.Col(dcc.Input(id="C_PV", type="number",
+#                           min=0.0,
+#                           value=1122,
+#                           step=1, style={}),
+#                 width={'size': 1, 'offset': 0}
+#                 ),
+#         dbc.Col(children=html.Div('USD/kW',
+#                                   style={'textAlign': 'left'}),
+#                 width={'size': 1, 'offset': 1})
+#     ]),
+
+
+#     #Cost of Wind
+#     dbc.Row([
+#         dbc.Col(children=html.Div('Unit cost of Wind:',
+#                                   style={'textAlign': 'right'}),
+#                 width={'size': 2, 'offset': 0}
+#                 ),
+#         dbc.Col(dcc.Input(id="C_WIND", type="number",
+#                           min=0.0,
+#                           value=1455,
+#                           step=1, style={}),
+#                 width={'size': 1, 'offset': 0}
+#                 ),
+#         dbc.Col(children=html.Div('USD/kW',
+#                                   style={'textAlign': 'left'}),
+#                 width={'size': 1, 'offset': 1})
+#     ]),
+
+
+#     #Cost of Electrolyser
+#     dbc.Row([
+#         dbc.Col(children=html.Div('Unit cost of Electrolyser:',
+#                                   style={'textAlign': 'right'}),
+#                 width={'size': 2, 'offset': 0}
+#                 ),
+#         dbc.Col(dcc.Input(id="C_EL", type="number",
+#                           min=0.0,
+#                           value=1067,
+#                           step=1, style={}),
+#                 width={'size': 1, 'offset': 0}
+#                 ),
+#         dbc.Col(children=html.Div('USD/kW',
+#                                   style={'textAlign': 'left'}),
+#                 width={'size': 1, 'offset': 1})
+#     ]),
+
+#     #UG_STORAGE_CAPA_MAX
+#     dbc.Row([
+#         dbc.Col(children=html.Div('UG storage max capacity:',
+#                                   style={'textAlign': 'right'}),
+#                 width={'size': 2, 'offset': 0}
+#                 ),
+#         dbc.Col(dcc.Input(id="UG_STORAGE_CAPA_MAX", type="number",
+#                           min=0.0,
+#                           value=0,
+#                           step=1000, style={}),
+#                 width={'size': 1, 'offset': 0}
+#                 ),
+#         dbc.Col(children=html.Div('kg of H2',
+#                                   style={'textAlign': 'left'}),
+#                 width={'size': 1, 'offset': 1})
+#     ]),
+
+
+#     #C_PIPE_STORAGE
+#     dbc.Row([
+#         dbc.Col(children=html.Div('Unit cost of pipe storage:',
+#                                   style={'textAlign': 'right'}),
+#                 width={'size': 2, 'offset': 0}
+#                 ),
+#         dbc.Col(dcc.Input(id="C_PIPE_STORAGE", type="number",
+#                           min=0.0,
+#                           value=516,
+#                           step=1, style={}),
+#                 width={'size': 1, 'offset': 0}
+#                 ),
+#         dbc.Col(children=html.Div('USD/kg of H2',
+#                                   style={'textAlign': 'left'}),
+#                 width={'size': 1, 'offset': 1})
+#     ]),
+
+
+#     #PIPE_STORAGE_CAPA_MIN
+#     dbc.Row([
+#         dbc.Col(children=html.Div('Pipe storage min capacity:',
+#                                   style={'textAlign': 'right'}),
+#                 width={'size': 2, 'offset': 0}
+#                 ),
+#         dbc.Col(dcc.Input(id="PIPE_STORAGE_CAPA_MIN", type="number",
+#                           min=0.0,
+#                           value=0,
+#                           step=1000, style={}),
+#                 width={'size': 1, 'offset': 0}
+#                 ),
+#         dbc.Col(children=html.Div('kg of H2',
+#                                   style={'textAlign': 'left'}),
+#                 width={'size': 1, 'offset': 1})
+#     ]),
+
+
+#     #C_BAT_ENERGY
+#     dbc.Row([
+#         dbc.Col(children=html.Div('Battery energy unit price:',
+#                                   style={'textAlign': 'right'}),
+#                 width={'size': 2, 'offset': 0}
+#                 ),
+#         dbc.Col(dcc.Input(id="C_BAT_ENERGY", type="number",
+#                           min=0.0,
+#                           value=196,
+#                           step=1, style={}),
+#                 width={'size': 1, 'offset': 0}
+#                 ),
+#         dbc.Col(children=html.Div('USD/kWh',
+#                                   style={'textAlign': 'left'}),
+#                 width={'size': 1, 'offset': 1})
+#     ]),
+
+
+#     #C_BAT_POWER
+#     dbc.Row([
+#         dbc.Col(children=html.Div('Battery power unit price:',
+#                                   style={'textAlign': 'right'}),
+#                 width={'size': 2, 'offset': 0}
+#                 ),
+#         dbc.Col(dcc.Input(id="C_BAT_POWER", type="number",
+#                           min=0,
+#                           value=405,
+#                           step=1, style={}),
+#                 width={'size': 1, 'offset': 0}
+#                 ),
+#         dbc.Col(children=html.Div('USD/kW',
+#                                   style={'textAlign': 'left'}),
+#                 width={'size': 1, 'offset': 1}
+#                 ),
+#     ]),
+
+#     #CF
+#     dbc.Row([
+#         dbc.Col(children=html.Div('Capcaity factor:',
+#                                   style={'textAlign': 'right'}),
+#                 width={'size': 2, 'offset': 0}
+#                 ),
+#         dbc.Col(dcc.Input(id="CF", type="number",
+#                           min=1, max=100,
+#                           value=100,
+#                           step=1, style={}),
+#                 width={'size': 1, 'offset': 0}
+#                 ),
+#         dbc.Col(children=html.Div('Percent[%]',
+#                                   style={'textAlign': 'left'}),
+#                 width={'size': 1, 'offset': 1}
+#                 ),
+#     ]),
+
+
+#     #Load
+#     dbc.Row([
+#         dbc.Col(children=html.Div('Load:',
+#                                   style={'textAlign': 'right'}),
+#                 width={'size': 2, 'offset': 0}
+#                 ),
+#         dbc.Col(dcc.Input(id="LOAD", type="number",
+#                           min=0.0,
+#                           value=5.0,
+#                           step=0.05, style={}),
+#                 width={'size': 1, 'offset': 0}
+#                 ),
+#         dbc.Col(children=html.Div('kgH2/s',
+#                                   style={'textAlign': 'left'}),
+#                 width={'size': 1, 'offset': 1}
+#                 ),
+#     ]),
+
+
+#     #Run optimisation
+#     dbc.Row([dbc.Col(html.Button('Optimise!',
+#                                  id='Optimise',
+#                                  n_clicks=0),
+#                      width={'size': 1, 'offset': 1}
+#                      ),
+
+#              #print results
+
+#              dbc.Col(dcc.Loading(
+#                  id="OPTIMISATION_TEXT",
+#                  type="default",
+#                  children=html.Div('Progress!',
+#                                    id='optimisation_text')),
+#                      width={'size': 1, 'offset': 0}
+#                      ),
+
+#              dbc.Col(dcc.Textarea(id='Output',
+#                                   value='',
+#                                   readOnly=True,
+#                                   style={'width': '100%', 'height': 200}
+#                                   ),
+#                      width={'size': 3, 'offset': 2}
+
+#                      ),
+
+#              ]),
+
+#     #Export output
+#     dbc.Row([
+
+#         dbc.Col([html.Button('Export!', id='export', n_clicks=0),
+#                  dcc.Download(id='download_csv')],
+#                 width={'size': 1, 'offset': 5}
+#                 )
+#     ]),
+
+
+#     #Choose plotting variabe
+
+#     dbc.Row(dbc.Col(dcc.Dropdown(id='variable_selector',
+#                                  options=results_var,
+#                                  multi=True,
+#                                  searchable=True,
+#                                  placeholder='Choose a variable!'
+#                                  ), width={'size': 2, 'offset': 1}
+#                     ),
+#             ),
+
+#     #Download timeseries
+#     dbc.Row([
+
+#         dbc.Col([html.Button('Download data!', id='download', n_clicks=0),
+#                  dcc.Download(id='download_data_csv')],
+#                 width={'size': 1, 'offset': 1}
+#                 )
+#     ]),
+
+
+#     dbc.Row(dbc.Col(dcc.Graph(id='GraphI', figure={'data': []}),
+#                     width={'size': 10, 'offset': 1}
+#                     )),
+
+
+#     #Interest rate
+#     dbc.Row([
+#         dbc.Col(children=html.Div('Interest rate:',
+#                                   style={'textAlign': 'right'}),
+#                 width={'size': 2, 'offset': 0}
+#                 ),
+#         dbc.Col(dcc.Input(id="interest_rate", type="number",
+#                           min=0.0,
+#                           value=6,
+#                           step=0.1, style={}),
+#                 width={'size': 1, 'offset': 0}
+#                 ),
+#         dbc.Col(children=html.Div('Percent [%]',
+#                                   style={'textAlign': 'left'}),
+#                 width={'size': 1, 'offset': 1}
+#                 ),
+#     ]),
+
+
+#     #Lifetime
+#     dbc.Row([
+#         dbc.Col(children=html.Div('Lifetime:',
+#                                   style={'textAlign': 'right'}),
+#                 width={'size': 2, 'offset': 0}
+#                 ),
+#         dbc.Col(dcc.Input(id="lifetime", type="number",
+#                           min=0.0,
+#                           value=25,
+#                           step=1, style={}),
+#                 width={'size': 1, 'offset': 0}
+#                 ),
+#         dbc.Col(children=html.Div('Years',
+#                                   style={'textAlign': 'left'}),
+#                 width={'size': 1, 'offset': 1}
+#                 ),
+#     ]),
+
+#     #FOM PV
+#     dbc.Row([
+#         dbc.Col(children=html.Div('FOM PV:',
+#                                   style={'textAlign': 'right'}),
+#                 width={'size': 2, 'offset': 0}
+#                 ),
+#         dbc.Col(dcc.Input(id="pv_fom", type="number",
+#                           min=0.0,
+#                           value=12.7,
+#                           step=0.1, style={}),
+#                 width={'size': 1, 'offset': 0}
+#                 ),
+#         dbc.Col(children=html.Div('USD/kW',
+#                                   style={'textAlign': 'left'}),
+#                 width={'size': 1, 'offset': 1}
+#                 ),
+#     ]),
+
+
+#     #FOM WIND
+#     dbc.Row([
+#         dbc.Col(children=html.Div('FOM Wind:',
+#                                   style={'textAlign': 'right'}),
+#                 width={'size': 2, 'offset': 0}
+#                 ),
+#         dbc.Col(dcc.Input(id="wind_fom", type="number",
+#                           min=0.0,
+#                           value=18.7,
+#                           step=0.1, style={}),
+#                 width={'size': 1, 'offset': 0}
+#                 ),
+#         dbc.Col(children=html.Div('USD/kW',
+#                                   style={'textAlign': 'left'}),
+#                 width={'size': 1, 'offset': 1}
+#                 ),
+#     ]),
+
+
+#     #FOM Electrolyser
+#     dbc.Row([
+#         dbc.Col(children=html.Div('FOM Electrolyser:',
+#                                   style={'textAlign': 'right'}),
+#                 width={'size': 2, 'offset': 0}
+#                 ),
+#         dbc.Col(dcc.Input(id="elec_fom", type="number",
+#                           min=0.0,
+#                           value=37.3,
+#                           step=0.1, style={}),
+#                 width={'size': 1, 'offset': 0}
+#                 ),
+#         dbc.Col(children=html.Div('USD/kW',
+#                                   style={'textAlign': 'left'}),
+#                 width={'size': 1, 'offset': 1}
+#                 ),
+#     ]),
+
+
+#     #VOM PV
+#     dbc.Row([
+#         dbc.Col(children=html.Div('VOM PV:',
+#                                   style={'textAlign': 'right'}),
+#                 width={'size': 2, 'offset': 0}
+#                 ),
+#         dbc.Col(dcc.Input(id="pv_vom", type="number",
+#                           min=0.0,
+#                           value=0,
+#                           step=0.001, style={}),
+#                 width={'size': 1, 'offset': 0}
+#                 ),
+#         dbc.Col(children=html.Div('USD/kWh',
+#                                   style={'textAlign': 'left'}),
+#                 width={'size': 1, 'offset': 1}
+#                 ),
+#     ]),
+
+
+#     #VOM WIND
+#     dbc.Row([
+#         dbc.Col(children=html.Div('VOM Wind:',
+#                                   style={'textAlign': 'right'}),
+#                 width={'size': 2, 'offset': 0}
+#                 ),
+#         dbc.Col(dcc.Input(id="wind_vom", type="number",
+#                           min=0.0,
+#                           value=0,
+#                           step=0.001, style={}),
+#                 width={'size': 1, 'offset': 0}
+#                 ),
+#         dbc.Col(children=html.Div('USD/kWh',
+#                                   style={'textAlign': 'left'}),
+#                 width={'size': 1, 'offset': 1}
+#                 ),
+#     ]),
+
+
+#     #VOM Electrolyser
+#     dbc.Row([
+#         dbc.Col(children=html.Div('VOM Electrolyser:',
+#                                   style={'textAlign': 'right'}),
+#                 width={'size': 2, 'offset': 0}
+#                 ),
+#         dbc.Col(dcc.Input(id="elec_vom", type="number",
+#                           min=0.0,
+#                           value=0.075,
+#                           step=0.001, style={}),
+#                 width={'size': 1, 'offset': 0}
+#                 ),
+#         dbc.Col(children=html.Div('USD/kg of H2',
+#                                   style={'textAlign': 'left'}),
+#                 width={'size': 1, 'offset': 1}
+#                 ),
+#     ]),
+
+
+#     #Calculate LCOH2
+#     dbc.Row([dbc.Col(html.Button('Calculate LCOH2!',
+#                                  id='LCOH2',
+#                                  n_clicks=0),
+#                      width={'size': 1, 'offset': 2}
+#                      )
+#              ]),
+
+
+#     #plot LCOH2
+#     dbc.Row(dbc.Col(dcc.Graph(id='graph_LCOH2', figure={'data': []}),
+#                     width={'size': 5, 'offset': 1}
+#                     )),
+
+
+#     #Signiture secrtion
+#     dbc.Row(dbc.Col(children=html.Div('The work has been supported by the Heavy\
+#                                     Industry Low-carbon Transition Cooperative\
+#                                     Research Centre whose activities are funded\
+#                                     by the Australian Governments Cooperative\
+#                                     Research Centre Program.',
+#                                       style={'textAlign': 'left'}),
+#                     width={'size': 4, 'offset': 1}
+#                     )),
+
+#     html.Br(),
+
+#     dbc.Row(dbc.Col(children=html.Div('For more information please contact:',
+#                                       style={'textAlign': 'left'}),
+#                     width={'size': 3, 'offset': 1}
+#                     )),
+
+#     dbc.Row(dbc.Col(children=html.Div('Dr Ahmad Mojiri (ahmad.mojiri@anu.edu.au)',
+#                                       style={'textAlign': 'left'}),
+#                     width={'size': 3, 'offset': 1}
+#                     )),
+
+
+#     dbc.Row(dbc.Col(children=html.Div('A/Professor Joe Coventry (joe.coventry@anu.edu.au)',
+#                                       style={'textAlign': 'left'}),
+#                     width={'size': 3, 'offset': 1}
+#                     )),
+
+# ])
 
 # -------------------------------------
 
