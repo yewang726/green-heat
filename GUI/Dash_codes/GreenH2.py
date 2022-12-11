@@ -106,9 +106,7 @@ app.scripts.config.serve_locally = True
 server = app.server
 
 
-app.layout = html.Div(
-
-            children=[dbc.Col(html.Div('Electrolyser efficiency:',
+app.layout = html.Div(children=[dbc.Col(html.Div('Electrolyser efficiency:',
                                                 style={'textAlign': 'right'}),
                               width={ 'offset': 0}
                               ), dbc.Col(dcc.Input(id="EL_ETA", type="number",
@@ -134,11 +132,8 @@ app.layout = html.Div(
                                                       placeholder='Select a location!'
                                                       ), width={'size': 2, 'offset': 0}
                                          ),]
-
-
-
-        ),
-# html.Div([
+                                                     
+                                                      )
 #     dbc.Row(dbc.Col(html.H1('Green H2'),
 #                     width={'size': 6, 'offset': 5}
 #                     )),
@@ -641,7 +636,7 @@ app.layout = html.Div(
 #                     width={'size': 3, 'offset': 1}
 #                     )),
 
-# ])
+
 
 # -------------------------------------
 
