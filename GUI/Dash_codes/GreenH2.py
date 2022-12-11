@@ -106,32 +106,32 @@ app.scripts.config.serve_locally = True
 server = app.server
 
 
-app.layout = html.Div(children=[dbc.Col(html.Div('Electrolyser efficiency:',
-                                                style={'textAlign': 'right'}),
-                              width={ 'offset': 0}
-                              ), dbc.Col(dcc.Input(id="EL_ETA", type="number",
+app.layout = html.Div(children=[html.Div('Electrolyser efficiency:',
+                                                style={'textAlign': 'right'})
+                             
+                             ,dcc.Input(id="EL_ETA", type="number",
                                                    value=0.7,
                                                    min=0.5,
                                                    max=1.0,
                                                    step=0.1,
-                                                   style={}),
-                                         width={'size': 1, 'offset': 0}
-                                         ),
+                                                   style={})
+                                        
+                                         ,
                                                    #Location
-                                                   dbc.Col(dcc.Loading(
+                                                  dcc.Loading(
                 id="Lolcation_Status",
                 type="default",
                 children=html.Div('None has been selected!',
                               id='location_status',
                               style={'textAlign': 'right'})),
-                              width={'size': 2, 'offset': 1}
-                              ),dbc.Col(dcc.Dropdown(id='location_selector',
+                             
+                              dcc.Dropdown(id='location_selector',
                                                       options=locations,
                                                       multi=False,
                                                       searchable=True,
                                                       placeholder='Select a location!'
-                                                      ), width={'size': 2, 'offset': 0}
-                                         ),]
+                                                      )
+                                         ,]
                                                      
                                                       )
 #     dbc.Row(dbc.Col(html.H1('Green H2'),
