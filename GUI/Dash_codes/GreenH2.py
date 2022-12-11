@@ -106,18 +106,7 @@ app.scripts.config.serve_locally = True
 server = app.server
 
 
-app.layout = html.Div([
-    dbc.Row(dbc.Col(html.H1('Green H2'),
-                    width={'size': 6, 'offset': 5}
-                    )),
-
-    dbc.Row(dbc.Col(html.H2('Australian National University'),
-                    width={'size': 7, 'offset': 4}
-                    )),
-
-    dbc.Row(dbc.Col(children=[
-
-        html.Div(
+app.layout = html.Div(
 
             children=[dbc.Col(html.Div('Electrolyser efficiency:',
                                                 style={'textAlign': 'right'}),
@@ -149,6 +138,18 @@ app.layout = html.Div([
 
 
         ),
+html.Div([
+    dbc.Row(dbc.Col(html.H1('Green H2'),
+                    width={'size': 6, 'offset': 5}
+                    )),
+
+    dbc.Row(dbc.Col(html.H2('Australian National University'),
+                    width={'size': 7, 'offset': 4}
+                    )),
+
+    dbc.Row(dbc.Col(children=[
+
+      
 
      ])),
 
