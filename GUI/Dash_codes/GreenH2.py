@@ -121,7 +121,7 @@ app.layout = html.Div([
 
             children=[dbc.Col(children=html.Div('Electrolyser efficiency:',
                                                 style={'textAlign': 'right'}),
-                              width={'size': 2, 'offset': 0}
+                              width={'size': 1, 'offset': 0}
                               ), dbc.Col(dcc.Input(id="EL_ETA", type="number",
                                                    value=0.7,
                                                    min=0.5,
