@@ -115,7 +115,7 @@ app.layout = html.Div([
                     width={'size': 7, 'offset': 4}
                     )),
 
-    dbc.row(dbc.col(children=[html.Div(
+    dbc.Row(dbc.col(children=[html.Div(
         dbc.Col(children=html.Div('Electrolyser efficiency:',
                                   style={'textAlign': 'right'}),
                 width={'size': 2, 'offset': 0}
