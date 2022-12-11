@@ -105,35 +105,31 @@ app.scripts.config.serve_locally = True
 
 server = app.server
 
+html.Div(children=[
+        dcc.Graph(id="graph1", style={'display': 'inline-block'}),
+        dcc.Graph(id="graph2", style={'display': 'inline-block'})
+    ])
 
-app.layout = html.Div(children=[html.Div('Electrolyser efficiency:',
-                                                style={'textAlign': 'right'})
+
+app.layout = html.Div(children=[
+    html.Div('Electrolyser efficiency:', style={'display': 'inline-block'}),
                              
-                             ,dcc.Input(id="EL_ETA", type="number",
-                                                   value=0.7,
-                                                   min=0.5,
-                                                   max=1.0,
-                                                   step=0.1,
-                                                   style={})
-                                        
-                                         ,
-                                                   #Location
-                                                  dcc.Loading(
+   dcc.Input(id="EL_ETA", type="number", value=0.7,  min=0.5,  max=1.0,   step=0.1, style={'display': 'inline-block'}) ,
+    dcc.Loading(
                 id="Lolcation_Status",
                 type="default",
                 children=html.Div('None has been selected!',
                               id='location_status',
-                              style={'textAlign': 'right'})),
+                              style={'display': 'inline-block'})),
                              
-                              dcc.Dropdown(id='location_selector',
+     dcc.Dropdown(id='location_selector',
                                                       options=locations,
                                                       multi=False,
                                                       searchable=True,
-                                                      placeholder='Select a location!'
+                                                      placeholder='Select a location!',
+                                                      style={'display': 'inline-block'}
                                                       )
-                                         ,]
-                                                     
-                                                      )
+                                       ])
 #     dbc.Row(dbc.Col(html.H1('Green H2'),
 #                     width={'size': 6, 'offset': 5}
 #                     )),
