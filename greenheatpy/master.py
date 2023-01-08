@@ -6,7 +6,7 @@ from greenheatpy.run_minizinc import run_minizinc
 from greenheatpy.pySAM_models import pv_gen, wind_gen, cst_gen
 from greenheatpy.get_weather_data import SolarResource_solcast_TMY, WindSource_solcast_TMY
 from greenheatpy.get_location import get_location
-from greenheatpy.parameters import Parameters
+from greenheatpy.parameters import Parameters, CST_SL_OM
 from greenheatpy.outputs import Outputs
 from greenheatpy.gen_minizinc_input_data import GenDZN
 
@@ -14,7 +14,7 @@ from greenheatpy.gen_minizinc_input_data import GenDZN
 def AUD2USD(value):
     return(0.746 * value)
 
-def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_heater=None, bat_pmax=None, casedir=None, solar_data_fn=None, wind_data_fn=None, verbose=False):
+def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_heater=None, bat_pmax=None, casedir=None, solar_data_fn=None, wind_data_fn=None, verbose=False, OM_method='SAM'):
     '''
     Arguments:
         model_name (str)  : minizic model name
@@ -27,6 +27,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         P_load_des (float): system load design power (kW)
         casedir    (str)  : the case directory, if the default None is kept, it will load/save data in 'datadir'
         verbose    (bool) : to save and plot the time series results or not
+        OM_method  (str)  : 'SL' will use Sargent&Lundy method, 'SAM' will use fixed/varied OM approach
 
     Returns:
 
@@ -252,8 +253,13 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         C_indirect = pm.r_EPC_owner*C_direct + C_land 
         C_cap=C_direct + C_indirect
 
-        OM_fixed=pm.c_om_cst_fix * P_load_des
-        c_OM_var = pm.c_om_cst_var
+        if OM_method=='SAM':
+            OM_fixed=pm.c_om_cst_fix * P_load_des
+            c_OM_var = pm.c_om_cst_var
+        elif OM_method=='SL':
+            A_helios=n_helios * pm.A_helio
+            OM_fixed=CST_SL_OM(A_helios)
+            c_OM_var=0 
 
         LCOH, epy, OM_total=cal_LCOH(CF,  P_load_des, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_constr_cst)
 

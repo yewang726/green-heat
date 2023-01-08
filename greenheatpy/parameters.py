@@ -15,6 +15,7 @@ class Parameters:
         self.pv_params()
         self.wind_params()
         self.bat_params()
+        self.PHES_params()
         self.TES_params()
         self.heater_params()
         self.finance_system_params()
@@ -48,7 +49,8 @@ class Parameters:
         self.r_EPC_owner=0.2 # rate of EPC and owner cost
         self.r_conting_cst = 0.1 # contingency rate
         self.t_constr_cst=3 # year of construction
-        
+
+
 
     def pv_params(self):
         self.c_pv_system=1074.99 # USD/kW
@@ -73,6 +75,14 @@ class Parameters:
         self.t_life_bt =10 # heater lifetime
         self.c_replace_bt=self.c_bt_energy # replacement cost after lifetime
 
+    def PHES_params(self):
+        self.eff_rdtrip_PHES=0.79
+        self.c_PHES_energy=50. # USD/kWh https://energystorage.shinyapps.io/LCOSApp/
+        self.c_PHES_power=1100. # USD/kW
+        self.c_om_PHES_fix=20. # USD/kW
+        self.c_om_PHES_var=0.0004 #USD/kWh
+
+
     def TES_params(self):
         self.eff_rdtrip_TES=0.99
         self.c_TES=22 # USD/kWh
@@ -86,13 +96,54 @@ class Parameters:
 
 
     def finance_system_params(self):
-        #self.r_conting = 0.07 # contingency cost
         self.r_disc_real = 0.064 # real discount rate
-        #self.r_EPC = 0.13 # ratio of EPC and owner cost to the direct cost, 13% default in SAM
         self.t_life = 25 # int, life time of systems
-        #self.t_cons = 0 # construction time
     
 
 
+def CST_SL_OM(A_helios):
+    '''
+    OM cost of CST using Sargent & Lundy (2003) analysis
+    https://www.nrel.gov/docs/fy04osti/34440.pdf
+
+    '''
+    c_labour=2.11549e-9*A_helios**2-0.01438705*A_helios+65188.593 # USD/person
+    c_labour=max(c_labour, 42000.)
+    #num_labour_helio=int(1.7596e-12*A_helios**2+9.3236*A_helios*1e-6+5.7523)+1
+    num_labour_helio=int(1.50830474e-5*A_helios+2.3784455)+1
+    num_labour_others=int(15*0.25)+1 # include receiver, TES (assumed it is 1/4 of the total 15 staff required for a whole plant)
+    C_labour=(num_labour_helio+num_labour_others)*c_labour
+
+    C_service=(7.923561e-5*A_helios+155.637032)*1000. # USD
+
+    c_water=0.32 #USD/m3
+    u_water=0.022*A_helios # water ussage m3
+    C_water=c_water*u_water
+
+    c_material=0.25 #USD/m2, for heliostats wear and tear (parts and material) 
+    C_material=c_material*A_helios
+
+    #c_equipment=(1.0535e-7*A_helios+0.09432)/5. # USD/m2, Unit cost of heliostat maintenance equipment per heliostat per year
+    c_equipment=(1.1023381e-7*A_helios+0.08467133184)/5.
+    C_equipment=c_equipment*A_helios
+
+    CI_2003=402
+    CI_2022=628.22
+    F_update=CI_2022/CI_2003
+
+    OM=(C_labour+C_service+C_water+C_material+C_equipment)*F_update
+    #print(F_update)
+    #print(c_labour)
+    #print(num_labour_helio, num_labour_others, C_labour)
+    #print(C_water, C_material, C_equipment)
+    return OM
+
+if __name__=='__main__':
+    A_helios=81400
+    OM=CST_SL_OM(A_helios)
+    print(OM, abs(OM-1136023)<5)
   
+    A_helios=2606000
+    OM=CST_SL_OM(A_helios)
+    print(OM, abs(OM-4370947)<5)
 
