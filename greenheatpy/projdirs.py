@@ -11,7 +11,7 @@ import platform
 ## TODO
 # setup basedir
 basedir = '/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/repo/' #'/mnt/data/Software/Green-heat-models/HILT-CRC---Green-Heat/'
-wea_repo= '/media/yewang/Data/Work/Research/Topics/svn-hilt/WEATHER DATA/TMY DATA for H2 HUBS/'#'/mnt/data/Software/Green-heat-models/svn-hilt/WEATHER DATA/TMY DATA for H2 HUBS/'
+wea_repo= '/media/yewang/Data/Work/Research/Topics/svn-hilt/weather/TMY DATA for H2 HUBS/'#'/mnt/data/Software/Green-heat-models/svn-hilt/WEATHER DATA/TMY DATA for H2 HUBS/'
 
 if platform.system()=="Windows":
 	connector = '\\'

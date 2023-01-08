@@ -350,6 +350,7 @@ def SolarResource_solcast_TMY(location, casedir=None):
         elif platform.system()=='Linux':
             wea_fn=casedir + "/SolarSource_%s.csv"%location
 
+    print('weather file', wea_fn)
     if not os.path.exists(wea_fn):
         
         # elevation from the see level: https://www.freemaptools.com/elevation-finder.htm
