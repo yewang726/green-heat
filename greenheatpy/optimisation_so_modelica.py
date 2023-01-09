@@ -16,15 +16,15 @@ def objective_function(location, sim, t_storage, RM, obj_cf, par_n, par_v):
             r_pv=par_v[i]
         elif par_n[i]=='P_heater':
             P_heater=par_v[i]
-        elif par_n[i]=='P_bat':
-            P_bat=par_v[i]
+        elif par_n[i]=='P_ST_max':
+            P_ST_max=par_v[i]
         elif par_n[i]=='RM':
             RM=par_v[i]
         elif par_n[i]=='t_storage':
             t_storage=par_v[i]
 
     var_n=['t_storage','RM','F_pv','P_ST_max']
-    var_v=[str(t_storage), str(RM), str(r_pv), str(P_bat)]
+    var_v=[str(t_storage), str(RM), str(r_pv), str(P_ST_max)]
 
     try:
         sim.update_pars(var_n, var_v)
@@ -32,7 +32,7 @@ def objective_function(location, sim, t_storage, RM, obj_cf, par_n, par_v):
         res_fn=sim.res_fn
         res=DyMat.DyMatFile(res_fn)
 
-        LCOH=process_BAT(res, obj_cf=obj_cf) 
+        LCOH=process_BAT(res, obj_cf=obj_cf, verbose=True) 
 
     except:
         LCOH=99999
@@ -47,7 +47,7 @@ def objective_function_PHES(location, sim, t_storage, RM, obj_cf, par_n, par_v):
             r_pv=par_v[i]
         elif par_n[i]=='P_heater':
             P_heater=par_v[i]
-        elif par_n[i]=='P_ST':
+        elif par_n[i]=='P_ST_max':
             P_ST=par_v[i]
         elif par_n[i]=='RM':
             RM=par_v[i]
@@ -63,7 +63,7 @@ def objective_function_PHES(location, sim, t_storage, RM, obj_cf, par_n, par_v):
         res_fn=sim.res_fn
         res=DyMat.DyMatFile(res_fn)
 
-        LCOH=process_PHES(res, obj_cf=obj_cf) 
+        LCOH=process_PHES(res, obj_cf=obj_cf, verbose=True) 
     except:
         LCOH=99999
 
@@ -91,7 +91,7 @@ def objective_function_TES(location, sim, t_storage, RM, obj_cf, par_n, par_v):
         sim.simulate(start='0', stop='1y', step='5m', initStep=None, maxStep='5m', integOrder='1e-06', solver='dassl', nls='homotopy', lv='-LOG_SUCCESS,-stdout')
         res_fn=sim.res_fn
         res=DyMat.DyMatFile(res_fn)
-        LCOH=process_TES(res, obj_cf=obj_cf) 
+        LCOH=process_TES(res, obj_cf=obj_cf, verbose=True) 
     except:
         LCOH=99999
 
@@ -134,8 +134,8 @@ def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, ca
     #sim.compile_model()
     #sim.compile_sim(args=['-s'])
 
-    table_file_pv="/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/repo/RenewableTherm/motab-data/PV_out_ref_%s.motab"%location
-    table_file_wind="/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/repo/RenewableTherm/motab-data/Wind_out_ref_%s.motab"%location 
+    table_file_pv="/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/repo/RenewableTherm/data-motab/PV_out_ref_%s.motab"%location
+    table_file_wind="/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/repo/RenewableTherm/data-motab/Wind_out_ref_%s.motab"%location 
     sim.update_pars(['table_file_pv', 'table_file_wind'], [table_file_pv, table_file_wind])
 
     bounds=[]
