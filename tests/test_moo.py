@@ -35,7 +35,7 @@ class TestMOO(unittest.TestCase):
         # run dakota
         np=mp.cpu_count()
 
-        #subprocess.call('mpirun --use-hwthread-cpus -np %s dakota -i sample.in -o sample.out > sample.stdout'%(4), shell=True)
+        subprocess.call('mpirun --use-hwthread-cpus -np %s dakota -i sample.in -o sample.out > sample.stdout'%(4), shell=True)
 
     def test(self):
 
