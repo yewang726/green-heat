@@ -16,7 +16,7 @@ class TestMasterHeat(unittest.TestCase):
         t_storage=8
 
         model_name='CST_TES_heat'
-        self.casedir='test/'+model_name
+        self.casedir='test-'+model_name
         self.LCOH, CF, CAPEX=master(model_name, location, RM=RM, t_storage=t_storage, P_load_des=500e3, casedir=self.casedir, verbose=True)
 
     def test(self):
@@ -40,7 +40,7 @@ class TestMasterHeat(unittest.TestCase):
         self.assertTrue(balance_2<1e-2)
         self.assertTrue(abs(self.LCOH-47.97)/47.91<0.05)
 
-        #os.system('rm *.csv')
+        os.system('rm -r %s'%self.casedir)
 
         
 

@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 import os
 from greenheatpy.optimisation_so_modelica import st_sciopt
+from greenheatpy.projdirs import modelica_dir
 
 import unittest
 import matplotlib.pyplot as plt
@@ -17,7 +18,7 @@ class TestMasterHeat(unittest.TestCase):
 		UB=[5000e6, 1.]
 		nominals=[600e6, 0.9]
 		names=['P_ST_max', 'r_pv']
-		mofn='../../RenewableTherm/PVWindEES.mo'
+		mofn=modelica_dir+'PVWindEES.mo'
 		self.casedir='test-EES-om'
 		st_sciopt(mofn, location, t_storage=t_storage, RM=RM, method='Nelder-Mead', LB=LB, UB=UB, nominals=nominals, names=names, casedir=self.casedir, case='BAT')
 

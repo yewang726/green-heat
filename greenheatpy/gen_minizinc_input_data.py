@@ -3,7 +3,7 @@
 Created on Tue Mar 29 10:28:44 2022 @author: Ahmad Mojiri
 Modified on 18 Jun 2022 by Ye Wang for Green Heat models
 """
-from greenheatpy.projdirs import optdir
+from greenheatpy.projdirs import minizinc_dir
 import numpy as np
 import platform
 
@@ -22,9 +22,8 @@ class GenDZN:
             textinput=self.data_CST_TES_heat(**simparams)  
                    
         
-
         if casedir==None:
-            self.dzn_fn=optdir +"%s_data.dzn"%casename
+            self.dzn_fn=minizinc_dir +"%s_data.dzn"%casename
         else:
             self.dzn_fn=casedir+"/%s_data.dzn"%casename
         

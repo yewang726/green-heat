@@ -4,7 +4,7 @@ Created on Tue Mar 29 10:28:44 2022 @author: Ahmad Mojiri
 Modified on 18 Jun 2022 by Ye Wang for Green Heat models
 """
 
-from greenheatpy.projdirs import optdir
+from greenheatpy.projdirs import minizinc_dir
 import numpy as np
 from subprocess import check_output
 
@@ -32,12 +32,12 @@ def run_minizinc(model_name, dzn_fn, casedir=None):
         mzdir = r'C:\\Program Files\\MiniZinc\\'
         output = str(check_output([mzdir + 'minizinc', "--soln-sep", '""',
                                    "--search-complete-msg", '""', "--solver",
-                                   "COIN-BC", optdir + model_name+ ".mzn",
+                                   "COIN-BC", minizinc_dir + model_name+ ".mzn",
                                    dzn_fn]))
     elif platform.system()=='Linux':
         output = str(check_output(['minizinc', "--soln-sep", '""',
                                    "--search-complete-msg", '""', "--solver",
-                                   "COIN-BC", optdir + model_name+ ".mzn",
+                                   "COIN-BC", minizinc_dir + model_name+ ".mzn",
                                    dzn_fn]))
 
     

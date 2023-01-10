@@ -14,13 +14,13 @@ class TestMOO(unittest.TestCase):
     def setUp(self):
         location='Newman'
         model_name='pv_wind_TES_heat'
-        self.casedir='test/test_moo'
+        self.casedir='test_moo'
 
         var_names=['RM', 't_storage', 'P_heater'] 
         nominals=[2, 8, 2000e3]
         lbs=[1, 1e-6, 500e3]
         ubs=[20, 60, 5000e3]
-
+        self.cwd=os.getcwd()
         if not os.path.exists(self.casedir):
             os.makedirs(self.casedir)
 
@@ -35,15 +35,16 @@ class TestMOO(unittest.TestCase):
         # run dakota
         np=mp.cpu_count()
 
-        subprocess.call('mpirun --use-hwthread-cpus -np %s dakota -i sample.in -o sample.out > sample.stdout'%(4), shell=True)
+        #subprocess.call('mpirun --use-hwthread-cpus -np %s dakota -i sample.in -o sample.out > sample.stdout'%(4), shell=True)
 
     def test(self):
 
         res_fn='finaldata1.dat'
 
         self.assertTrue(os.path.exists(res_fn))
-  
-        #os.system('rm *.csv')
+        os.chdir(self.cwd)  
+        os.system('rm -r %s'%self.casedir)
+ 
 
         
 

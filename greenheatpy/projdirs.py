@@ -10,7 +10,7 @@ import platform
 
 ## TODO
 # setup basedir
-basedir = '/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/repo/' #'/mnt/data/Software/Green-heat-models/HILT-CRC---Green-Heat/'
+basedir = '/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/repo' #'/mnt/data/Software/Green-heat-models/HILT-CRC---Green-Heat/'
 wea_repo= '/media/yewang/Data/Work/Research/Topics/svn-hilt/weather/TMY DATA for H2 HUBS/'#'/mnt/data/Software/Green-heat-models/svn-hilt/WEATHER DATA/TMY DATA for H2 HUBS/'
 
 if platform.system()=="Windows":
@@ -18,11 +18,7 @@ if platform.system()=="Windows":
 elif platform.system()=="Linux":
  	connector='/'
 
-datadir = basedir + "data%s" %connector
-optdir = basedir + "minizinc%s" %(connector)
+datadir = basedir + connector+ "data" + connector
+minizinc_dir = basedir + connector + "greenheatpy"+ connector + "minizinc" + connector
+modelica_dir = basedir + connector + "greenheatpy"+ connector + "modelica" + connector
 
-
-# modeldir = basedir + "modelling%spython%spackage%s" %(connector, connector, connector)
-# figdir = basedir + "modelling%sfigures%s" %(connector, connector)
-# paperdir = basedir + "Publications%spaper_1%s" %(connector, connector)
-# resultsdir = datadir + "arbitrage%s" %connector
