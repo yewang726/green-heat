@@ -20,8 +20,8 @@ model PVWindTES
   parameter SI.Power P_heater_max = 1000e6 "The maximal charging power of the battery"; 
   parameter SI.Efficiency eff_heater = 0.99 "Efficiency of the heater";  
   
-  parameter String table_file_pv=Modelica.Utilities.Files.loadResource("/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/repo/RenewableTherm/data-motab/PV_out_ref_Newman.motab");
-  parameter String table_file_wind=Modelica.Utilities.Files.loadResource("/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/repo/RenewableTherm/data-motab/Wind_out_ref_Newman.motab");  
+  parameter String table_file_pv=Modelica.Utilities.Files.loadResource("/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/repo/data/weather/motab/PV_out_ref_Newman.motab");
+  parameter String table_file_wind=Modelica.Utilities.Files.loadResource("/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/repo/data/weather/motab/Wind_out_ref_Newman.motab");  
   
   Modelica.Blocks.Tables.CombiTable1Ds PV_out_ref (
       tableOnFile=true, 

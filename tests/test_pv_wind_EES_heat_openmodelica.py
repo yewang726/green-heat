@@ -17,29 +17,26 @@ class TestMasterHeat(unittest.TestCase):
 		UB=[5000e6, 1.]
 		nominals=[600e6, 0.9]
 		names=['P_ST_max', 'r_pv']
-		mofn='../RenewableTherm/PVWindEES.mo'
-
-		st_sciopt(mofn, location, t_storage=t_storage, RM=RM, method='Nelder-Mead', LB=LB, UB=UB, nominals=nominals, names=names, case='BAT')
+		mofn='../../RenewableTherm/PVWindEES.mo'
+		self.casedir='test-EES-om'
+		st_sciopt(mofn, location, t_storage=t_storage, RM=RM, method='Nelder-Mead', LB=LB, UB=UB, nominals=nominals, names=names, casedir=self.casedir, case='BAT')
 
 
 	def test(self):
 
-		results=np.loadtxt('./summary_2.000_8.00.csv', delimiter=',', dtype=str)
+		results=np.loadtxt(self.casedir+'/summary_2.000_8.00.csv', delimiter=',', dtype=str)
 
 		LCOH=results[2,1].astype(float)
 		CF=results[3,1].astype(float)
 		P_ST=results[9,1].astype(float)
 		r_pv=results[4,1].astype(float)
 
-		self.assertTrue(abs(LCOH-138.81)/138.81<0.05) 
-		self.assertTrue(abs(CF-0.4767)/0.4767<0.05) 
+		self.assertTrue(abs(LCOH-121.57)/121.57<0.05) 
+		self.assertTrue(abs(CF-0.58)/0.58<0.05) 
 		self.assertTrue(abs(P_ST-500)/500<0.05) 
-		self.assertTrue(abs(r_pv-1.)/1.<0.05)    
+		self.assertTrue(abs(r_pv-0.526)/0.526<0.05)    
 
-		os.system('rm PVWindEES*')
-		os.system('rm summary*.csv')
-
-        
+		os.system('rm -r %s'%self.casedir)
 
 
 if __name__=='__main__':

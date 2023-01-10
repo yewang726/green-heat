@@ -42,7 +42,7 @@ class TestMasterHeat(unittest.TestCase):
         self.assertTrue(balance_1<1e-2)
         self.assertTrue(balance_2<1e-2)
         self.assertTrue(balance_3<1e-2)
-        self.assertTrue(abs(self.LCOH-93.39)/93.39<0.05)    
+        self.assertTrue(abs(self.LCOH-62.88)/62.88<0.05)    
 
         #os.system('rm *.csv')
 

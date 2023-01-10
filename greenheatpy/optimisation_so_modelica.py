@@ -4,6 +4,7 @@ import numpy as np
 import os
 from greenheatpy.parameters import Parameters
 from greenheatpy.master import cal_LCOH
+from greenheatpy.gen_motab_data import gen_ref_power
 import time
 import functools
 from scipy import optimize as sciopt
@@ -97,20 +98,13 @@ def objective_function_TES(location, sim, t_storage, RM, obj_cf, par_n, par_v):
 
     return LCOH
 
-def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, case='BAT', obj_cf=None):
+def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, casedir, case='BAT', obj_cf=None):
     '''
     Arguments:
         model_name (str)  : minizic model name
         location   (str)  : site location
-        P_load_des (float): system load design power (kW)
-        RM         (float): renewable multiple, the total size of the renewable energy collection system (e.g. PV+Wind) to the load
-        SH         (float): storage hour (h)
-		r_pv       (float): fraction of pv, 1 is 100% pv, 0 is 100% wind, required by the pv+wind hybrid model
-		P_heater   (float): electric power of the heater (kW), required by the pv/wind/hybrid+TES model
-		bat_pmax   (float): power of the battery (kW), required by the pv/wind/hybrid+battery model
-        casedir    (str)  : the case directory, if the default None is kept, it will load/save data in 'datadir'
-        verbose    (bool) : to save and plot the time series results or not
-   
+        t_storage         (float): storage hour (h)
+        RM         (float): renewable multiple, the total size of the renewable energy collection system (e.g. PV+Wind) to the load   
         method     (str)  : the optimisation algorithm that is available in scipy package
                     e.g. 'Nelder-Mead', 'COBYLA', 'SLSQP', 'TNC', 
                         'L-BFGS-B' (can be used for maximisation)
@@ -118,11 +112,19 @@ def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, ca
         UB         (list) : upper bounds of all the variables
         nominals   (list) : nominal values of all the variables
         names      (list) : names of all the variables
-        maxiter    (int)  : max number of iterations
+        casedir    (str)  : directory to save the restuls
+        case       (str)  : 'TES', 'BAT' or 'PHES' 
+        obj_cf     (float): None or the capacity factor that is aimed for
         
-        
+    Return:
+        The LCOH minimised design
     '''
     start=time.time()
+    cwd=os.getcwd()
+    if not os.path.exists(casedir):
+        os.makedirs(casedir)
+    wd=os.path.abspath(casedir)
+    os.chdir(casedir)
 
     model=os.path.splitext(os.path.split(mofn)[1])[0] 
     sim=simulation.Simulator(fn=mofn, fusemount=False)
@@ -134,8 +136,10 @@ def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, ca
     #sim.compile_model()
     #sim.compile_sim(args=['-s'])
 
-    table_file_pv="/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/repo/RenewableTherm/data-motab/PV_out_ref_%s.motab"%location
-    table_file_wind="/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/repo/RenewableTherm/data-motab/Wind_out_ref_%s.motab"%location 
+    pv_fn=gen_ref_power(model_name='pv', location=location,  casedir=wd, plot=False)
+    table_file_pv=pv_fn
+    wind_fn=gen_ref_power(model_name='wind', location=location, casedir=wd, plot=False) 
+    table_file_wind=wind_fn
     sim.update_pars(['table_file_pv', 'table_file_wind'], [table_file_pv, table_file_wind])
 
     bounds=[]
@@ -164,7 +168,7 @@ def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, ca
     end=time.time()
     total_time=end-start # s
     print('Total time %.2f (s)'%total_time)
-
+    os.chdir(cwd)
     return res.fun, res.x
 
 
