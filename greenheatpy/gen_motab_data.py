@@ -8,27 +8,28 @@ import numpy as np
 import matplotlib.pyplot as plt
 import os
 from greenheatpy.pySAM_models import pv_gen, wind_gen, cst_gen
-from greenheatpy.get_weather_data import SolarResource_solcast_TMY, WindSource_solcast_TMY
+from greenheatpy.get_weather_data import SolarResource, WindSource
 
-def gen_ref_power(model_name, location, casedir, plot=False):
+def gen_ref_power(model_name, location, casedir, plot=False, solcast_TMY=False):
     '''
     Arguments:
         model_name (str): pv or wind
         location (str): location name
         casedir (str): directory to save the data
+        solcast_TMY (bool): True to use solcast_TMY data, False to use the data in data/weather folder (from Windlab)
 
     Return:
         A motab data file that is saved in the case directory
     '''
 
     if model_name=='pv':
-        solar_data_fn=SolarResource_solcast_TMY(location, casedir=casedir) 
+        solar_data_fn=SolarResource(location, casedir=casedir, solcast_TMY=solcast_TMY) 
         pv_ref_capa = 1e3 #(kW)
         output_fn = pv_gen(pv_ref_capa, location=location, casedir=casedir, wea_fn=solar_data_fn)   
         name='PV_out_ref'
    
     elif model_name=='wind':
-        wind_data_fn=WindSource_solcast_TMY(location, casedir=casedir)        
+        wind_data_fn=WindSource(location, casedir=casedir, solcast_TMY=solcast_TMY)        
         wind_ref_capa = 200e3 #(kW)
         output_fn = wind_gen(wind_ref_capa, location=location, casedir=casedir, wea_fn=wind_data_fn)    
         name='Wind_out_ref'

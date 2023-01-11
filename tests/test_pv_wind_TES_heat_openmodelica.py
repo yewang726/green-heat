@@ -11,7 +11,8 @@ import matplotlib.pyplot as plt
 class TestMasterHeat(unittest.TestCase):
 
 	def setUp(self):
-		location='Newman'
+		location='Newman' #'Pilbara 1'
+		solcast_TMY=True
 		RM=2
 		t_storage=8
 		LB=[500e6, 0.]
@@ -20,7 +21,7 @@ class TestMasterHeat(unittest.TestCase):
 		names=['P_heater', 'r_pv']
 		mofn=modelica_dir+'PVWindTES.mo'
 		self.casedir='test-TES-om'
-		st_sciopt(mofn, location, t_storage=t_storage, RM=RM, method='Nelder-Mead', LB=LB, UB=UB, nominals=nominals, names=names,  casedir=self.casedir, case='TES')
+		st_sciopt(mofn, location, t_storage=t_storage, RM=RM, method='Nelder-Mead', LB=LB, UB=UB, nominals=nominals, names=names,  casedir=self.casedir, case='TES', solcast_TMY=solcast_TMY)
 
 
 	def test(self):

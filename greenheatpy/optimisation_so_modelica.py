@@ -98,7 +98,7 @@ def objective_function_TES(location, sim, t_storage, RM, obj_cf, par_n, par_v):
 
     return LCOH
 
-def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, casedir, case='BAT', obj_cf=None):
+def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, casedir, case='BAT', obj_cf=None, solcast_TMY=False):
     '''
     Arguments:
         model_name (str)  : minizic model name
@@ -115,6 +115,7 @@ def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, ca
         casedir    (str)  : directory to save the restuls
         case       (str)  : 'TES', 'BAT' or 'PHES' 
         obj_cf     (float): None or the capacity factor that is aimed for
+        solcast_TMY (bool): True to use solcast_TMY data, False to use the data in data/weather folder (from Windlab)
         
     Return:
         The LCOH minimised design
@@ -136,9 +137,9 @@ def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, ca
     #sim.compile_model()
     #sim.compile_sim(args=['-s'])
 
-    pv_fn=gen_ref_power(model_name='pv', location=location,  casedir=wd, plot=False)
+    pv_fn=gen_ref_power(model_name='pv', location=location,  casedir=wd, plot=False, solcast_TMY=solcast_TMY)
     table_file_pv=pv_fn
-    wind_fn=gen_ref_power(model_name='wind', location=location, casedir=wd, plot=False) 
+    wind_fn=gen_ref_power(model_name='wind', location=location, casedir=wd, plot=False, solcast_TMY=solcast_TMY) 
     table_file_wind=wind_fn
     sim.update_pars(['table_file_pv', 'table_file_wind'], [table_file_pv, table_file_wind])
 

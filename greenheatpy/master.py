@@ -4,7 +4,7 @@ import os
 from greenheatpy.projdirs import datadir #load the path that contains the data files 
 from greenheatpy.run_minizinc import run_minizinc
 from greenheatpy.pySAM_models import pv_gen, wind_gen, cst_gen
-from greenheatpy.get_weather_data import SolarResource_solcast_TMY, WindSource_solcast_TMY
+from greenheatpy.get_weather_data import SolarResource, WindSource
 from greenheatpy.get_location import get_location
 from greenheatpy.parameters import Parameters, CST_SL_OM
 from greenheatpy.outputs import Outputs
@@ -14,7 +14,7 @@ from greenheatpy.gen_minizinc_input_data import GenDZN
 def AUD2USD(value):
     return(0.746 * value)
 
-def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_heater=None, bat_pmax=None, casedir=None, solar_data_fn=None, wind_data_fn=None, verbose=False, OM_method='SAM'):
+def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_heater=None, bat_pmax=None, casedir=None, solar_data_fn=None, wind_data_fn=None, verbose=False, OM_method='SAM', solcast_TMY=False):
     '''
     Arguments:
         model_name (str)  : minizic model name
@@ -28,6 +28,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         casedir    (str)  : the case directory, if the default None is kept, it will load/save data in 'datadir'
         verbose    (bool) : to save and plot the time series results or not
         OM_method  (str)  : 'SL' will use Sargent&Lundy method, 'SAM' will use fixed/varied OM approach
+        solcast_TMY (bool): True to use solcast_TMY data, False to use the data in data/weather folder (from Windlab)
 
     Returns:
 
@@ -48,7 +49,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         #    SolarResource(Lat,Lon, casedir)
         # Get SAM reference system outputs
         if solar_data_fn ==None:
-            solar_data_fn=SolarResource_solcast_TMY(location, casedir=casedir)        
+            solar_data_fn=SolarResource(location, casedir=casedir, solcast_TMY=solcast_TMY)        
         pv_ref_capa = 1e3 #(kW)
         output_fn = pv_gen(pv_ref_capa, location=location, casedir=casedir, wea_fn=solar_data_fn)      
 
@@ -65,7 +66,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         #    WindSource(Lat, Lon, casedir)
         # Get SAM reference system outputs
         if wind_data_fn==None:
-            wind_data_fn=WindSource_solcast_TMY(location, casedir=casedir)        
+            wind_data_fn=WindSource(location, casedir=casedir, solcast_TMY=solcast_TMY)        
         wind_ref_capa = 200e3 #(kW)
         output_fn = wind_gen(wind_ref_capa, location=location, casedir=casedir, wea_fn=wind_data_fn)
             
@@ -82,7 +83,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         #    SolarResource(Lat,Lon, casedir)
         # Get SAM output 
         if solar_data_fn ==None:
-            solar_data_fn=SolarResource_solcast_TMY(location, casedir=casedir)       
+            solar_data_fn=SolarResource(location, casedir=casedir, solcast_TMY=solcast_TMY)       
         output_fn= cst_gen(Q_des_th=P_load_des, SM=RM, location=location, casedir=casedir, wea_fn=solar_data_fn)
 
         with open(output_fn) as f:
@@ -272,7 +273,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
     if not verbose:
         os.system('rm '+ genDZN.dzn_fn)
 
-    return LCOH, CF, CAPEX
+    return LCOH, CF, C_cap
 
 def cal_LCOH(CF, load, C_cap, OM_fixed, c_OM_var, r_discount, t_life, t_cons):
     """Levelised cost of heat in USD/MWh. 

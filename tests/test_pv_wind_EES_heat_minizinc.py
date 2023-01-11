@@ -11,13 +11,14 @@ import matplotlib.pyplot as plt
 class TestMasterHeat(unittest.TestCase):
 
     def setUp(self):
-        location='Newman'
+        location='Newman' #'Pilbara 1'
+        solcast_TMY=True
         RM=2
         t_storage=8
 
         model_name='pv_wind_battery_heat'
         self.casedir='test-EES-mnz'
-        self.LCOH, CF, CAPEX =master(model_name, location, RM=RM, t_storage=t_storage, P_load_des=500e3, r_pv=0.6, P_heater=500e3/0.99, bat_pmax=650e3, casedir=self.casedir, verbose=True)
+        self.LCOH, self.CF, self.C_cap =master(model_name, location, RM=RM, t_storage=t_storage, P_load_des=500e3, r_pv=0.6, P_heater=500e3/0.99, bat_pmax=650e3, casedir=self.casedir, verbose=True, solcast_TMY=solcast_TMY)
 
     def test(self):
 
@@ -34,6 +35,8 @@ class TestMasterHeat(unittest.TestCase):
         print('check=', check)
         self.assertTrue(check<1e-2)
         self.assertTrue(abs(self.LCOH-123.16)/123.16<0.05)
+        self.assertTrue(abs(self.CF-0.573)/0.573<0.05)
+        self.assertTrue(abs(self.C_cap-3401863691.6)/3401863691.6<0.05)
         os.system('rm -r '+self.casedir)
 
         
