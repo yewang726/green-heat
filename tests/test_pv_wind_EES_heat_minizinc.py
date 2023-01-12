@@ -3,6 +3,7 @@ import numpy as np
 import os
 from greenheatpy.projdirs import datadir #load the path that contains the data files 
 from greenheatpy.master import master
+from greenheatpy.get_green_h2 import get_best_location
 
 import unittest
 import matplotlib.pyplot as plt
@@ -11,8 +12,11 @@ import matplotlib.pyplot as plt
 class TestMasterHeat(unittest.TestCase):
 
     def setUp(self):
-        location='Newman' #'Pilbara 1'
-        solcast_TMY=True
+        best=get_best_location(2020)
+        location='Pilbara'+' %s'%best['Pilbara']
+        #location='Newman'
+        solcast_TMY=False
+        
         RM=2
         t_storage=8
 
@@ -34,8 +38,8 @@ class TestMasterHeat(unittest.TestCase):
         check=sum(pv_out+ wind_out - P_curt - pv_wind_direct - P_bat_in)
         print('check=', check)
         self.assertTrue(check<1e-2)
-        self.assertTrue(abs(self.LCOH-123.16)/123.16<0.05)
-        self.assertTrue(abs(self.CF-0.573)/0.573<0.05)
+        self.assertTrue(abs(self.LCOH-85.89)/85.89<0.05)
+        self.assertTrue(abs(self.CF-0.822)/0.822<0.05)
         self.assertTrue(abs(self.C_cap-3401863691.6)/3401863691.6<0.05)
         os.system('rm -r '+self.casedir)
 

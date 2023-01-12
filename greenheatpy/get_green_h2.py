@@ -1,0 +1,113 @@
+"""
+Created on Thu Jan 12 10:21:54 2023 @author: Ye Wang
+
+Get the CF and LCOH2 results for different locations, present-day and future costs, from the HILT Green Hydrogen project  
+"""
+from greenheatpy.projdirs import hilt_svn_repo
+from openpyxl import load_workbook
+import numpy as np
+
+def get_data(year, savedir=None):
+
+    fn=hilt_svn_repo+'/H2-SUPPLY/reporting/Final report data/Results with Windlab+Solcast data - %s.xlsx'%year
+    wb = load_workbook(fn, data_only=True) 
+
+    locations= wb.sheetnames  
+    LCOH2=np.array([])
+    LCOH=np.array([])
+    title=np.array([])
+
+    for location in locations:
+        ws=wb[location]
+        CF=get_row_values(ws, min_row=7, max_row=12, min_col=1, max_col=1) 
+        lcoh2=get_row_values(ws, min_row=7, max_row=12, min_col=33, max_col=33) 
+        lcoh=convert_lcoh(lcoh2)
+        
+        LCOH2=np.append(LCOH2, lcoh2) #USD/kg
+        LCOH=np.append(LCOH, lcoh) # USD/MWh
+        title=np.append(title, location)
+        
+    LCOH=LCOH.reshape(len(locations), len(CF))
+    LCOH2=LCOH2.reshape(len(locations), len(CF))
+      
+    if savedir!=None:
+        CF=CF.reshape(len(CF), 1)
+        LCOH=np.hstack((CF, LCOH.T))
+        LCOH2=np.hstack((CF, LCOH2.T)) 
+ 
+        title1=np.append('CF/LCOH (USD/MWh)', title)
+        LCOH=np.vstack((title1, LCOH))
+        title2=np.append('CF/LCOH2 (USD/kg)', title)
+        LCOH2=np.vstack((title2, LCOH2))  
+        data=np.vstack((LCOH, LCOH2))
+        np.savetxt(savedir+'/CF_LCOH_%s.csv'%year, data, delimiter=',', fmt='%s') 
+
+    for i in range(len(locations)):
+        locations[i]=locations[i][:-5]
+
+    return LCOH, LCOH2, locations  
+
+
+def convert_lcoh(lcoh2):
+    '''
+    Convert levelised cost of hydrogen (LCOH2) in USD/kg to levlised cost of heat (LCOH) in USD/MWh
+
+    Argument:
+        lcoh2 (float): LCOH2 in USD/kg
+    Return:
+        lcoh (float):  LCOH in USD/MWh
+    '''
+    LHV=120 # MJ/kg
+    lcoh=lcoh2/LHV*3600
+    return lcoh
+
+def get_row_values(worksheet, min_row, max_row, min_col, max_col):
+    row_data=np.array([])
+    for row in worksheet.iter_rows(min_row=min_row, max_row=max_row, min_col=min_col, max_col=max_col):
+        for cell in row:
+             row_data=np.append(row_data, cell.value)
+    return row_data
+
+def get_best_location(year, verbose=False):
+    '''
+    get the best local location in each region that produced the lowest LCOH2 for hydrogen
+    '''
+    regions=np.array(['Pilbara', 'Pinjara', 'Gladstone', 'Burnie', 'Upper Spencer Gulf'])
+    LCOH, LCOH2, locations=get_data(year, savedir=None)
+    best={}
+    for region in regions:
+        data=np.array([])
+        for i in range(len(locations)):
+            location=locations[i]
+            if region in location:
+                data=np.append(data, LCOH2[i,-1])
+        best_id=np.argmin(data)+1
+        if verbose:
+            print(region, 'has total locations: ', len(data), ', the best location is No.', best_id)
+        best[region]=best_id
+
+    return best
+       
+def plot_bar(locations, LCOH2):
+    import matplotlib.pyplot as plt
+    fts=14
+    fig, ax = plt.subplots()
+    ax.bar(locations, LCOH2, width=0.4)
+    ax.tick_params(axis='x', labelrotation=45, labelsize=fts)
+    ax.tick_params(axis='y', labelsize=fts)
+    #plt.xlabel(fontsize=20)
+    plt.ylabel('LCOH2 (USD/kg)', fontsize=fts)
+    plt.savefig(open('./LCOH2.png', 'wb'), bbox_inches='tight', dpi=200)
+    #plt.show()
+    plt.close()            
+
+if __name__=='__main__':
+
+    years=[2020, 2030, 2050]
+    for year in years:
+        LCOH, LCOH2, locations =get_data(year, savedir=None)
+        best=get_best_location(year, verbose=True)
+        #plot_bar(locations, LCOH2[:,-2])
+        #print(best)
+        stop
+    
