@@ -38,8 +38,8 @@ class TestMasterHeat(unittest.TestCase):
         check=sum(pv_out+ wind_out - P_curt - pv_wind_direct - P_bat_in)
         print('check=', check)
         self.assertTrue(check<1e-2)
-        self.assertTrue(abs(self.LCOH-85.89)/85.89<0.05)
-        self.assertTrue(abs(self.CF-0.822)/0.822<0.05)
+        self.assertTrue(abs(self.LCOH-106.63)/106.63<0.05)
+        self.assertTrue(abs(self.CF-0.661)/0.661<0.05)
         self.assertTrue(abs(self.C_cap-3401863691.6)/3401863691.6<0.05)
         os.system('rm -r '+self.casedir)
 

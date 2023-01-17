@@ -8,7 +8,7 @@ model PVWindTES
   parameter SI.Power P_pv_des = P_load*RM*F_pv "Capacity of the PV system";
   parameter SI.Power P_wind_des = P_load*RM*(1-F_pv) "Capacity of the Wind system";
   parameter SI.Power P_pv_ref = 1e6 "Capacity of the referenced PV system from the SAM model";
-  parameter SI.Power P_wind_ref = 200e6 "Capacity of the referenced Wind system from the SAM model";
+  parameter SI.Power P_wind_ref = 320e6 "Capacity of the referenced Wind system from the SAM model";
     
   parameter Real t_storage(unit = "h")  = 8 "Hours of storage";
   //parameter SI.Power P_ST_max = 650e6 "The maximal charging power of the electric storage";  

@@ -45,7 +45,7 @@ def get_data(year, savedir=None):
     for i in range(len(locations)):
         locations[i]=locations[i][:-5]
 
-    return LCOH, LCOH2, locations  
+    return CF, LCOH, LCOH2, locations  
 
 
 def convert_lcoh(lcoh2):
@@ -73,7 +73,7 @@ def get_best_location(year, verbose=False):
     get the best local location in each region that produced the lowest LCOH2 for hydrogen
     '''
     regions=np.array(['Pilbara', 'Pinjara', 'Gladstone', 'Burnie', 'Upper Spencer Gulf'])
-    LCOH, LCOH2, locations=get_data(year, savedir=None)
+    CF, LCOH, LCOH2, locations=get_data(year, savedir=None)
     best={}
     for region in regions:
         data=np.array([])
@@ -105,7 +105,7 @@ if __name__=='__main__':
 
     years=[2020, 2030, 2050]
     for year in years:
-        LCOH, LCOH2, locations =get_data(year, savedir=None)
+        CF, LCOH, LCOH2, locations =get_data(year, savedir=None)
         best=get_best_location(year, verbose=True)
         #plot_bar(locations, LCOH2[:,-2])
         #print(best)

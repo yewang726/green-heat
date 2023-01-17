@@ -47,8 +47,8 @@ class TestMasterHeat(unittest.TestCase):
         self.assertTrue(balance_1<2e-2)
         self.assertTrue(balance_2<2e-2)
         self.assertTrue(balance_3<2e-2)
-        self.assertTrue(abs(self.LCOH-43.14)/43.14<0.05)   
-        self.assertTrue(abs(self.CF-0.86)/0.86<0.05)
+        self.assertTrue(abs(self.LCOH-52.67)/52.67<0.05)   
+        self.assertTrue(abs(self.CF-0.71)/0.71<0.05)
         self.assertTrue(abs(self.C_cap-1705513327.4)/1705513327.4<0.05) 
 
         os.system('rm -r '+self.casedir)

@@ -67,7 +67,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         # Get SAM reference system outputs
         if wind_data_fn==None:
             wind_data_fn=WindSource(location, casedir=casedir, solcast_TMY=solcast_TMY)        
-        wind_ref_capa = 200e3 #(kW)
+        wind_ref_capa = 320e3 #(kW)
         output_fn = wind_gen(wind_ref_capa, location=location, casedir=casedir, wea_fn=wind_data_fn)
             
         with open(output_fn) as f:

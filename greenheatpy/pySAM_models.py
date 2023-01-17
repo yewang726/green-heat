@@ -98,8 +98,8 @@ def wind_gen(capacity, location, casedir, wea_fn=None):
             module.value('wind_resource_filename', wea_fn)
 
         module.value('system_capacity', capacity)
-        
         module.execute()
+
         output = np.array(module.Outputs.gen)
         output=output.tolist()
         with open(output_fn, "w") as text_file:

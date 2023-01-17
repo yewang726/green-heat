@@ -37,10 +37,10 @@ class TestMasterHeat(unittest.TestCase):
         P_heater=results[7,1].astype(float)
         r_pv=results[4,1].astype(float)
 
-        self.assertTrue(abs(LCOH-41.35)/41.35<0.05) 
-        self.assertTrue(abs(CF-0.8436)/0.8436<0.05) 
-        self.assertTrue(abs(P_heater-662.2)/662.2<0.05) 
-        self.assertTrue(abs(r_pv-0.532)/0.532<0.05)    
+        self.assertTrue(abs(LCOH-49.45)/49.45<0.05) 
+        self.assertTrue(abs(CF-0.7410)/0.7410<0.05) 
+        self.assertTrue(abs(P_heater-643.4)/643.4<0.05) 
+        self.assertTrue(abs(r_pv-0.328)/0.328<0.05)    
 
         os.system('rm -r %s'%self.casedir)
 
