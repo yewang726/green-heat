@@ -14,7 +14,7 @@ from greenheatpy.gen_minizinc_input_data import GenDZN
 def AUD2USD(value):
     return(0.746 * value)
 
-def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_heater=None, bat_pmax=None, casedir=None, solar_data_fn=None, wind_data_fn=None, verbose=False, OM_method='SAM', solcast_TMY=False):
+def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_heater=None, bat_pmax=None, casedir=None, solar_data_fn=None, wind_data_fn=None, verbose=False, OM_method='SAM', solcast_TMY=False, multi_cst_modules=False):
     '''
     Arguments:
         model_name (str)  : minizic model name
@@ -29,6 +29,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         verbose    (bool) : to save and plot the time series results or not
         OM_method  (str)  : 'SL' will use Sargent&Lundy method, 'SAM' will use fixed/varied OM approach
         solcast_TMY (bool): True to use solcast_TMY data, False to use the data in data/weather folder (from Windlab)
+        multi_cst_modules (bool): True to run multiple identical cst modules, the solar_data_fn must be given 
 
     Returns:
 
@@ -83,8 +84,15 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         #    SolarResource(Lat,Lon, casedir)
         # Get SAM output 
         if solar_data_fn ==None:
-            solar_data_fn=SolarResource(location, casedir=casedir, solcast_TMY=solcast_TMY)       
-        output_fn= cst_gen(Q_des_th=P_load_des, SM=RM, location=location, casedir=casedir, wea_fn=solar_data_fn)
+            solar_data_fn=SolarResource(location, casedir=casedir, solcast_TMY=solcast_TMY)  
+     
+        if multi_cst_modules:
+            module_power =1250 #MWrh
+            output_fn=datadir+'modular_cst_design/CST_gen_%s_load%.1fMWth.dat'%(location, module_power)
+       
+        else:
+    
+            output_fn= cst_gen(Q_des_th=P_load_des, SM=RM, location=location, casedir=casedir, wea_fn=solar_data_fn)
 
         with open(output_fn) as f:
             cst_output=f.read().splitlines()
@@ -93,6 +101,13 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         H_recv, D_recv, H_tower, n_helios, A_land = np.float_(cst_output[2].split(','))
         P_recv_out = list(np.float_(cst_output[3][1:-1].split(',')))  
 
+        if multi_cst_modules:
+            num_modules=RM*P_load_des/1250e3
+            for i in range(len(P_recv_out)):
+                P_recv_out[i] *= num_modules
+
+        else:
+            num_modules=1
         
 
     #solcast_weather(Newman)
@@ -242,12 +257,12 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
 
     elif model_name=='CST_TES_heat':
 
-        C_recv = pm.C_recv_ref * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_exp
-        C_tower = pm.C_tower_fix * np.exp(pm.f_tower_exp * (H_tower - H_recv/2.+pm.H_helio/2.))
-        C_field = pm.c_helio * n_helios * pm.A_helio
-        C_site = pm.c_site_cst * pm.A_helio * n_helios
+        C_recv = pm.C_recv_ref * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_exp*num_modules
+        C_tower = pm.C_tower_fix * np.exp(pm.f_tower_exp * (H_tower - H_recv/2.+pm.H_helio/2.))*num_modules
+        C_field = pm.c_helio * n_helios * pm.A_helio*num_modules
+        C_site = pm.c_site_cst * pm.A_helio * n_helios*num_modules
         C_TES = pm.c_TES * results['TES_capa'][0]
-        C_land = pm.c_land_cst * A_land
+        C_land = pm.c_land_cst * A_land*num_modules
         CAPEX = C_recv + C_tower + C_field + C_site + C_TES 
         
         C_direct= CAPEX*(1.+pm.r_conting_cst)
