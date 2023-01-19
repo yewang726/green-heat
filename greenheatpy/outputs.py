@@ -167,7 +167,7 @@ class Outputs:
             np.savetxt(casedir+'/load.csv', load, fmt='%.4f', delimiter=',')
 
 
-    def CST_TES_heat_outputs(self, results, casedir, SM, H_recv, D_recv, H_tower, n_helios, A_land, LCOH, location, solar_data_fn, epy, OM_total, C_cap, C_indirect, C_direct, CAPEX, C_recv, C_tower, C_field, C_site, C_TES, C_land, r_disc_real, t_life, t_cons, eta_storage):
+    def CST_TES_heat_outputs(self, results, casedir, SM, H_recv, D_recv, H_tower, n_helios, A_land, LCOH, location, solar_data_fn, epy, OM_total, C_cap, C_indirect, C_direct, CAPEX, C_recv, C_tower, C_field, C_site, C_TES, C_land, r_disc_real, t_life, t_cons, eta_storage, num_modules):
 
         CF=results["CF"][0]
         t_storage=results["t_storage"][0]
@@ -188,6 +188,7 @@ class Outputs:
                 ['t_storage', t_storage, 'h'],
                 ['LCOH', LCOH, 'USD/MWh_th'],
                 ['CF', CF, '-'],
+                ['num_modules',num_modules, '-'],
                 ['H_recv', H_recv, 'm'],
                 ['D_recv', D_recv, 'm'],
                 ['H_tower', H_tower, 'm'],

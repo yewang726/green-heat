@@ -279,7 +279,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
 
         LCOH, epy, OM_total=cal_LCOH(CF,  P_load_des, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_constr_cst)
 
-        output.CST_TES_heat_outputs(results, casedir, RM, H_recv, D_recv, H_tower, n_helios, A_land, LCOH, location, solar_data_fn, epy, OM_total, C_cap, C_indirect, C_direct, CAPEX, C_recv, C_tower, C_field, C_site, C_TES,  C_land, pm.r_disc_real, pm.t_life, pm.t_constr_cst, eta_storage)
+        output.CST_TES_heat_outputs(results, casedir, RM, H_recv, D_recv, H_tower, n_helios, A_land, LCOH, location, solar_data_fn, epy, OM_total, C_cap, C_indirect, C_direct, CAPEX, C_recv, C_tower, C_field, C_site, C_TES,  C_land, pm.r_disc_real, pm.t_life, pm.t_constr_cst, eta_storage, num_modules)
 
 
     print('LCOH', LCOH)
