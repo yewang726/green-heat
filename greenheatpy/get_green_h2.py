@@ -47,6 +47,24 @@ def get_data(year, savedir=None):
 
     return CF, LCOH, LCOH2, locations  
 
+def get_storage_data(year, location, cost):
+
+    fn=hilt_svn_repo+'/H2-SUPPLY/reporting/Final report data/Results with Windlab+Solcast data - storage cost impact - %s.xlsx'%year
+    wb = load_workbook(fn, data_only=True) 
+
+    title=np.array([])
+    sheetnames= wb.sheetnames
+
+    sheetname='%s @%s-%s'%(location, cost, year)
+
+    ws=wb[sheetname]
+    CF=get_row_values(ws, min_row=7, max_row=12, min_col=1, max_col=1) 
+    LCOH2=get_row_values(ws, min_row=7, max_row=12, min_col=33, max_col=33) 
+    LCOH=convert_lcoh(LCOH2)
+    
+
+    return CF, LCOH, LCOH2 
+
 
 def convert_lcoh(lcoh2):
     '''
@@ -105,9 +123,10 @@ if __name__=='__main__':
 
     years=[2020, 2030, 2050]
     for year in years:
-        CF, LCOH, LCOH2, locations =get_data(year, savedir=None)
-        best=get_best_location(year, verbose=True)
+        #CF, LCOH, LCOH2, locations =get_data(year, savedir=None)
+        #best=get_best_location(year, verbose=True)
         #plot_bar(locations, LCOH2[:,-2])
         #print(best)
+        CF, LCOH, LCOH2=get_storage_data(year=2020, location='Pilbara 3', cost=1000)
+        print(CF, LCOH, LCOH2)
         stop
-    
