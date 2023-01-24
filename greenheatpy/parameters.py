@@ -11,6 +11,7 @@ class Parameters:
         '''
         set the default value of parameters (cost and performance)  
         '''
+        self.F_future_cost=0.2 #e.g. nominal_2030=(1-0.2)*nominal, nominal_2050=(1-0.2)*nominal_2030
         self.cst_params()
         self.pv_params()
         self.wind_params()
@@ -20,27 +21,42 @@ class Parameters:
         self.heater_params()
         self.finance_system_params()
 
+  
+
     def cst_params(self):
 
         self.A_helio = 12.2*12.2 # m2, default heliostat size
         self.H_helio = 12.2 # heilisotat height
         self.c_helio = 127. # USD/m2
+        self.c_helio_2030 = 75. # G3P3
+        self.c_helio_2050 = 50. # HelioCon target TODO check 
         #self.c_helio_LB = 96. # USD/m2
         #self.c_helio_UB = 140. # USD/m2
         #self.c_helio_2030 = 75. # USD/m2
 
-        self.c_site_cst = 16 # USD/m2 per area of heliostats        
+        self.c_site_cst = 16 # USD/m2 per area of heliostats      
+        self.c_site_cst_2030 = 10
+        self.c_site_cst_2050 = self.c_site_cst_2030*(1.-self.F_future_cost) # TODO future cost is not sure 
+          
         self.c_land_cst=2.471 # USD/m2, 10,000 USD/acre
+        self.c_land_cst_2030 = self.c_land_cst
+        self.c_land_cst_2050 = self.c_land_cst
 
         # SAM:
         # Receiver Cost = Receiver Reference Cost x ( Receiver Area / Receiver Reference Area ) ^ Receiver Cost Scaling Exponent
         self.C_recv_ref = 103.e6 # USD, reference receiver cost
+        self.C_recv_ref_2030 = self.C_recv_ref  * (1.-self.F_future_cost)    # TODO
+        self.C_recv_ref_2050 = self.C_recv_ref_2030 * (1.-self.F_future_cost)   
+
         self.A_recv_ref = 1571 # m2, reference receiver area
         self.f_recv_exp = 0.7 # receiver cost scaling exponent
 
         # SAM: 
         # Total Tower Cost = Fixed Tower Costs x e ^ ( Tower Cost Scaling Exponent x ( Tower Height - Receiver Height ÷ 2 + Heliostat Height ÷ 2 ) )
         self.C_tower_fix = 3.e6 # USD, fixed tower cost
+        self.C_tower_fix_2030 = self.C_tower_fix  * (1.-self.F_future_cost)    #TODO
+        self.C_tower_fix_2050 = self.C_tower_fix_2030 * (1.-self.F_future_cost)  
+
         self.f_tower_exp = 0.0113 # tower cost scaling exponent
 
         self.c_om_cst_fix = 66 # USD/kW per year
@@ -53,7 +69,10 @@ class Parameters:
 
 
     def pv_params(self):
-        self.c_pv_system=1074.99 # USD/kW
+        self.c_pv_system=1074.99 # USD/kW # 2021-2022 GenCost report
+        self.c_pv_system_2030=755.70
+        self.c_pv_system_2050=480.424
+
         self.c_om_pv_fix=12.68 # USD/kW
         self.c_om_pv_var=0
         self.r_conting_pv=0.03 
@@ -61,7 +80,10 @@ class Parameters:
 
 
     def wind_params(self):
-        self.c_wind_system=1462.16# USD/kW
+        self.c_wind_system=1462.16# USD/kW 2021-2022 GenCost report
+        self.c_wind_system_2030=1415.16
+        self.c_wind_system_2050=1363.69
+
         self.c_om_wind_fix=18.65 # USD/kW
         self.c_om_wind_var=0
         self.r_conting_wind=0.03 
@@ -70,27 +92,46 @@ class Parameters:
     def bat_params(self):
         # 0.82 round trip: https://www.eia.gov/todayinenergy/detail.php?id=46756 
         self.eff_rdtrip_bt=0.82
-        self.c_bt_energy=250. # USD/kWh
+        self.c_bt_energy=250. # USD/kWh (Fig5, NREL, https://www.nrel.gov/docs/fy21osti/79236.pdf)
+        self.c_bt_energy_2030=150.
+        self.c_bt_energy_2050=100.
+
         self.c_bt_power=230. # USD/kW
+        self.c_bt_power_2030=199.
+        self.c_bt_power_2050=180.
+ 
         self.t_life_bt =10 # heater lifetime
         self.c_replace_bt=self.c_bt_energy # replacement cost after lifetime
 
     def PHES_params(self):
         self.eff_rdtrip_PHES=0.79
         self.c_PHES_energy=50. # USD/kWh https://energystorage.shinyapps.io/LCOSApp/
+        self.c_PHES_energy_2030=self.c_PHES_energy * (1.-self.F_future_cost)    #TODO future cost of PHES is unsure
+        self.c_PHES_energy_2050=self.c_PHES_energy_2030 * (1.-self.F_future_cost)   
+
+
         self.c_PHES_power=1100. # USD/kW
+        self.c_PHES_power_2030=self.c_PHES_power * (1.-self.F_future_cost) 
+        self.c_PHES_power_2050=self.c_PHES_power_2030 * (1.-self.F_future_cost)   
+
         self.c_om_PHES_fix=20. # USD/kW
         self.c_om_PHES_var=0.0004 #USD/kWh
 
 
     def TES_params(self):
         self.eff_rdtrip_TES=0.99
-        self.c_TES=22 # USD/kWh
+        self.c_TES=22 # USD/kWh TODO
+        self.c_TES_2030=self.c_TES * (1.-self.F_future_cost)  
+        self.c_TES_2050=self.c_TES_2030 * (1.-self.F_future_cost)   
+
 
 
     def heater_params(self):
         self.eff_heater=0.99
-        self.c_heater=206. # USD/kW
+        self.c_heater=206. # USD/kW TODO
+        self.c_heater_2030=self.c_heater  * (1.-self.F_future_cost)   
+        self.c_heater_2050=self.c_heater_2030 * (1.-self.F_future_cost)   
+
         self.t_life_heater =10 # heater lifetime
         self.c_replace_heater=0.6*self.c_heater # replacement cost after lifetime
 

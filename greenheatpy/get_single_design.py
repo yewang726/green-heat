@@ -9,15 +9,15 @@ from greenheatpy.master import cal_LCOH
 from greenheatpy.projdirs import datadir
 from greenheatpy.get_green_h2 import get_best_location
 
-def get_CST_design(rm, sh, location, case, resdir, savename, OM_method='SL'):
+def get_CST_design(rm, sh, location, case, resdir, savename=None, year=2020, OM_method='SL'):
 
 
-    CF_data=np.loadtxt('%s/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
-    Aland_data=np.loadtxt('%s/%s-%s-data_Aland.csv'%(resdir, case, location), delimiter=',', skiprows=1)
-    Drecv_data=np.loadtxt('%s/%s-%s-data_Drecv.csv'%(resdir, case, location), delimiter=',', skiprows=1)
-    Hrecv_data=np.loadtxt('%s/%s-%s-data_Hrecv.csv'%(resdir, case, location), delimiter=',', skiprows=1)
-    Htower_data=np.loadtxt('%s/%s-%s-data_Htower.csv'%(resdir, case, location), delimiter=',', skiprows=1)
-    Nhelio_data=np.loadtxt('%s/%s-%s-data_Nhelio.csv'%(resdir, case, location), delimiter=',', skiprows=1)
+    CF_data=np.loadtxt('%s/2020/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
+    Aland_data=np.loadtxt('%s/2020/%s-%s-data_Aland.csv'%(resdir, case, location), delimiter=',', skiprows=1)
+    Drecv_data=np.loadtxt('%s/2020/%s-%s-data_Drecv.csv'%(resdir, case, location), delimiter=',', skiprows=1)
+    Hrecv_data=np.loadtxt('%s/2020/%s-%s-data_Hrecv.csv'%(resdir, case, location), delimiter=',', skiprows=1)
+    Htower_data=np.loadtxt('%s/2020/%s-%s-data_Htower.csv'%(resdir, case, location), delimiter=',', skiprows=1)
+    Nhelio_data=np.loadtxt('%s/2020/%s-%s-data_Nhelio.csv'%(resdir, case, location), delimiter=',', skiprows=1)
 
     CF=CF_data[1:,1:]
     RM=CF_data[1:,0]
@@ -90,12 +90,32 @@ def get_CST_design(rm, sh, location, case, resdir, savename, OM_method='SL'):
     TES_capa=P_load*sh
 
     pm=Parameters()
-    C_recv = pm.C_recv_ref * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_exp
-    C_tower = pm.C_tower_fix * np.exp(pm.f_tower_exp * (H_tower - H_recv/2.+pm.H_helio/2.))
-    C_field = pm.c_helio * n_helios * pm.A_helio
-    C_site = pm.c_site_cst * pm.A_helio * n_helios
-    C_TES = pm.c_TES * TES_capa
-    C_land = pm.c_land_cst * A_land
+    if year==2020:
+        C_recv = pm.C_recv_ref * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_exp
+        C_tower = pm.C_tower_fix * np.exp(pm.f_tower_exp * (H_tower - H_recv/2.+pm.H_helio/2.))
+        C_field = pm.c_helio * n_helios * pm.A_helio
+        C_site = pm.c_site_cst * pm.A_helio * n_helios
+        C_TES = pm.c_TES * TES_capa
+        C_land = pm.c_land_cst * A_land
+    elif year==2030:
+        C_recv = pm.C_recv_ref_2030 * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_exp
+        C_tower = pm.C_tower_fix_2030 * np.exp(pm.f_tower_exp * (H_tower - H_recv/2.+pm.H_helio/2.))
+        C_field = pm.c_helio_2030 * n_helios * pm.A_helio
+        C_site = pm.c_site_cst_2030 * pm.A_helio * n_helios
+        C_TES = pm.c_TES_2030 * TES_capa
+        C_land = pm.c_land_cst_2030 * A_land
+
+    elif year==2050:
+        C_recv = pm.C_recv_ref_2050 * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_exp
+        C_tower = pm.C_tower_fix_2050 * np.exp(pm.f_tower_exp * (H_tower - H_recv/2.+pm.H_helio/2.))
+        C_field = pm.c_helio_2050 * n_helios * pm.A_helio
+        C_site = pm.c_site_cst_2050 * pm.A_helio * n_helios
+        C_TES = pm.c_TES_2050 * TES_capa
+        C_land = pm.c_land_cst_2050 * A_land
+
+    else:
+        print('Year %s data is not implemented'%year)
+
     CAPEX = C_recv + C_tower + C_field + C_site + C_TES 
 
     C_direct= CAPEX*(1.+pm.r_conting_cst)
@@ -141,14 +161,15 @@ def get_CST_design(rm, sh, location, case, resdir, savename, OM_method='SL'):
             ['t_life', pm.t_life, 'year'],
     ])
 
-    np.savetxt('./summary_%s.csv'%(savename), summary, fmt='%s', delimiter=',')
+    if savename!=None:
+        np.savetxt('./summary_%s.csv'%(savename), summary, fmt='%s', delimiter=',')
     print('%s RM=%.1f, SH=%.1f, CF=%.4f, LCOH=%.2f'%(case, rm, sh, CF, LCOH))	
     return LCOH, CF
 
-def get_CST_modular_design(rm, sh, location, case, resdir, savename, OM_method='SL'):
+def get_CST_modular_design(rm, sh, location, case, resdir, savename=None, year=2020, OM_method='SL'):
 
-    CF_data=np.loadtxt('%s/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
-    num_modules=np.loadtxt('%s/%s-%s-data_num_modules.csv'%(resdir, case, location), delimiter=',', skiprows=1)
+    CF_data=np.loadtxt('%s/2020/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
+    num_modules=np.loadtxt('%s/2020/%s-%s-data_num_modules.csv'%(resdir, case, location), delimiter=',', skiprows=1)
 
 
     CF=CF_data[1:,1:]
@@ -204,12 +225,32 @@ def get_CST_modular_design(rm, sh, location, case, resdir, savename, OM_method='
     TES_capa=P_load*sh
 
     pm=Parameters()
-    C_recv = pm.C_recv_ref * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_exp*num_modules
-    C_tower = pm.C_tower_fix * np.exp(pm.f_tower_exp * (H_tower - H_recv/2.+pm.H_helio/2.))*num_modules
-    C_field = pm.c_helio * n_helios * pm.A_helio*num_modules
-    C_site = pm.c_site_cst * pm.A_helio * n_helios*num_modules
-    C_TES = pm.c_TES * TES_capa
-    C_land = pm.c_land_cst * A_land*num_modules
+    if year==2020:
+        C_recv = pm.C_recv_ref * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_exp*num_modules
+        C_tower = pm.C_tower_fix * np.exp(pm.f_tower_exp * (H_tower - H_recv/2.+pm.H_helio/2.))*num_modules
+        C_field = pm.c_helio * n_helios * pm.A_helio*num_modules
+        C_site = pm.c_site_cst * pm.A_helio * n_helios*num_modules
+        C_TES = pm.c_TES * TES_capa
+        C_land = pm.c_land_cst * A_land*num_modules
+    elif year==2030:
+        C_recv = pm.C_recv_ref_2030 * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_exp*num_modules
+        C_tower = pm.C_tower_fix_2030 * np.exp(pm.f_tower_exp * (H_tower - H_recv/2.+pm.H_helio/2.))*num_modules
+        C_field = pm.c_helio_2030 * n_helios * pm.A_helio*num_modules
+        C_site = pm.c_site_cst_2030 * pm.A_helio * n_helios*num_modules
+        C_TES = pm.c_TES_2030 * TES_capa
+        C_land = pm.c_land_cst_2030 * A_land*num_modules
+    
+    elif year==2050:
+        C_recv = pm.C_recv_ref_2050 * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_exp*num_modules
+        C_tower = pm.C_tower_fix_2050 * np.exp(pm.f_tower_exp * (H_tower - H_recv/2.+pm.H_helio/2.))*num_modules
+        C_field = pm.c_helio_2050 * n_helios * pm.A_helio*num_modules
+        C_site = pm.c_site_cst_2050 * pm.A_helio * n_helios*num_modules
+        C_TES = pm.c_TES_2050 * TES_capa
+        C_land = pm.c_land_cst_2050 * A_land*num_modules
+
+    else:
+        print('Year %s data is not implemented'%year)
+
     CAPEX = C_recv + C_tower + C_field + C_site + C_TES 
 
     C_direct= CAPEX*(1.+pm.r_conting_cst)
@@ -256,15 +297,16 @@ def get_CST_modular_design(rm, sh, location, case, resdir, savename, OM_method='
             ['num_modules', num_modules, '-'],
     ])
 
-    np.savetxt('./summary_%s.csv'%(savename), summary, fmt='%s', delimiter=',')
+    if savename!=None:
+        np.savetxt('./summary_%s.csv'%(savename), summary, fmt='%s', delimiter=',')
     print('%s RM=%.1f, SH=%.1f, CF=%.4f, LCOH=%.2f'%(case, rm, sh, CF, LCOH))	
     return LCOH, CF
 
-def get_TES_design(rm, sh, location, case,  resdir, savename, F_pv=None):
+def get_TES_design(rm, sh, location, case,  resdir, savename=None, year=2020, F_pv=None):
 
 
-    CF_data=np.loadtxt('%s/%s-%s-data_CF.csv'%(resdir,case, location), delimiter=',')
-    Pheater_data=np.loadtxt('%s/%s-%s-data_P_heater.csv'%(resdir, case, location), delimiter=',')
+    CF_data=np.loadtxt('%s/2020/%s-%s-data_CF.csv'%(resdir,case, location), delimiter=',')
+    Pheater_data=np.loadtxt('%s/2020/%s-%s-data_P_heater.csv'%(resdir, case, location), delimiter=',')
 
     CF=CF_data[1:,1:]
     P_heater=Pheater_data[1:,1:]
@@ -305,7 +347,7 @@ def get_TES_design(rm, sh, location, case,  resdir, savename, F_pv=None):
 
     if F_pv==None:
    
-        F_data=np.loadtxt('%s/%s-%s-data_F_pv.csv'%(resdir, case, location), delimiter=',')
+        F_data=np.loadtxt('%s/2020/%s-%s-data_F_pv.csv'%(resdir, case, location), delimiter=',')
         F_pv=F_data[1:,1:]
         Q_11=F_pv[row,col]
         Q_12=F_pv[row+1,col]
@@ -319,10 +361,29 @@ def get_TES_design(rm, sh, location, case,  resdir, savename, F_pv=None):
     TES_capa=P_load*sh
 
     pm=Parameters()
-    C_pv=pm.c_pv_system*pv_max
-    C_wind=pm.c_wind_system*wind_max
-    C_heater=P_heater*pm.c_heater*1000.
-    C_TES=TES_capa*pm.c_TES
+
+    if year ==2020:
+        C_pv=pm.c_pv_system*pv_max
+        C_wind=pm.c_wind_system*wind_max
+        C_heater=P_heater*pm.c_heater*1000.
+        C_TES=TES_capa*pm.c_TES
+
+    elif year==2030:
+        C_pv=pm.c_pv_system_2030*pv_max
+        C_wind=pm.c_wind_system_2030*wind_max
+        C_heater=P_heater*pm.c_heater_2030*1000.
+        C_TES=TES_capa*pm.c_TES_2030
+
+    elif year==2050:
+        C_pv=pm.c_pv_system_2050*pv_max
+        C_wind=pm.c_wind_system_2050*wind_max
+        C_heater=P_heater*pm.c_heater_2050*1000.
+        C_TES=TES_capa*pm.c_TES_2050
+
+    else:
+        print('Year %s data is not implemented'%year)
+
+
 
     CAPEX=C_pv+C_wind+C_heater+C_TES
 
@@ -372,15 +433,16 @@ def get_TES_design(rm, sh, location, case,  resdir, savename, F_pv=None):
             ['Location', location, '-']                   
     ])
 
-    np.savetxt('./summary_%s.csv'%(savename), summary, fmt='%s', delimiter=',')
+    if savename!=None:
+        np.savetxt('./summary_%s.csv'%(savename), summary, fmt='%s', delimiter=',')
     return LCOH, cf
 
 
-def get_BAT_design(rm, sh, location, case, resdir, savename, F_pv=None):
+def get_BAT_design(rm, sh, location, case, resdir, savename=None, year=2020, F_pv=None):
 
 
-    CF_data=np.loadtxt('%s/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
-    Pbat_data=np.loadtxt('%s/%s-%s-data_P_bat.csv'%(resdir, case, location), delimiter=',')
+    CF_data=np.loadtxt('%s/2020/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
+    Pbat_data=np.loadtxt('%s/2020/%s-%s-data_P_bat.csv'%(resdir, case, location), delimiter=',')
 
     CF=CF_data[1:,1:]
     P_bat=Pbat_data[1:,1:]
@@ -419,7 +481,7 @@ def get_BAT_design(rm, sh, location, case, resdir, savename, F_pv=None):
     P_bat=1/((x_2-x_1)*(y_2-y_1))*(Q_11*(x_2-x)*(y_2-y)+Q_21*(x-x_1)*(y_2-y)+Q_12*(x_2-x)*(y-y_1)+Q_22*(x-x_1)*(y-y_1))
 
     if F_pv==None:
-        F_data=np.loadtxt('%s/%s-%s-data_F_pv.csv'%(resdir, case, location), delimiter=',')
+        F_data=np.loadtxt('%s/2020/%s-%s-data_F_pv.csv'%(resdir, case, location), delimiter=',')
         F_pv=F_data[1:,1:]
 
         Q_11=F_pv[row,col]
@@ -437,10 +499,27 @@ def get_BAT_design(rm, sh, location, case, resdir, savename, F_pv=None):
     bat_pmax=P_bat*1000.
 
     pm=Parameters()
-    C_pv=pm.c_pv_system*pv_max
-    C_wind=pm.c_wind_system*wind_max
-    C_heater=P_heater*pm.c_heater
-    C_bat=bat_capa*pm.c_bt_energy+bat_pmax*pm.c_bt_power
+    if year ==2020:
+        C_pv=pm.c_pv_system*pv_max
+        C_wind=pm.c_wind_system*wind_max
+        C_heater=P_heater*pm.c_heater
+        C_bat=bat_capa*pm.c_bt_energy+bat_pmax*pm.c_bt_power
+
+    elif year==2030:
+        C_pv=pm.c_pv_system_2030*pv_max
+        C_wind=pm.c_wind_system_2030*wind_max
+        C_heater=P_heater*pm.c_heater_2030
+        C_bat=bat_capa*pm.c_bt_energy_2030+bat_pmax*pm.c_bt_power_2030
+
+    elif year==2050:
+        C_pv=pm.c_pv_system_2050*pv_max
+        C_wind=pm.c_wind_system_2050*wind_max
+        C_heater=P_heater*pm.c_heater_2050
+        C_bat=bat_capa*pm.c_bt_energy_2050+bat_pmax*pm.c_bt_power_2050
+
+    else:
+        print('Year %s data is not implemented'%year)
+
 
     CAPEX=C_pv+C_wind+C_heater+C_bat
 
@@ -502,16 +581,17 @@ def get_BAT_design(rm, sh, location, case, resdir, savename, F_pv=None):
             ['Location', location, '-']                 
     ])
 
-    np.savetxt('./summary_%s.csv'%savename, summary, fmt='%s', delimiter=',')
+    if savename!=None:
+        np.savetxt('./summary_%s.csv'%savename, summary, fmt='%s', delimiter=',')
 
     return LCOH, cf
 
 
-def get_PHES_design(rm, sh, location, case, resdir, savename, F_pv=None):
+def get_PHES_design(rm, sh, location, case, resdir, savename=None, year=2020, F_pv=None):
 
 
-    CF_data=np.loadtxt('%s/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
-    PHES_data=np.loadtxt('%s/%s-%s-data_P_PHES.csv'%(resdir, case, location), delimiter=',')
+    CF_data=np.loadtxt('%s/2020/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
+    PHES_data=np.loadtxt('%s/2020/%s-%s-data_P_PHES.csv'%(resdir, case, location), delimiter=',')
 
     CF=CF_data[1:,1:]
     P_PHES=PHES_data[1:,1:]
@@ -550,7 +630,7 @@ def get_PHES_design(rm, sh, location, case, resdir, savename, F_pv=None):
     P_PHES=1/((x_2-x_1)*(y_2-y_1))*(Q_11*(x_2-x)*(y_2-y)+Q_21*(x-x_1)*(y_2-y)+Q_12*(x_2-x)*(y-y_1)+Q_22*(x-x_1)*(y-y_1))
 
     if F_pv==None:
-        F_data=np.loadtxt('%s/%s-%s-data_F_pv.csv'%(resdir, case, location), delimiter=',')
+        F_data=np.loadtxt('%s/2020/%s-%s-data_F_pv.csv'%(resdir, case, location), delimiter=',')
         F_pv=F_data[1:,1:]
 
         Q_11=F_pv[row,col]
@@ -568,10 +648,27 @@ def get_PHES_design(rm, sh, location, case, resdir, savename, F_pv=None):
     PHES_pmax=P_PHES*1000.
 
     pm=Parameters()
-    C_pv=pm.c_pv_system*pv_max
-    C_wind=pm.c_wind_system*wind_max
-    C_heater=P_heater*pm.c_heater
-    C_PHES=PHES_capa*pm.c_PHES_energy+PHES_pmax*pm.c_PHES_power
+    if year ==2020:
+        C_pv=pm.c_pv_system*pv_max
+        C_wind=pm.c_wind_system*wind_max
+        C_heater=P_heater*pm.c_heater
+        C_PHES=PHES_capa*pm.c_PHES_energy+PHES_pmax*pm.c_PHES_power
+
+    elif year==2030:
+        C_pv=pm.c_pv_system_2030*pv_max
+        C_wind=pm.c_wind_system_2030*wind_max
+        C_heater=P_heater*pm.c_heater_2030
+        C_PHES=PHES_capa*pm.c_PHES_energy_2030+PHES_pmax*pm.c_PHES_power_2030
+
+    elif year==2050:
+        C_pv=pm.c_pv_system_2050*pv_max
+        C_wind=pm.c_wind_system_2050*wind_max
+        C_heater=P_heater*pm.c_heater_2050
+        C_PHES=PHES_capa*pm.c_PHES_energy_2030+PHES_pmax*pm.c_PHES_power_2050
+
+    else:
+        print('Year %s data is not implemented'%year)
+
 
     CAPEX=C_pv+C_wind+C_heater+C_PHES
 
@@ -625,7 +722,8 @@ def get_PHES_design(rm, sh, location, case, resdir, savename, F_pv=None):
             ['Location', location, '-']                 
     ])
 
-    np.savetxt('./summary_%s.csv'%savename, summary, fmt='%s', delimiter=',')
+    if savename!=None:
+        np.savetxt('./summary_%s.csv'%savename, summary, fmt='%s', delimiter=',')
 
     return LCOH, cf
 
