@@ -6,16 +6,18 @@ Get a specific design by interpolating the SH-RM data
 import numpy as np
 from greenheatpy.parameters import Parameters, CST_SL_OM
 from greenheatpy.master import cal_LCOH
+from greenheatpy.projdirs import datadir
+from greenheatpy.get_green_h2 import get_best_location
 
-def get_CST_design(rm, sh, location, datadir, savename, OM_method='SL'):
+def get_CST_design(rm, sh, location, case, resdir, savename, OM_method='SL'):
 
 
-    CF_data=np.loadtxt('%s/%s/data_CF.csv'%(datadir, location), delimiter=',')
-    Aland_data=np.loadtxt('%s/%s/data_Aland.csv'%(datadir, location), delimiter=',', skiprows=1)
-    Drecv_data=np.loadtxt('%s/%s/data_Drecv.csv'%(datadir, location), delimiter=',', skiprows=1)
-    Hrecv_data=np.loadtxt('%s/%s/data_Hrecv.csv'%(datadir, location), delimiter=',', skiprows=1)
-    Htower_data=np.loadtxt('%s/%s/data_Htower.csv'%(datadir, location), delimiter=',', skiprows=1)
-    Nhelio_data=np.loadtxt('%s/%s/data_Nhelio.csv'%(datadir, location), delimiter=',', skiprows=1)
+    CF_data=np.loadtxt('%s/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
+    Aland_data=np.loadtxt('%s/%s-%s-data_Aland.csv'%(resdir, case, location), delimiter=',', skiprows=1)
+    Drecv_data=np.loadtxt('%s/%s-%s-data_Drecv.csv'%(resdir, case, location), delimiter=',', skiprows=1)
+    Hrecv_data=np.loadtxt('%s/%s-%s-data_Hrecv.csv'%(resdir, case, location), delimiter=',', skiprows=1)
+    Htower_data=np.loadtxt('%s/%s-%s-data_Htower.csv'%(resdir, case, location), delimiter=',', skiprows=1)
+    Nhelio_data=np.loadtxt('%s/%s-%s-data_Nhelio.csv'%(resdir, case, location), delimiter=',', skiprows=1)
 
     CF=CF_data[1:,1:]
     RM=CF_data[1:,0]
@@ -26,6 +28,7 @@ def get_CST_design(rm, sh, location, datadir, savename, OM_method='SL'):
     Hrecv=Hrecv_data[:,1]
     Htower=Htower_data[:,1]
     Nhelio=Nhelio_data[:,1]
+
 
     x=sh
     y=rm
@@ -139,15 +142,129 @@ def get_CST_design(rm, sh, location, datadir, savename, OM_method='SL'):
     ])
 
     np.savetxt('./summary_%s.csv'%(savename), summary, fmt='%s', delimiter=',')
-    print('RM=%.1f, SH=%.1f, CF=%.4f, LCOH=%.2f'%(rm, sh, CF, LCOH))	
+    print('%s RM=%.1f, SH=%.1f, CF=%.4f, LCOH=%.2f'%(case, rm, sh, CF, LCOH))	
     return LCOH, CF
 
+def get_CST_modular_design(rm, sh, location, case, resdir, savename, OM_method='SL'):
 
-def get_TES_design(rm, sh, location, datadir, savename, F_pv=None):
+    CF_data=np.loadtxt('%s/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
+    num_modules=np.loadtxt('%s/%s-%s-data_num_modules.csv'%(resdir, case, location), delimiter=',', skiprows=1)
 
 
-    CF_data=np.loadtxt('%s/%s/data_CF.csv'%(datadir,location), delimiter=',')
-    Pheater_data=np.loadtxt('%s/%s/data_P_heater.csv'%(datadir,location), delimiter=',')
+    CF=CF_data[1:,1:]
+    RM=CF_data[1:,0]
+    SH=CF_data[0,1:]
+
+    num_modules=num_modules[:,1]
+
+    x=sh
+    y=rm
+
+    idx=np.argmin(abs(RM-rm))
+    if RM[idx]!=1:
+        row=idx-1
+    else:
+        row=idx
+
+    idx=np.argmin(abs(SH-sh))
+    if SH[idx]>0:
+        col=idx-1
+    else:
+        col=idx
+
+    x_1=SH[col]
+    x_2=SH[col+1]
+    y_1=RM[row]
+    y_2=RM[row+1]
+    Q_11=CF[row,col]
+    Q_12=CF[row+1,col]
+    Q_21=CF[row,col+1]
+    Q_22=CF[row+1,col+1]
+    CF=1/((x_2-x_1)*(y_2-y_1))*(Q_11*(x_2-x)*(y_2-y)+Q_21*(x-x_1)*(y_2-y)+Q_12*(x_2-x)*(y-y_1)+Q_22*(x-x_1)*(y-y_1))
+
+
+    x1=RM[row]
+    x2=RM[row+1]
+    y1=num_modules[row]
+    y2=num_modules[row+1]
+    num_modules=y2-(x2-rm)*(y2-y1)/(x2-x1)
+
+
+    module_power =1250 #MWrh
+    best=get_best_location(2020)
+    loc=location+' %s'%best[location]
+    output_fn=datadir+'modular_cst_design/CST_gen_%s_load%.1fMWth.dat'%(loc, module_power)
+    with open(output_fn) as f:
+        cst_output=f.read().splitlines()
+    f.close()
+    H_recv, D_recv, H_tower, n_helios, A_land = np.float_(cst_output[2].split(','))
+
+
+    P_load=500.e3
+    TES_capa=P_load*sh
+
+    pm=Parameters()
+    C_recv = pm.C_recv_ref * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_exp*num_modules
+    C_tower = pm.C_tower_fix * np.exp(pm.f_tower_exp * (H_tower - H_recv/2.+pm.H_helio/2.))*num_modules
+    C_field = pm.c_helio * n_helios * pm.A_helio*num_modules
+    C_site = pm.c_site_cst * pm.A_helio * n_helios*num_modules
+    C_TES = pm.c_TES * TES_capa
+    C_land = pm.c_land_cst * A_land*num_modules
+    CAPEX = C_recv + C_tower + C_field + C_site + C_TES 
+
+    C_direct= CAPEX*(1.+pm.r_conting_cst)
+    C_indirect = pm.r_EPC_owner*C_direct + C_land 
+    C_cap=C_direct + C_indirect
+
+
+    if OM_method=='SAM':
+        OM_fixed=pm.c_om_cst_fix * P_load_des
+        c_OM_var = pm.c_om_cst_var
+    elif OM_method=='SL':
+        A_helios=n_helios * pm.A_helio
+        OM_fixed=CST_SL_OM(A_helios)
+        c_OM_var=0 
+
+    LCOH, epy, OM_total=cal_LCOH(CF,  P_load, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_constr_cst)
+
+    summary=np.array([
+            ['SM',rm, '-'],
+            ['t_storage', sh, 'h'],
+            ['LCOH', LCOH, 'USD/MWh_th'],
+            ['CF', CF, '-'],
+            ['H_recv', H_recv, 'm'],
+            ['D_recv', D_recv, 'm'],
+            ['H_tower', H_tower, 'm'],
+            ['n_helios', n_helios, '-'],
+            ['A_land', A_land, 'm2'],
+            ['TES_capa',TES_capa/1e3, 'MWh'],
+            ['EPY', epy, 'MWh'],
+            ['C_cap_tot', C_cap/1e6, 'M.USD'],
+            ['OM_tot', OM_total/1e6, 'M.USD'],
+            ['C_recv', C_recv/1e6, 'M.USD'],
+            ['C_tower', C_tower/1e6, 'M.USD'],
+            ['C_field', C_field/1e6, 'M.USD'],
+            ['C_site', C_site/1e6, 'M.USD'],
+            ['C_TES', C_TES/1e6, 'M.USD'],
+            ['C_land', C_land/1e6, 'M.USD'],
+            ['C_equipment', CAPEX/1e6, 'M.USD'],
+            ['C_direct', C_direct/1e6, 'M.USD'],
+            ['C_indirect', C_indirect/1e6, 'USD'],
+            ['r_real_discount', pm.r_disc_real, '-'],
+            ['t_construction', pm.t_constr_cst, 'year'],
+            ['t_life', pm.t_life, 'year'],
+            ['num_modules', num_modules, '-'],
+    ])
+
+    np.savetxt('./summary_%s.csv'%(savename), summary, fmt='%s', delimiter=',')
+    print('%s RM=%.1f, SH=%.1f, CF=%.4f, LCOH=%.2f'%(case, rm, sh, CF, LCOH))	
+    return LCOH, CF
+
+def get_TES_design(rm, sh, location, case,  resdir, savename, F_pv=None):
+
+
+    CF_data=np.loadtxt('%s/%s-%s-data_CF.csv'%(resdir,case, location), delimiter=',')
+    Pheater_data=np.loadtxt('%s/%s-%s-data_P_heater.csv'%(resdir, case, location), delimiter=',')
 
     CF=CF_data[1:,1:]
     P_heater=Pheater_data[1:,1:]
@@ -188,7 +305,7 @@ def get_TES_design(rm, sh, location, datadir, savename, F_pv=None):
 
     if F_pv==None:
    
-        F_data=np.loadtxt('%s/%s/data_F_pv.csv'%(datadir,location), delimiter=',')
+        F_data=np.loadtxt('%s/%s-%s-data_F_pv.csv'%(resdir, case, location), delimiter=',')
         F_pv=F_data[1:,1:]
         Q_11=F_pv[row,col]
         Q_12=F_pv[row+1,col]
@@ -226,7 +343,7 @@ def get_TES_design(rm, sh, location, datadir, savename, F_pv=None):
 
     LCOH, epy, OM_total=cal_LCOH(cf,  P_load, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_constr_pv)
 
-    print('RM=%.1f, SH=%.1f, F_pv=%.3f, P_heater=%.1f (MW), CF=%.4f, LCOH=%.2f'%(rm, sh,  F_pv, P_heater, cf, LCOH))	
+    print('%s RM=%.1f, SH=%.1f, F_pv=%.3f, P_heater=%.1f (MW), CF=%.4f, LCOH=%.2f'%(case, rm, sh,  F_pv, P_heater, cf, LCOH))	
 
 
     summary=np.array([
@@ -259,11 +376,11 @@ def get_TES_design(rm, sh, location, datadir, savename, F_pv=None):
     return LCOH, cf
 
 
-def get_BAT_design(rm, sh, location, datadir, savename, F_pv=None):
+def get_BAT_design(rm, sh, location, case, resdir, savename, F_pv=None):
 
 
-    CF_data=np.loadtxt('%s/%s/data_CF.csv'%(datadir,location), delimiter=',')
-    Pbat_data=np.loadtxt('%s/%s/data_P_bat.csv'%(datadir,location), delimiter=',')
+    CF_data=np.loadtxt('%s/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
+    Pbat_data=np.loadtxt('%s/%s-%s-data_P_bat.csv'%(resdir, case, location), delimiter=',')
 
     CF=CF_data[1:,1:]
     P_bat=Pbat_data[1:,1:]
@@ -302,7 +419,7 @@ def get_BAT_design(rm, sh, location, datadir, savename, F_pv=None):
     P_bat=1/((x_2-x_1)*(y_2-y_1))*(Q_11*(x_2-x)*(y_2-y)+Q_21*(x-x_1)*(y_2-y)+Q_12*(x_2-x)*(y-y_1)+Q_22*(x-x_1)*(y-y_1))
 
     if F_pv==None:
-        F_data=np.loadtxt('%s/%s/data_F_pv.csv'%(datadir,location), delimiter=',')
+        F_data=np.loadtxt('%s/%s-%s-data_F_pv.csv'%(resdir, case, location), delimiter=',')
         F_pv=F_data[1:,1:]
 
         Q_11=F_pv[row,col]
@@ -354,7 +471,7 @@ def get_BAT_design(rm, sh, location, datadir, savename, F_pv=None):
 
     LCOH, epy, OM_total=cal_LCOH(cf,  P_load, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_constr_pv)
 
-    print('RM=%.1f, SH=%.1f, F_pv=%.3f, P_bat=%.1f (MW), CF=%.4f, LCOH=%.2f'%(rm, sh,  F_pv, bat_pmax/1e3, cf, LCOH))	
+    print('%s RM=%.1f, SH=%.1f, F_pv=%.3f, P_bat=%.1f (MW), CF=%.4f, LCOH=%.2f'%(case, rm, sh,  F_pv, bat_pmax/1e3, cf, LCOH))	
 
 
     summary=np.array([
@@ -390,11 +507,11 @@ def get_BAT_design(rm, sh, location, datadir, savename, F_pv=None):
     return LCOH, cf
 
 
-def get_PHES_design(rm, sh, location, datadir, savename, F_pv=None):
+def get_PHES_design(rm, sh, location, case, resdir, savename, F_pv=None):
 
 
-    CF_data=np.loadtxt('%s/%s/data_CF.csv'%(datadir,location), delimiter=',')
-    PHES_data=np.loadtxt('%s/%s/data_P_PHES.csv'%(datadir,location), delimiter=',')
+    CF_data=np.loadtxt('%s/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
+    PHES_data=np.loadtxt('%s/%s-%s-data_P_PHES.csv'%(resdir, case, location), delimiter=',')
 
     CF=CF_data[1:,1:]
     P_PHES=PHES_data[1:,1:]
@@ -433,7 +550,7 @@ def get_PHES_design(rm, sh, location, datadir, savename, F_pv=None):
     P_PHES=1/((x_2-x_1)*(y_2-y_1))*(Q_11*(x_2-x)*(y_2-y)+Q_21*(x-x_1)*(y_2-y)+Q_12*(x_2-x)*(y-y_1)+Q_22*(x-x_1)*(y-y_1))
 
     if F_pv==None:
-        F_data=np.loadtxt('%s/%s/data_F_pv.csv'%(datadir,location), delimiter=',')
+        F_data=np.loadtxt('%s/%s-%s-data_F_pv.csv'%(resdir, case, location), delimiter=',')
         F_pv=F_data[1:,1:]
 
         Q_11=F_pv[row,col]
@@ -478,7 +595,7 @@ def get_PHES_design(rm, sh, location, datadir, savename, F_pv=None):
 
     LCOH, epy, OM_total=cal_LCOH(cf,  P_load, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_constr_pv)
 
-    print('RM=%.1f, SH=%.1f, F_pv=%.3f, P_PHES=%.1f (MW), CF=%.4f, LCOH=%.2f'%(rm, sh,  F_pv, PHES_pmax/1e3, cf, LCOH))	
+    print('%s RM=%.1f, SH=%.1f, F_pv=%.3f, P_PHES=%.1f (MW), CF=%.4f, LCOH=%.2f'%(case, rm, sh,  F_pv, PHES_pmax/1e3, cf, LCOH))	
 
 
     summary=np.array([
