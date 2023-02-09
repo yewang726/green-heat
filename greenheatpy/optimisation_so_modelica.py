@@ -9,7 +9,7 @@ import time
 import functools
 from scipy import optimize as sciopt
 
-def objective_function(location, sim, t_storage, RM, obj_cf, par_n, par_v):
+def objective_function(location, year, sim, t_storage, RM, obj_cf, par_n, par_v):
 
     nv=len(par_n)
     for i in range(nv):
@@ -33,14 +33,14 @@ def objective_function(location, sim, t_storage, RM, obj_cf, par_n, par_v):
         res_fn=sim.res_fn
         res=DyMat.DyMatFile(res_fn)
 
-        LCOH=process_BAT(res, obj_cf=obj_cf, verbose=True) 
+        LCOH=process_BAT(res, year, obj_cf=obj_cf, verbose=True) 
 
     except:
         LCOH=99999
 
     return LCOH
 
-def objective_function_PHES(location, sim, t_storage, RM, obj_cf, par_n, par_v):
+def objective_function_PHES(location, year, sim, t_storage, RM, obj_cf, par_n, par_v):
 
     nv=len(par_n)
     for i in range(nv):
@@ -64,13 +64,13 @@ def objective_function_PHES(location, sim, t_storage, RM, obj_cf, par_n, par_v):
         res_fn=sim.res_fn
         res=DyMat.DyMatFile(res_fn)
 
-        LCOH=process_PHES(res, obj_cf=obj_cf, verbose=True) 
+        LCOH=process_PHES(res, year, obj_cf=obj_cf, verbose=True) 
     except:
         LCOH=99999
 
     return LCOH
 
-def objective_function_TES(location, sim, t_storage, RM, obj_cf, par_n, par_v):
+def objective_function_TES(location, year, sim, t_storage, RM, obj_cf, par_n, par_v):
 
     nv=len(par_n)
     for i in range(nv):
@@ -92,13 +92,13 @@ def objective_function_TES(location, sim, t_storage, RM, obj_cf, par_n, par_v):
         sim.simulate(start='0', stop='1y', step='5m', initStep=None, maxStep='5m', integOrder='1e-06', solver='dassl', nls='homotopy', lv='-LOG_SUCCESS,-stdout')
         res_fn=sim.res_fn
         res=DyMat.DyMatFile(res_fn)
-        LCOH=process_TES(res, obj_cf=obj_cf, verbose=True) 
+        LCOH=process_TES(res, year, obj_cf=obj_cf, verbose=True) 
     except:
         LCOH=99999
 
     return LCOH
 
-def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, casedir, case='BAT', obj_cf=None, solcast_TMY=False):
+def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, casedir, case='BAT', year=2020, obj_cf=None, solcast_TMY=False):
     '''
     Arguments:
         model_name (str)  : minizic model name
@@ -149,11 +149,11 @@ def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, ca
         bounds.append([LB[i], UB[i]])        
 
     if case=='BAT':
-        objfunc = functools.partial(objective_function, location, sim, t_storage, RM, obj_cf, names)
+        objfunc = functools.partial(objective_function, location, year,sim, t_storage, RM, obj_cf, names)
     elif case=='TES':
-        objfunc = functools.partial(objective_function_TES, location, sim, t_storage, RM, obj_cf, names)
+        objfunc = functools.partial(objective_function_TES,  location, year, sim, t_storage, RM, obj_cf, names)
     elif case=='PHES':
-        objfunc = functools.partial(objective_function_PHES, location, sim, t_storage, RM, obj_cf, names)
+        objfunc = functools.partial(objective_function_PHES, location, year, sim, t_storage, RM, obj_cf, names)
 
     res = sciopt.minimize(objfunc, nominals, method=method, bounds=bounds,
 			options={
@@ -352,7 +352,7 @@ results.write()
         f.write(bb)  
 
 
-def process_BAT(res, obj_cf=None, verbose=False):
+def process_BAT(res, year=2020, obj_cf=None, verbose=False):
     pm=Parameters()
     CF=res.data('CF')[-1]
     RM=res.data('RM')[-1]
@@ -367,10 +367,26 @@ def process_BAT(res, obj_cf=None, verbose=False):
     eta_storage=res.data('eff_ST_in')[0]
 
     pm=Parameters()
-    C_pv=pm.c_pv_system*pv_max
-    C_wind=pm.c_wind_system*wind_max
-    C_heater=P_heater*pm.c_heater
-    C_bat=bat_capa*pm.c_bt_energy+bat_pmax*pm.c_bt_power
+    if year==2020:
+        C_pv=pm.c_pv_system*pv_max
+        C_wind=pm.c_wind_system*wind_max
+        C_heater=P_heater*pm.c_heater
+        C_bat=bat_capa*pm.c_bt_energy+bat_pmax*pm.c_bt_power
+
+    elif year==2030:
+        C_pv=pm.c_pv_system_2030*pv_max
+        C_wind=pm.c_wind_system_2030*wind_max
+        C_heater=P_heater*pm.c_heater_2030
+        C_bat=bat_capa*pm.c_bt_energy_2030+bat_pmax*pm.c_bt_power_2030
+
+    elif year==2050:
+        C_pv=pm.c_pv_system_2050*pv_max
+        C_wind=pm.c_wind_system_2050*wind_max
+        C_heater=P_heater*pm.c_heater_2050
+        C_bat=bat_capa*pm.c_bt_energy_2050+bat_pmax*pm.c_bt_power_2050
+	
+    else:
+        print('Year %s data is not implemented'%year)
 
     CAPEX=C_pv+C_wind+C_heater+C_bat
 
@@ -441,7 +457,7 @@ def process_BAT(res, obj_cf=None, verbose=False):
     return LCOH
 
 
-def process_PHES(res, obj_cf=None, verbose=False):
+def process_PHES(res, year=2020, obj_cf=None, verbose=False):
     pm=Parameters()
     CF=res.data('CF')[-1]
     RM=res.data('RM')[-1]
@@ -455,10 +471,29 @@ def process_PHES(res, obj_cf=None, verbose=False):
     P_load_des=res.data('P_load')[0]/1e3 # kW
     eta_storage=res.data('eff_ST_in')[0]
 
-    C_pv=pm.c_pv_system*pv_max
-    C_wind=pm.c_wind_system*wind_max
-    C_heater=P_heater*pm.c_heater
-    C_PHES=E_ST_max*pm.c_PHES_energy+P_ST_max*pm.c_PHES_power
+
+    if year ==2020:
+        C_pv=pm.c_pv_system*pv_max
+        C_wind=pm.c_wind_system*wind_max
+        C_heater=P_heater*pm.c_heater
+        C_PHES=E_ST_max*pm.c_PHES_energy+P_ST_max*pm.c_PHES_power
+
+    elif year==2030:
+        C_pv=pm.c_pv_system_2030*pv_max
+        C_wind=pm.c_wind_system_2030*wind_max
+        C_heater=P_heater*pm.c_heater_2030
+        C_PHES=E_ST_max*pm.c_PHES_energy_2030+P_ST_max*pm.c_PHES_power_2030
+
+
+    elif year==2050:
+        C_pv=pm.c_pv_system_2050*pv_max
+        C_wind=pm.c_wind_system_2050*wind_max
+        C_heater=P_heater*pm.c_heater_2050
+        C_PHES=E_ST_max*pm.c_PHES_energy_2050+P_ST_max*pm.c_PHES_power_2050
+
+    else:
+        print('Year %s data is not implemented'%year)
+
 
     CAPEX=C_pv+C_wind+C_heater+C_PHES
 
@@ -515,10 +550,10 @@ def process_PHES(res, obj_cf=None, verbose=False):
     if obj_cf!=None:
         if CF<obj_cf:
             LCOH=99999
-    print(obj_cf, CF, LCOH)
+
     return LCOH
 
-def process_TES(res, obj_cf=None, verbose=False):
+def process_TES(res, year=2020, obj_cf=None, verbose=False):
     pm=Parameters()
     CF=res.data('CF')[-1]
     RM=res.data('RM')[-1]
@@ -532,10 +567,27 @@ def process_TES(res, obj_cf=None, verbose=False):
     eta_storage=res.data('eff_ST_in')[0]
 
     pm=Parameters()
-    C_pv=pm.c_pv_system*pv_max
-    C_wind=pm.c_wind_system*wind_max
-    C_heater=P_heater*pm.c_heater
-    C_TES=TES_capa*pm.c_TES
+    if year ==2020:
+        C_pv=pm.c_pv_system*pv_max
+        C_wind=pm.c_wind_system*wind_max
+        C_heater=P_heater*pm.c_heater
+        C_TES=TES_capa*pm.c_TES
+
+    elif year==2030:
+        C_pv=pm.c_pv_system_2030*pv_max
+        C_wind=pm.c_wind_system_2030*wind_max
+        C_heater=P_heater*pm.c_heater_2030
+        C_TES=TES_capa*pm.c_TES_2030
+
+    elif year==2050:
+        C_pv=pm.c_pv_system_2050*pv_max
+        C_wind=pm.c_wind_system_2050*wind_max
+        C_heater=P_heater*pm.c_heater_2050
+        C_TES=TES_capa*pm.c_TES_2050
+
+    else:
+        print('Year %s data is not implemented'%year)
+
 
     CAPEX=C_pv+C_wind+C_heater+C_TES
 
