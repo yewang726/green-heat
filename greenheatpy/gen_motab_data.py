@@ -41,12 +41,16 @@ def gen_ref_power(model_name, location, casedir, plot=False, solcast_TMY=False):
     data=output[0][1:-1].split(',')  
     data=np.array([float(x) for x in data])   
     if model_name=='pv':
-        print('%s design capacity factor'%model_name, np.sum(data)/pv_ref_capa/365./24.)  
+        CF=np.sum(data)/pv_ref_capa/365./24.
     elif model_name=='wind':
-        print('%s design capacity factor'%model_name, np.sum(data)/wind_ref_capa/365./24.) 
+        CF=np.sum(data)/wind_ref_capa/365./24.
+
+    print('%s design capacity factor'%model_name, CF) 
 
 
     savefile=casedir+'/%s_%s.motab'%(name, location)
+    savefile=savefile.replace(" ", "-")
+
     f=open(savefile, 'w')
     f.write('#1\n') 
     f.write('#METALABELS, time, %s\n'%name)
@@ -61,7 +65,8 @@ def gen_ref_power(model_name, location, casedir, plot=False, solcast_TMY=False):
         plt.ylabel('Power generation (kW)')
         plt.show()
         plt.close()
-    return savefile
+
+    return savefile, CF
 
 if __name__=='__main__':
     model_name='wind'

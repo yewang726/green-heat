@@ -137,9 +137,9 @@ def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, ca
     #sim.compile_model()
     #sim.compile_sim(args=['-s'])
 
-    pv_fn=gen_ref_power(model_name='pv', location=location,  casedir=wd, plot=False, solcast_TMY=solcast_TMY)
+    pv_fn, CF=gen_ref_power(model_name='pv', location=location,  casedir=wd, plot=False, solcast_TMY=solcast_TMY)
     table_file_pv=pv_fn
-    wind_fn=gen_ref_power(model_name='wind', location=location, casedir=wd, plot=False, solcast_TMY=solcast_TMY) 
+    wind_fn, CF=gen_ref_power(model_name='wind', location=location, casedir=wd, plot=False, solcast_TMY=solcast_TMY) 
     table_file_wind=wind_fn
     sim.update_pars(['table_file_pv', 'table_file_wind'], [table_file_pv, table_file_wind])
 
