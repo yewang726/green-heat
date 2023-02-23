@@ -6,11 +6,12 @@ import matplotlib
 import pandas as pd
 from greenheatpy.get_green_h2 import get_data, get_best_location, get_storage_data
 from greenheatpy.get_single_design import get_CST_design, get_CST_modular_design, get_TES_design, get_BAT_design,get_PHES_design
-from greenheat.process_cost import update_cost
+from greenheatpy.process_cost import update_cost
 
-def plot_cf_curves(year=2020):
+def plot_cf_curves(resdir, year=2020):
     """
-    plot CF, SH, RM curves
+    plot CF-SH-RM curves
+    resdir (str): the main directory of the results
 
     """
     locations=[ 'Pinjara',  'Pilbara',  'Gladstone', 'Burnie', 'Upper Spencer Gulf']
@@ -43,7 +44,7 @@ def plot_cf_curves(year=2020):
             'Wind+PHES',
             ]
 
-    info=np.loadtxt('./max_rm_sh.csv', delimiter=',', dtype=str, skiprows=1)
+    info=np.loadtxt('%s/max_rm_sh.csv'%resdir, delimiter=',', dtype=str, skiprows=1)
     INFO={}
     for i in range(len(info)):
         case=info[i,0][1:-1]
@@ -67,13 +68,13 @@ def plot_cf_curves(year=2020):
         for location in locations:  
             t_storage=np.r_[1e-6,2,4,6,8,10,12,14,17,20,25,40,60]
             multiple=np.append(np.arange(1, 5, 0.5), np.arange(5, 11, 2))
-            if 'HYBRID' in case:
-                if year==2020:
-                    casedir='./%s/%s'%(case, location)
-                else:
-                    casedir='./%s/%s-%s'%(case, location, year)
-            else:
-                casedir='./%s/%s'%(case, location)
+            #if 'HYBRID' in case:
+            #    if year==2020:
+            #        casedir='%s/%s/%s'%(resdir, case, location)
+            #    else:
+            #        casedir='%s/%s/%s-%s'%(resdir, case, location, year)
+            #else:
+            casedir='%s/%s/%s'%(resdir, case, location)
 
             print(case, location)
             results=np.array([])
@@ -109,18 +110,18 @@ def plot_cf_curves(year=2020):
             CF=results[:,3].reshape(m,n).astype(float)
             savedata=np.vstack((t_storage, CF))
             savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
-            np.savetxt('./post/%s/%s-%s-data_CF.csv'%(year, case, location), savedata, fmt='%.6f', delimiter=',')
+            np.savetxt('%s/post/%s/%s-%s-data_CF.csv'%(resdir, year, case, location), savedata, fmt='%.6f', delimiter=',')
   
             savedata=np.vstack((t_storage, LCOH))
             savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
-            np.savetxt('./post/%s/%s-%s-data_LCOH.csv'%(year, case, location), savedata, fmt='%.6f', delimiter=',')
+            np.savetxt('%s/post/%s/%s-%s-data_LCOH.csv'%(resdir, year, case, location), savedata, fmt='%.6f', delimiter=',')
 
             if 'HYBRID' in case:
 
                 F_pv=results[:,4].reshape(m,n).astype(float)
                 savedata=np.vstack((t_storage, F_pv))
                 savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
-                np.savetxt('./post/%s/%s-%s-data_F_pv.csv'%(year, case, location), savedata, fmt='%.6f', delimiter=',')
+                np.savetxt('%s/post/%s/%s-%s-data_F_pv.csv'%(resdir, year, case, location), savedata, fmt='%.6f', delimiter=',')
 
             elif case=='CST':
                 Hrecv=results[:,5].reshape(m,n).astype(float)
@@ -134,50 +135,50 @@ def plot_cf_curves(year=2020):
 
                 savedata=np.append(multiple, Htower[:,0]).reshape(2, m)
                 savedata=np.vstack((np.array(['SM', 'Tower height (m)']).reshape(1,2), savedata.T))
-                np.savetxt('./post/%s/%s-%s-data_Htower.csv'%(year, case, location), savedata, fmt='%s', delimiter=',')
+                np.savetxt('%s/post/%s/%s-%s-data_Htower.csv'%(resdir, year, case, location), savedata, fmt='%s', delimiter=',')
 
                 savedata=np.append(multiple, Hrecv[:,0]).reshape(2, m)
                 savedata=np.vstack((np.array(['SM', 'Receiver height (m)']).reshape(1,2), savedata.T))    
-                np.savetxt('./post/%s/%s-%s-data_Hrecv.csv'%(year, case, location), savedata, fmt='%s', delimiter=',')
+                np.savetxt('%s/post/%s/%s-%s-data_Hrecv.csv'%(resdir, year, case, location), savedata, fmt='%s', delimiter=',')
 
                 savedata=np.append(multiple, Drecv[:,0]).reshape(2, m)
                 savedata=np.vstack((np.array(['SM', 'Receiver diameter (m)']).reshape(1,2), savedata.T))  
-                np.savetxt('./post/%s/%s-%s-data_Drecv.csv'%(year, case, location), savedata, fmt='%s', delimiter=',')
+                np.savetxt('%s/post/%s/%s-%s-data_Drecv.csv'%(resdir, year, case, location), savedata, fmt='%s', delimiter=',')
 
                 savedata=np.append(multiple, Nhelio[:,0]).reshape(2, m)
                 savedata=np.vstack((np.array(['SM', 'Number of heliostats']).reshape(1,2), savedata.T))    
-                np.savetxt('./post/%s/%s-%s-data_Nhelio.csv'%(year, case, location), savedata, fmt='%s', delimiter=',')
+                np.savetxt('%s/post/%s/%s-%s-data_Nhelio.csv'%(resdir, year, case, location), savedata, fmt='%s', delimiter=',')
 
                 savedata=np.append(multiple, Aland[:,0]).reshape(2, m)
                 savedata=np.vstack((np.array(['SM', 'Land area (m2)']).reshape(1,2), savedata.T))   
-                np.savetxt('./post/%s/%s-%s-data_Aland.csv'%(year, case, location), savedata, fmt='%s', delimiter=',')
+                np.savetxt('%s/post/%s/%s-%s-data_Aland.csv'%(resdir, year, case, location), savedata, fmt='%s', delimiter=',')
 
             if case=='CST-modular':
                 num_modules=results[:,4].reshape(m,n).astype(float)
                 savedata=np.vstack((t_storage, num_modules))
                 savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
-                np.savetxt('./post/%s/%s-%s-data_num_modules.csv'%(year, case, location), savedata, fmt='%s', delimiter=',')
+                np.savetxt('%s/post/%s/%s-%s-data_num_modules.csv'%(resdir, year, case, location), savedata, fmt='%s', delimiter=',')
 
             if 'BAT' in case:
                 P_bat=results[:,9].reshape(m,n).astype(float) 
 
                 savedata=np.vstack((t_storage, P_bat))
                 savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
-                np.savetxt('./post/%s/%s-%s-data_P_bat.csv'%(year, case, location), savedata, fmt='%.2f', delimiter=',')  
+                np.savetxt('%s/post/%s/%s-%s-data_P_bat.csv'%(resdir, year, case, location), savedata, fmt='%.2f', delimiter=',')  
 
             elif 'PHES' in case:
                 P_PHES=results[:,9].reshape(m,n).astype(float) 
 
                 savedata=np.vstack((t_storage, P_PHES))
                 savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
-                np.savetxt('./post/%s/%s-%s-data_P_PHES.csv'%(year, case, location), savedata, fmt='%.2f', delimiter=',')  
+                np.savetxt('%s/post/%s/%s-%s-data_P_PHES.csv'%(resdir, year, case, location), savedata, fmt='%.2f', delimiter=',')  
     
             elif 'TES' in case:
                 P_heater=results[:,7].reshape(m,n).astype(float)  
 
                 savedata=np.vstack((t_storage, P_heater))
                 savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
-                np.savetxt('./post/%s/%s-%s-data_P_heater.csv'%(year, case, location), savedata, fmt='%.2f', delimiter=',')            
+                np.savetxt('%s/post/%s/%s-%s-data_P_heater.csv'%(resdir, year, case, location), savedata, fmt='%.2f', delimiter=',')            
 
             for i in range(m):
                 if RM[i,0]>9:
@@ -193,7 +194,7 @@ def plot_cf_curves(year=2020):
             plt.legend(loc=1, bbox_to_anchor=(1.4,1.), fontsize=fts)
             plt.xticks(fontsize=fts)
             plt.yticks(fontsize=fts)
-            plt.savefig(open('./post/%s/%s-%s-CF.png'%(year, case, location), 'wb'),  bbox_inches='tight')
+            plt.savefig(open('%s/post/%s/%s-%s-CF.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
             #plt.show()
             plt.close()    
 
@@ -209,7 +210,7 @@ def plot_cf_curves(year=2020):
             #plt.legend(loc=1, bbox_to_anchor=(1.4,1.), fontsize=fts)
             plt.xticks(fontsize=fts)
             plt.yticks(fontsize=fts)
-            plt.savefig(open('./post/%s/%s-%s-CF-LCOH.png'%(year, case, location), 'wb'),  bbox_inches='tight')
+            plt.savefig(open('%s/post/%s/%s-%s-CF-LCOH.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
             #plt.show()
             plt.close()    
 
@@ -224,7 +225,7 @@ def plot_cf_curves(year=2020):
                 plt.legend(loc=1, bbox_to_anchor=(1.4,1.), fontsize=fts)
                 plt.xticks(fontsize=fts)
                 plt.yticks(fontsize=fts)
-                plt.savefig(open('./post/%s/%s-%s-CF-Fpv.png'%(year, case, location), 'wb'),  bbox_inches='tight')
+                plt.savefig(open('%s/post/%s/%s-%s-CF-Fpv.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
                 #plt.show()
                 plt.close()   
 
@@ -237,7 +238,7 @@ def plot_cf_curves(year=2020):
                 #plt.title(title, fontsize=fts)
                 plt.xticks(fontsize=fts)
                 plt.yticks(fontsize=fts)
-                plt.savefig(open('./post/%s/%s-%s-CF-Hrecv.png'%(year, case, location), 'wb'),  bbox_inches='tight')
+                plt.savefig(open('%s/post/%s/%s-%s-CF-Hrecv.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
                 #plt.show()
                 plt.close()   
 
@@ -249,7 +250,7 @@ def plot_cf_curves(year=2020):
                 #plt.title(title, fontsize=fts)
                 plt.xticks(fontsize=fts)
                 plt.yticks(fontsize=fts)
-                plt.savefig(open('./post/%s/%s-%s-CF-Drecv.png'%(year, case, location), 'wb'),  bbox_inches='tight')
+                plt.savefig(open('%s/post/%s/%s-%s-CF-Drecv.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
                 #plt.show()
                 plt.close()   
 
@@ -261,7 +262,7 @@ def plot_cf_curves(year=2020):
                 #plt.title(title, fontsize=fts)
                 plt.xticks(fontsize=fts)
                 plt.yticks(fontsize=fts)
-                plt.savefig(open('./post/%s/%s-%s-CF-Htower.png'%(year, case, location), 'wb'),  bbox_inches='tight')
+                plt.savefig(open('%s/post/%s/%s-%s-CF-Htower.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
                 #plt.show()
                 plt.close()   
 
@@ -273,7 +274,7 @@ def plot_cf_curves(year=2020):
                 #plt.title(title, fontsize=fts)
                 plt.xticks(fontsize=fts)
                 plt.yticks(fontsize=fts)
-                plt.savefig(open('./post/%s/%s-%s-CF-Nhelio.png'%(year, case, location), 'wb'),  bbox_inches='tight')
+                plt.savefig(open('%s/post/%s/%s-%s-CF-Nhelio.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
                 #plt.show()
                 plt.close()   
 
@@ -285,7 +286,7 @@ def plot_cf_curves(year=2020):
                 #plt.title(title, fontsize=fts)
                 plt.xticks(fontsize=fts)
                 plt.yticks(fontsize=fts)
-                plt.savefig(open('./post/%s/%s-%s-CF-Rland.png'%(year, case, location), 'wb'),  bbox_inches='tight')
+                plt.savefig(open('%s/post/%s/%s-%s-CF-Rland.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
                 #plt.show()
                 plt.close()   
 
@@ -297,7 +298,7 @@ def plot_cf_curves(year=2020):
                 #plt.title(title, fontsize=fts)
                 plt.xticks(fontsize=fts)
                 plt.yticks(fontsize=fts)
-                plt.savefig(open('./post/%s/%s-%s-CF-num_modules.png'%(year, case, location), 'wb'),  bbox_inches='tight')
+                plt.savefig(open('%s/post/%s/%s-%s-CF-num_modules.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
                 #plt.show()
                 plt.close() 
 
@@ -311,7 +312,7 @@ def plot_cf_curves(year=2020):
                 plt.legend(loc=1, bbox_to_anchor=(1.4,1.), fontsize=fts)
                 plt.xticks(fontsize=fts)
                 plt.yticks(fontsize=fts)
-                plt.savefig(open('./post/%s/%s-%s-CF-P_bat.png'%(year, case, location), 'wb'),  bbox_inches='tight')
+                plt.savefig(open('%s/post/%s/%s-%s-CF-P_bat.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
                 #plt.show()
                 plt.close()   
 
@@ -325,7 +326,7 @@ def plot_cf_curves(year=2020):
                 plt.legend(loc=1, bbox_to_anchor=(1.4,1.), fontsize=fts)
                 plt.xticks(fontsize=fts)
                 plt.yticks(fontsize=fts)
-                plt.savefig(open('./post/%s/%s-%s-CF-P_PHES.png'%(year, case, location), 'wb'),  bbox_inches='tight')
+                plt.savefig(open('%s/post/%s/%s-%s-CF-P_PHES.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
                 #plt.show()
                 plt.close()  
 
@@ -340,7 +341,7 @@ def plot_cf_curves(year=2020):
                 plt.legend(loc=1, bbox_to_anchor=(1.4,1.), fontsize=fts)
                 plt.xticks(fontsize=fts)
                 plt.yticks(fontsize=fts)
-                plt.savefig(open('./post/%s/%s-%s-CF-P_heater.png'%(year, case, location), 'wb'),  bbox_inches='tight')
+                plt.savefig(open('%s/post/%s/%s-%s-CF-P_heater.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
                 #plt.show()
                 plt.close()   
 
@@ -353,12 +354,12 @@ def fmt(x):
 
 
 
-def get_cf_lcoh_optimal(location, case, year=2020, plot=True):
+def get_cf_lcoh_optimal(location, case, resdir, year=2020, plot=True):
 
  
-    data=np.loadtxt('./post/%s/%s-%s-data_LCOH.csv'%(year, case, location), delimiter=',')
+    data=np.loadtxt('%s/post/%s/%s-%s-data_LCOH.csv'%(resdir, year, case, location), delimiter=',')
     LCOH=data[1:, 1:]
-    data=np.loadtxt('./post/%s/%s-%s-data_CF.csv'%(year, case, location), delimiter=',')
+    data=np.loadtxt('%s/post/%s/%s-%s-data_CF.csv'%(resdir, year, case, location), delimiter=',')
     CF=data[1:, 1:]  
       
     multiple=data[1:, 0]
@@ -422,7 +423,7 @@ def get_cf_lcoh_optimal(location, case, year=2020, plot=True):
     results=results.reshape(int(len(results)/4), 4)   
     title=np.array(['CF','SH','RM','LCOH']).reshape(1,4)
     summary=np.vstack((title, results))
-    np.savetxt('./post/%s/%s-%s-LCOH-CF.csv'%(year, case, location), summary, fmt='%s', delimiter=',')
+    np.savetxt('%s/post/%s/%s-%s-LCOH-CF.csv'%(resdir, year, case, location), summary, fmt='%s', delimiter=',')
           
     if plot:
         #cmap_reversed = matplotlib.cm.get_cmap('bone_r')
@@ -443,7 +444,7 @@ def get_cf_lcoh_optimal(location, case, year=2020, plot=True):
         plt.yticks(fontsize=fts)
         plt.xlim([0,np.max(t_storage)])
         plt.ylim([1,np.max(multiple)])
-        plt.savefig(open('./post/%s/%s-%s-RM-SH-LCOH.png'%(year, case, location), 'wb'),  bbox_inches='tight')
+        plt.savefig(open('%s/post/%s/%s-%s-RM-SH-LCOH.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
         #plt.show()
         plt.close()
 
@@ -462,7 +463,7 @@ def get_cf_lcoh_optimal(location, case, year=2020, plot=True):
         plt.yticks(fontsize=fts)
         plt.xlim([0,np.max(t_storage)])
         plt.ylim([1,np.max(multiple)])
-        plt.savefig(open('./post/%s/%s-%s-RM-SH-CF.png'%(year, case, location), 'wb'),  bbox_inches='tight')
+        plt.savefig(open('%s/post/%s/%s-%s-RM-SH-CF.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
         #plt.show()
         plt.close()
         
@@ -473,7 +474,7 @@ def get_cf_lcoh_optimal(location, case, year=2020, plot=True):
         plt.ylabel('LCOH (USD/MWh$_\mathrm{th}$)', fontsize=fts)
         plt.xticks(fontsize=fts)
         plt.yticks(fontsize=fts)
-        plt.savefig(open('./post/%s/%s-%s-LCOH-CF.png'%(year, case, location), 'wb'),  bbox_inches='tight')
+        plt.savefig(open('%s/post/%s/%s-%s-LCOH-CF.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
         #plt.show()
         plt.close()
     else:
@@ -503,10 +504,9 @@ def get_cf_lcoh_optimal_hydrogen(year=2020):
 
 
 
-def plot_cf_lcoh_comparison(location, year=2020):
+def plot_cf_lcoh_comparison(location, resdir, year=2020):
 
     cases=['CST', 'CST-modular', 'TES-PV', 'TES-WIND', 'TES-HYBRID','BAT-PV','BAT-WIND','BAT-HYBRID','PHES-PV','PHES-WIND','PHES-HYBRID', 'H2', 'H2-storage']
-    #LABELS=['CST+TES', 'CST-modular+TES', 'PV+TES',  'Wind+TES', 'PV+Wind+TES',  'PV+Batt', 'Wind+Batt', 'PV+Wind+Batt', 'PV+PHES', 'Wind+PHES','PV+Wind+PHES', 'Hydrogen'] 
     linestyles=['-', '-', '-', '-', 'o', '--', '--', '^', '-.', '-.', 's', ':', ':'] 
 
     norm = matplotlib.colors.Normalize(vmin=1, vmax=20)
@@ -527,7 +527,7 @@ def plot_cf_lcoh_comparison(location, year=2020):
                 lcoh=LCOH_h2[location]
             cf=CF*100.
         else:
-            fn='./post/%s/%s-%s-LCOH-CF.csv'%(year, case, location)
+            fn='%s/post/%s/%s-%s-LCOH-CF.csv'%(resdir, year, case, location)
             data=np.loadtxt(fn, delimiter=',', skiprows=1)
             cf=data[:,0]
             lcoh=data[:,3]
@@ -544,11 +544,11 @@ def plot_cf_lcoh_comparison(location, year=2020):
                  label=ll[ss], c='black')
     ax2.get_yaxis().set_visible(False)
 
-    legend1 = plt.legend([plot_lines[0],plot_lines[1],plot_lines[2],plot_lines[3]], ["CST", "CST-modules", "PV", "Wind"], loc=1, bbox_to_anchor=(1.43,1.), fontsize=fts)
-    ax.legend([plot_lines[4],plot_lines[7], plot_lines[10], plot_lines[11], plot_lines[12]] , ["PV+Wind+TES", "PV+Wind+Batt", "PV+Wind+PHES", "H$_2$", "H$_2$ (high \$ stor)"], loc=1, bbox_to_anchor=(1.492,0.4), fontsize=fts)
+    legend1 = plt.legend([plot_lines[0],plot_lines[1],plot_lines[2],plot_lines[3]], ["CST", "CST-md", "PV", "Wind"], loc=1, bbox_to_anchor=(1.33,1.), fontsize=fts)
+    ax.legend([plot_lines[4],plot_lines[7], plot_lines[10], plot_lines[11], plot_lines[12]] , ["PV+Wind+TES", "PV+Wind+Batt", "PV+Wind+PHES", "H$_2$", "H$_2$ (high \$ stor)"], loc=1, bbox_to_anchor=(1.492,0.66), fontsize=fts)
     plt.gca().add_artist(legend1)
 
-    ax2.legend(loc=1, bbox_to_anchor=(1.28,0.66), fontsize=fts)
+    ax2.legend(loc=1, bbox_to_anchor=(1.58,1), fontsize=fts)
 
     #plt.legend()
     #plt.xlim([0.15,1])
@@ -559,12 +559,12 @@ def plot_cf_lcoh_comparison(location, year=2020):
     ax.set_ylim([0, 300])
     #plt.title(case)
     plt.title(location+' %s'%year)
-    plt.savefig(open('./post/%s/Comparison-LCOH-CF-%s.png'%(year, location),'wb'), bbox_inches='tight', dpi=200)
+    plt.savefig(open('%s/post/%s/Comparison-LCOH-CF-%s.png'%(resdir, year, location),'wb'), bbox_inches='tight', dpi=200)
     #plt.show()
     plt.close()
 
 
-def plot_breakdown_bars(location, year=2020):
+def plot_breakdown_bars(location, resdir, year=2020):
 
     cases=['CST', 'CST-modular','TES-PV', 'TES-WIND', 'TES-HYBRID',  'BAT-PV', 'BAT-WIND', 'BAT-HYBRID','PHES-PV','PHES-WIND','PHES-HYBRID']
     #LABELS=['CST+TES', 'PV+TES',  'WT+TES', 'PV+WT+TES',  'PV+BAT', 'WT+BAT', 'PV+WT+BAT', 'PV+PHES', 'WT+PHES','PV+WT+PHES']
@@ -603,7 +603,7 @@ def plot_breakdown_bars(location, year=2020):
         CFs=np.array([])  
 
         case=cases[i]
-        fn='./post/%s/%s-%s-LCOH-CF.csv'%(year, case, location)
+        fn='%s/post/%s/%s-%s-LCOH-CF.csv'%(resdir, year, case, location)
         data=np.loadtxt(fn, delimiter=',', skiprows=1)
         cfs=data[:,0]
         SHs=data[:,1]
@@ -621,7 +621,7 @@ def plot_breakdown_bars(location, year=2020):
                 lcoh=LCOHs[idx][0]
                 cf=cfs[idx][0]
                 savename='design_%s_CF=%.0f%%'%(case, cf0)
-                resdir='./post/%s'%year
+                resdir='%s/post/%s'%(resdir, year)
                 if case=='CST':
                     lcoh_1, cf_1=get_CST_design(rm, sh, location, case, resdir, savename)
                 if case=='CST-modular':
@@ -837,11 +837,11 @@ def plot_breakdown_bars(location, year=2020):
     ax.legend([l1, l2, l3, l4, l5, l6, l7, l8 ,l9, l10, l11, l12, l13], legends, loc=1, bbox_to_anchor=(1.3,1.), fontsize=fts)
 
     ax.set_ylim([0,300.])
-    plt.savefig(open('./post/%s/LCOH-breakdown-%s.png'%(year, location), 'wb'),  bbox_inches='tight')
+    plt.savefig(open('%s/LCOH-breakdown-%s.png'%(resdir, location), 'wb'),  bbox_inches='tight')
     #plt.show()
     plt.close()
 
-def plot_breakdown_compare(cf0, year=2020, process=False):
+def plot_breakdown_compare(cf0, resdir, year=2020, process=False):
 
     locations=np.array([ 'Pilbara', 'Burnie',  'Gladstone', 'Pinjara',   'Upper Spencer Gulf'])
     cases=np.array(['CST-modular', 'TES-PV', 'TES-WIND', 'TES-HYBRID',  'BAT-PV', 'BAT-WIND', 'BAT-HYBRID','PHES-PV','PHES-WIND','PHES-HYBRID', 'H2'])
@@ -876,7 +876,7 @@ def plot_breakdown_compare(cf0, year=2020, process=False):
                     lcoh=interp_lcoh(LCOH_best[location], CF*100., cf0)
                     LCOH=np.append(LCOH, lcoh)
                 else:
-                    fn='./post/%s/%s-%s-LCOH-CF.csv'%(year, case, location)
+                    fn='%s/post/%s/%s-%s-LCOH-CF.csv'%(resdir, year, case, location)
                     data=np.loadtxt(fn, delimiter=',', skiprows=1)
                     CF=data[:,0]
                     lcoh=data[:,3]
@@ -895,10 +895,10 @@ def plot_breakdown_compare(cf0, year=2020, process=False):
 
         DATA=DATA.reshape(12,5)
         DATA=np.hstack((np.append(0,cases).reshape(12,1), DATA))
-        np.savetxt('./post/%s/data_lcoh_%s.csv'%(year, cf0), DATA, delimiter=',', fmt='%s')
+        np.savetxt('%s/post/%s/data_lcoh_%s.csv'%(resdir, year, cf0), DATA, delimiter=',', fmt='%s')
 
     else:
-        DATA=np.loadtxt('./post/%s/data_lcoh_%.1f.csv'%(year, cf0), delimiter=',', dtype=str, skiprows=1)
+        DATA=np.loadtxt('%s/post/%s/data_lcoh_%.1f.csv'%(resdir, year, cf0), delimiter=',', dtype=str, skiprows=1)
         for i in range(len(cases)):
             LCOH=DATA[i, 1:].astype(float)
             width=0.08
@@ -918,49 +918,52 @@ def plot_breakdown_compare(cf0, year=2020, process=False):
     ax.legend(loc=1, bbox_to_anchor=(1.3,1.), fontsize=fts)
 
     ax.set_ylim([0,300.])
-    plt.savefig(open('./post/%s/compare-LCOH-breakdown-CF%s.png'%(year, cf0), 'wb'),  bbox_inches='tight')
+    plt.savefig(open('%s/post/%s/compare-LCOH-breakdown-CF%s.png'%(resdir, year, cf0), 'wb'),  bbox_inches='tight')
     #plt.show()
     plt.close()
-
 
 
 def interp_lcoh(LCOH, CF, cf):
     lcoh=np.interp(cf, CF, LCOH)
     return lcoh
 
+
 if __name__=='__main__':
     locations=[ 'Pilbara', 'Gladstone', 'Burnie',  'Pinjara',  'Upper Spencer Gulf']
-    cases=[#'CST',
-           #'CST-modular',
+    cases=['CST',
+           'CST-modular',
            'TES-HYBRID',
-           #'TES-PV',
-           #'TES-WIND',
+           'TES-PV',
+           'TES-WIND',
            'BAT-HYBRID',
-           #'BAT-PV',
-           #'BAT-WIND',
+           'BAT-PV',
+           'BAT-WIND',
            'PHES-HYBRID',
-           #'PHES-PV',
-           #'PHES-WIND'
+           'PHES-PV',
+           'PHES-WIND'
             ]
-    year=2030
-    #plot_cf_curves(year=year)
+    workdir='/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/results/CF-curves-new-wind'
+    year=2020
+    #plot_cf_curves(workdir, year=year)
 
+    '''
     for case in cases:
         for location in locations:
             print(case, location)
             costmodel=str(year)
             if 'HYBRID' in case:
-                update_cost(location, case, year=year, costmodel=costmodel)
+                update_cost(location, case, year=2020, costmodel=costmodel, resdir= workdir)
             else:
-                update_cost(location, case, year=2020, costmodel=costmodel)
+                update_cost(location, case, year=2020, costmodel=costmodel, resdir= workdir)
 
-            get_cf_lcoh_optimal(location, case, year=year, plot=True)
+            get_cf_lcoh_optimal(location, case, resdir= workdir, year=year, plot=False)
      
+    '''
+    for location in locations:
+        plot_cf_lcoh_comparison(location, workdir, year)
+ 
+        #plot_breakdown_bars(location, workdir)
 
-    #for location in locations:
-        #plot_cf_lcoh_comparison(location, year)
-        #plot_breakdown_bars(location)
-
-    #plot_breakdown_compare(cf0=99.)
+    #plot_breakdown_compare(cf0=99., workdir)
 
     

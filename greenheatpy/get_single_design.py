@@ -12,12 +12,12 @@ from greenheatpy.get_green_h2 import get_best_location
 def get_CST_design(rm, sh, location, case, resdir, savename=None, year=2020, costmodel='2020', OM_method='SL'):
 
 
-    CF_data=np.loadtxt('%s/2020/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
-    Aland_data=np.loadtxt('%s/2020/%s-%s-data_Aland.csv'%(resdir, case, location), delimiter=',', skiprows=1)
-    Drecv_data=np.loadtxt('%s/2020/%s-%s-data_Drecv.csv'%(resdir, case, location), delimiter=',', skiprows=1)
-    Hrecv_data=np.loadtxt('%s/2020/%s-%s-data_Hrecv.csv'%(resdir, case, location), delimiter=',', skiprows=1)
-    Htower_data=np.loadtxt('%s/2020/%s-%s-data_Htower.csv'%(resdir, case, location), delimiter=',', skiprows=1)
-    Nhelio_data=np.loadtxt('%s/2020/%s-%s-data_Nhelio.csv'%(resdir, case, location), delimiter=',', skiprows=1)
+    CF_data=np.loadtxt('%s/post/2020/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
+    Aland_data=np.loadtxt('%s/post/2020/%s-%s-data_Aland.csv'%(resdir, case, location), delimiter=',', skiprows=1)
+    Drecv_data=np.loadtxt('%s/post/2020/%s-%s-data_Drecv.csv'%(resdir, case, location), delimiter=',', skiprows=1)
+    Hrecv_data=np.loadtxt('%s/post/2020/%s-%s-data_Hrecv.csv'%(resdir, case, location), delimiter=',', skiprows=1)
+    Htower_data=np.loadtxt('%s/post/2020/%s-%s-data_Htower.csv'%(resdir, case, location), delimiter=',', skiprows=1)
+    Nhelio_data=np.loadtxt('%s/post/2020/%s-%s-data_Nhelio.csv'%(resdir, case, location), delimiter=',', skiprows=1)
 
     CF=CF_data[1:,1:]
     RM=CF_data[1:,0]
@@ -168,8 +168,8 @@ def get_CST_design(rm, sh, location, case, resdir, savename=None, year=2020, cos
 
 def get_CST_modular_design(rm, sh, location, case, resdir, savename=None, year=2020, costmodel='2020', OM_method='SL'):
 
-    CF_data=np.loadtxt('%s/2020/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
-    num_modules=np.loadtxt('%s/2020/%s-%s-data_num_modules.csv'%(resdir, case, location), delimiter=',', skiprows=1)
+    CF_data=np.loadtxt('%s/post/2020/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
+    num_modules=np.loadtxt('%s/post/2020/%s-%s-data_num_modules.csv'%(resdir, case, location), delimiter=',', skiprows=1)
 
 
     CF=CF_data[1:,1:]
@@ -340,8 +340,8 @@ def get_TES_design(rm, sh, location, case,  resdir, savename=None, year=2020, co
     costmodel (str): '2020', '2030', '2050', '2020_ub', ''2020_lb'
     '''
 
-    CF_data=np.loadtxt('%s/%s/%s-%s-data_CF.csv'%(resdir, year, case, location), delimiter=',')
-    Pheater_data=np.loadtxt('%s/%s/%s-%s-data_P_heater.csv'%(resdir, year, case, location), delimiter=',')
+    CF_data=np.loadtxt('%s/post/%s/%s-%s-data_CF.csv'%(resdir, year, case, location), delimiter=',')
+    Pheater_data=np.loadtxt('%s/post/%s/%s-%s-data_P_heater.csv'%(resdir, year, case, location), delimiter=',')
 
 
     CF=CF_data[1:,1:]
@@ -383,7 +383,7 @@ def get_TES_design(rm, sh, location, case,  resdir, savename=None, year=2020, co
 
     if F_pv==None:
    
-        F_data=np.loadtxt('%s/%s/%s-%s-data_F_pv.csv'%(resdir, year, case, location), delimiter=',')
+        F_data=np.loadtxt('%s/post/%s/%s-%s-data_F_pv.csv'%(resdir, year, case, location), delimiter=',')
         F_pv=F_data[1:,1:]
         Q_11=F_pv[row,col]
         Q_12=F_pv[row+1,col]
@@ -481,8 +481,8 @@ def get_BAT_design(rm, sh, location, case, resdir, savename=None, year=2020, cos
     costmodel (str): '2020', '2030', '2050', '2020_ub', ''2020_lb'
     '''
 
-    CF_data=np.loadtxt('%s/%s/%s-%s-data_CF.csv'%(resdir, year, case, location), delimiter=',')
-    Pbat_data=np.loadtxt('%s/%s/%s-%s-data_P_bat.csv'%(resdir, year, case, location), delimiter=',')
+    CF_data=np.loadtxt('%s/post/%s/%s-%s-data_CF.csv'%(resdir, year, case, location), delimiter=',')
+    Pbat_data=np.loadtxt('%s/post/%s/%s-%s-data_P_bat.csv'%(resdir, year, case, location), delimiter=',')
 
 
     CF=CF_data[1:,1:]
@@ -522,7 +522,7 @@ def get_BAT_design(rm, sh, location, case, resdir, savename=None, year=2020, cos
     P_bat=1/((x_2-x_1)*(y_2-y_1))*(Q_11*(x_2-x)*(y_2-y)+Q_21*(x-x_1)*(y_2-y)+Q_12*(x_2-x)*(y-y_1)+Q_22*(x-x_1)*(y-y_1))
 
     if F_pv==None:
-        F_data=np.loadtxt('%s/%s/%s-%s-data_F_pv.csv'%(resdir, year , case, location), delimiter=',')
+        F_data=np.loadtxt('%s/post/%s/%s-%s-data_F_pv.csv'%(resdir, year , case, location), delimiter=',')
         F_pv=F_data[1:,1:]
 
         Q_11=F_pv[row,col]
@@ -635,8 +635,8 @@ def get_PHES_design(rm, sh, location, case, resdir, savename=None, year=2020, co
     costmodel (str): '2020', '2030', '2050', '2020_ub', ''2020_lb'
     '''
 
-    CF_data=np.loadtxt('%s/%s/%s-%s-data_CF.csv'%(resdir, year, case, location), delimiter=',')
-    PHES_data=np.loadtxt('%s/%s/%s-%s-data_P_PHES.csv'%(resdir, year, case, location), delimiter=',')
+    CF_data=np.loadtxt('%s/post/%s/%s-%s-data_CF.csv'%(resdir, year, case, location), delimiter=',')
+    PHES_data=np.loadtxt('%s/post/%s/%s-%s-data_P_PHES.csv'%(resdir, year, case, location), delimiter=',')
 
     CF=CF_data[1:,1:]
     P_PHES=PHES_data[1:,1:]
@@ -675,7 +675,7 @@ def get_PHES_design(rm, sh, location, case, resdir, savename=None, year=2020, co
     P_PHES=1/((x_2-x_1)*(y_2-y_1))*(Q_11*(x_2-x)*(y_2-y)+Q_21*(x-x_1)*(y_2-y)+Q_12*(x_2-x)*(y-y_1)+Q_22*(x-x_1)*(y-y_1))
 
     if F_pv==None:
-        F_data=np.loadtxt('%s/%s/%s-%s-data_F_pv.csv'%(resdir, year, case, location), delimiter=',')
+        F_data=np.loadtxt('%s/post/%s/%s-%s-data_F_pv.csv'%(resdir, year, case, location), delimiter=',')
         F_pv=F_data[1:,1:]
 
         Q_11=F_pv[row,col]
