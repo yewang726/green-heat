@@ -6,7 +6,7 @@ import matplotlib
 import pandas as pd
 from greenheatpy.get_green_h2 import get_data, get_best_location, get_storage_data
 from greenheatpy.get_single_design import get_CST_design, get_CST_modular_design, get_TES_design, get_BAT_design,get_PHES_design
-from greenheatpy.process_cost import update_cost
+from greenheatpy.process_cost import future_cost
 
 def plot_cf_curves(resdir, year=2020):
     """
@@ -943,22 +943,18 @@ if __name__=='__main__':
            'PHES-WIND'
             ]
     workdir='/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/results/CF-curves-new-wind'
-    year=2020
+    year=2030
     #plot_cf_curves(workdir, year=year)
 
-    '''
+
     for case in cases:
         for location in locations:
-            print(case, location)
+            #print(case, location)
             costmodel=str(year)
-            if 'HYBRID' in case:
-                update_cost(location, case, year=2020, costmodel=costmodel, resdir= workdir)
-            else:
-                update_cost(location, case, year=2020, costmodel=costmodel, resdir= workdir)
-
+            future_cost(location, case, year=2020, costmodel=costmodel, resdir= workdir)
             get_cf_lcoh_optimal(location, case, resdir= workdir, year=year, plot=False)
      
-    '''
+
     for location in locations:
         plot_cf_lcoh_comparison(location, workdir, year)
  
