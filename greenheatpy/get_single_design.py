@@ -9,7 +9,7 @@ from greenheatpy.master import cal_LCOH
 from greenheatpy.projdirs import datadir
 from greenheatpy.get_green_h2 import get_best_location
 
-def get_CST_design(rm, sh, location, case, resdir, savename=None, year=2020, OM_method='SL'):
+def get_CST_design(rm, sh, location, case, resdir, savename=None, year=2020, costmodel='2020', OM_method='SL'):
 
 
     CF_data=np.loadtxt('%s/2020/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
@@ -90,14 +90,14 @@ def get_CST_design(rm, sh, location, case, resdir, savename=None, year=2020, OM_
     TES_capa=P_load*sh
 
     pm=Parameters()
-    if year==2020:
+    if costmodel=='2020':
         C_recv = pm.C_recv_ref * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_exp
         C_tower = pm.C_tower_fix * np.exp(pm.f_tower_exp * (H_tower - H_recv/2.+pm.H_helio/2.))
         C_field = pm.c_helio * n_helios * pm.A_helio
         C_site = pm.c_site_cst * pm.A_helio * n_helios
         C_TES = pm.c_TES * TES_capa
         C_land = pm.c_land_cst * A_land
-    elif year==2030:
+    elif costmodel=='2030':
         C_recv = pm.C_recv_ref_2030 * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_exp
         C_tower = pm.C_tower_fix_2030 * np.exp(pm.f_tower_exp * (H_tower - H_recv/2.+pm.H_helio/2.))
         C_field = pm.c_helio_2030 * n_helios * pm.A_helio
@@ -105,7 +105,7 @@ def get_CST_design(rm, sh, location, case, resdir, savename=None, year=2020, OM_
         C_TES = pm.c_TES_2030 * TES_capa
         C_land = pm.c_land_cst_2030 * A_land
 
-    elif year==2050:
+    elif costmodel=='2050':
         C_recv = pm.C_recv_ref_2050 * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_exp
         C_tower = pm.C_tower_fix_2050 * np.exp(pm.f_tower_exp * (H_tower - H_recv/2.+pm.H_helio/2.))
         C_field = pm.c_helio_2050 * n_helios * pm.A_helio
@@ -166,7 +166,7 @@ def get_CST_design(rm, sh, location, case, resdir, savename=None, year=2020, OM_
     print('%s RM=%.1f, SH=%.1f, CF=%.4f, LCOH=%.2f'%(case, rm, sh, CF, LCOH))	
     return LCOH, CF
 
-def get_CST_modular_design(rm, sh, location, case, resdir, savename=None, year=2020, OM_method='SL'):
+def get_CST_modular_design(rm, sh, location, case, resdir, savename=None, year=2020, costmodel='2020', OM_method='SL'):
 
     CF_data=np.loadtxt('%s/2020/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
     num_modules=np.loadtxt('%s/2020/%s-%s-data_num_modules.csv'%(resdir, case, location), delimiter=',', skiprows=1)
@@ -212,6 +212,7 @@ def get_CST_modular_design(rm, sh, location, case, resdir, savename=None, year=2
 
 
     module_power =1250 #MWrh
+    '''
     best=get_best_location(2020)
     loc=location+' %s'%best[location]
     output_fn=datadir+'modular_cst_design/CST_gen_%s_load%.1fMWth.dat'%(loc, module_power)
@@ -219,20 +220,51 @@ def get_CST_modular_design(rm, sh, location, case, resdir, savename=None, year=2
         cst_output=f.read().splitlines()
     f.close()
     H_recv, D_recv, H_tower, n_helios, A_land = np.float_(cst_output[2].split(','))
+    '''
+    if location=='Burnie':
+        H_recv=25.68
+        D_recv=22.23
+        H_tower=259.94
+        n_helios=17361
+        A_land= 19909374.49
+    elif location=='Gladstone':
+        H_recv=25.82
+        D_recv=22.27
+        H_tower=260.72
+        n_helios=17094
+        A_land=19509973.30   
+    elif location=='Pilbara':
+        H_recv=26.20
+        D_recv=22.09
+        H_tower=259.68
+        n_helios=17314
+        A_land=19833258.22   
+    elif location=='Pinjara':
+        H_recv=25.699
+        D_recv=22.46
+        H_tower=259.20
+        n_helios=17261
+        A_land=19797561.38  
+    elif location=='Upper Spencer Gulf':
+        H_recv=25.67
+        D_recv=22.43
+        H_tower=258.92
+        n_helios=17159
+        A_land= 19673291.19   
 
 
     P_load=500.e3
     TES_capa=P_load*sh
 
     pm=Parameters()
-    if year==2020:
+    if costmodel=='2020':
         C_recv = pm.C_recv_ref * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_exp*num_modules
         C_tower = pm.C_tower_fix * np.exp(pm.f_tower_exp * (H_tower - H_recv/2.+pm.H_helio/2.))*num_modules
         C_field = pm.c_helio * n_helios * pm.A_helio*num_modules
         C_site = pm.c_site_cst * pm.A_helio * n_helios*num_modules
         C_TES = pm.c_TES * TES_capa
         C_land = pm.c_land_cst * A_land*num_modules
-    elif year==2030:
+    elif costmodel=='2030':
         C_recv = pm.C_recv_ref_2030 * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_exp*num_modules
         C_tower = pm.C_tower_fix_2030 * np.exp(pm.f_tower_exp * (H_tower - H_recv/2.+pm.H_helio/2.))*num_modules
         C_field = pm.c_helio_2030 * n_helios * pm.A_helio*num_modules
@@ -240,7 +272,7 @@ def get_CST_modular_design(rm, sh, location, case, resdir, savename=None, year=2
         C_TES = pm.c_TES_2030 * TES_capa
         C_land = pm.c_land_cst_2030 * A_land*num_modules
     
-    elif year==2050:
+    elif costmodel=='2050':
         C_recv = pm.C_recv_ref_2050 * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_exp*num_modules
         C_tower = pm.C_tower_fix_2050 * np.exp(pm.f_tower_exp * (H_tower - H_recv/2.+pm.H_helio/2.))*num_modules
         C_field = pm.c_helio_2050 * n_helios * pm.A_helio*num_modules
@@ -302,11 +334,15 @@ def get_CST_modular_design(rm, sh, location, case, resdir, savename=None, year=2
     print('%s RM=%.1f, SH=%.1f, CF=%.4f, LCOH=%.2f'%(case, rm, sh, CF, LCOH))	
     return LCOH, CF
 
-def get_TES_design(rm, sh, location, case,  resdir, savename=None, year=2020, F_pv=None):
+def get_TES_design(rm, sh, location, case,  resdir, savename=None, year=2020, costmodel='2020', F_pv=None):
+    '''
+    year (int): year basis of the design
+    costmodel (str): '2020', '2030', '2050', '2020_ub', ''2020_lb'
+    '''
 
+    CF_data=np.loadtxt('%s/%s/%s-%s-data_CF.csv'%(resdir, year, case, location), delimiter=',')
+    Pheater_data=np.loadtxt('%s/%s/%s-%s-data_P_heater.csv'%(resdir, year, case, location), delimiter=',')
 
-    CF_data=np.loadtxt('%s/2020/%s-%s-data_CF.csv'%(resdir,case, location), delimiter=',')
-    Pheater_data=np.loadtxt('%s/2020/%s-%s-data_P_heater.csv'%(resdir, case, location), delimiter=',')
 
     CF=CF_data[1:,1:]
     P_heater=Pheater_data[1:,1:]
@@ -347,7 +383,7 @@ def get_TES_design(rm, sh, location, case,  resdir, savename=None, year=2020, F_
 
     if F_pv==None:
    
-        F_data=np.loadtxt('%s/2020/%s-%s-data_F_pv.csv'%(resdir, case, location), delimiter=',')
+        F_data=np.loadtxt('%s/%s/%s-%s-data_F_pv.csv'%(resdir, year, case, location), delimiter=',')
         F_pv=F_data[1:,1:]
         Q_11=F_pv[row,col]
         Q_12=F_pv[row+1,col]
@@ -362,19 +398,19 @@ def get_TES_design(rm, sh, location, case,  resdir, savename=None, year=2020, F_
 
     pm=Parameters()
 
-    if year ==2020:
+    if costmodel =='2020':
         C_pv=pm.c_pv_system*pv_max
         C_wind=pm.c_wind_system*wind_max
         C_heater=P_heater*pm.c_heater*1000.
         C_TES=TES_capa*pm.c_TES
 
-    elif year==2030:
+    elif costmodel =='2030':
         C_pv=pm.c_pv_system_2030*pv_max
         C_wind=pm.c_wind_system_2030*wind_max
         C_heater=P_heater*pm.c_heater_2030*1000.
         C_TES=TES_capa*pm.c_TES_2030
 
-    elif year==2050:
+    elif costmodel =='2050':
         C_pv=pm.c_pv_system_2050*pv_max
         C_wind=pm.c_wind_system_2050*wind_max
         C_heater=P_heater*pm.c_heater_2050*1000.
@@ -438,11 +474,16 @@ def get_TES_design(rm, sh, location, case,  resdir, savename=None, year=2020, F_
     return LCOH, cf
 
 
-def get_BAT_design(rm, sh, location, case, resdir, savename=None, year=2020, F_pv=None):
+def get_BAT_design(rm, sh, location, case, resdir, savename=None, year=2020, costmodel='2020', F_pv=None):
 
+    '''
+    year (int): year basis of the design
+    costmodel (str): '2020', '2030', '2050', '2020_ub', ''2020_lb'
+    '''
 
-    CF_data=np.loadtxt('%s/2020/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
-    Pbat_data=np.loadtxt('%s/2020/%s-%s-data_P_bat.csv'%(resdir, case, location), delimiter=',')
+    CF_data=np.loadtxt('%s/%s/%s-%s-data_CF.csv'%(resdir, year, case, location), delimiter=',')
+    Pbat_data=np.loadtxt('%s/%s/%s-%s-data_P_bat.csv'%(resdir, year, case, location), delimiter=',')
+
 
     CF=CF_data[1:,1:]
     P_bat=Pbat_data[1:,1:]
@@ -481,7 +522,7 @@ def get_BAT_design(rm, sh, location, case, resdir, savename=None, year=2020, F_p
     P_bat=1/((x_2-x_1)*(y_2-y_1))*(Q_11*(x_2-x)*(y_2-y)+Q_21*(x-x_1)*(y_2-y)+Q_12*(x_2-x)*(y-y_1)+Q_22*(x-x_1)*(y-y_1))
 
     if F_pv==None:
-        F_data=np.loadtxt('%s/2020/%s-%s-data_F_pv.csv'%(resdir, case, location), delimiter=',')
+        F_data=np.loadtxt('%s/%s/%s-%s-data_F_pv.csv'%(resdir, year , case, location), delimiter=',')
         F_pv=F_data[1:,1:]
 
         Q_11=F_pv[row,col]
@@ -499,19 +540,19 @@ def get_BAT_design(rm, sh, location, case, resdir, savename=None, year=2020, F_p
     bat_pmax=P_bat*1000.
 
     pm=Parameters()
-    if year ==2020:
+    if costmodel =='2020':
         C_pv=pm.c_pv_system*pv_max
         C_wind=pm.c_wind_system*wind_max
         C_heater=P_heater*pm.c_heater
         C_bat=bat_capa*pm.c_bt_energy+bat_pmax*pm.c_bt_power
 
-    elif year==2030:
+    elif costmodel =='2030':
         C_pv=pm.c_pv_system_2030*pv_max
         C_wind=pm.c_wind_system_2030*wind_max
         C_heater=P_heater*pm.c_heater_2030
         C_bat=bat_capa*pm.c_bt_energy_2030+bat_pmax*pm.c_bt_power_2030
 
-    elif year==2050:
+    elif costmodel =='2050':
         C_pv=pm.c_pv_system_2050*pv_max
         C_wind=pm.c_wind_system_2050*wind_max
         C_heater=P_heater*pm.c_heater_2050
@@ -587,11 +628,15 @@ def get_BAT_design(rm, sh, location, case, resdir, savename=None, year=2020, F_p
     return LCOH, cf
 
 
-def get_PHES_design(rm, sh, location, case, resdir, savename=None, year=2020, F_pv=None):
+def get_PHES_design(rm, sh, location, case, resdir, savename=None, year=2020, costmodel='2020', F_pv=None):
 
+    '''
+    year (int): year basis of the design
+    costmodel (str): '2020', '2030', '2050', '2020_ub', ''2020_lb'
+    '''
 
-    CF_data=np.loadtxt('%s/2020/%s-%s-data_CF.csv'%(resdir, case, location), delimiter=',')
-    PHES_data=np.loadtxt('%s/2020/%s-%s-data_P_PHES.csv'%(resdir, case, location), delimiter=',')
+    CF_data=np.loadtxt('%s/%s/%s-%s-data_CF.csv'%(resdir, year, case, location), delimiter=',')
+    PHES_data=np.loadtxt('%s/%s/%s-%s-data_P_PHES.csv'%(resdir, year, case, location), delimiter=',')
 
     CF=CF_data[1:,1:]
     P_PHES=PHES_data[1:,1:]
@@ -630,7 +675,7 @@ def get_PHES_design(rm, sh, location, case, resdir, savename=None, year=2020, F_
     P_PHES=1/((x_2-x_1)*(y_2-y_1))*(Q_11*(x_2-x)*(y_2-y)+Q_21*(x-x_1)*(y_2-y)+Q_12*(x_2-x)*(y-y_1)+Q_22*(x-x_1)*(y-y_1))
 
     if F_pv==None:
-        F_data=np.loadtxt('%s/2020/%s-%s-data_F_pv.csv'%(resdir, case, location), delimiter=',')
+        F_data=np.loadtxt('%s/%s/%s-%s-data_F_pv.csv'%(resdir, year, case, location), delimiter=',')
         F_pv=F_data[1:,1:]
 
         Q_11=F_pv[row,col]
@@ -648,19 +693,19 @@ def get_PHES_design(rm, sh, location, case, resdir, savename=None, year=2020, F_
     PHES_pmax=P_PHES*1000.
 
     pm=Parameters()
-    if year ==2020:
+    if costmodel =='2020':
         C_pv=pm.c_pv_system*pv_max
         C_wind=pm.c_wind_system*wind_max
         C_heater=P_heater*pm.c_heater
         C_PHES=PHES_capa*pm.c_PHES_energy+PHES_pmax*pm.c_PHES_power
 
-    elif year==2030:
+    elif costmodel =='2030':
         C_pv=pm.c_pv_system_2030*pv_max
         C_wind=pm.c_wind_system_2030*wind_max
         C_heater=P_heater*pm.c_heater_2030
         C_PHES=PHES_capa*pm.c_PHES_energy_2030+PHES_pmax*pm.c_PHES_power_2030
 
-    elif year==2050:
+    elif costmodel =='2050':
         C_pv=pm.c_pv_system_2050*pv_max
         C_wind=pm.c_wind_system_2050*wind_max
         C_heater=P_heater*pm.c_heater_2050
