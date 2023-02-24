@@ -31,7 +31,12 @@ def update_cost(rm, sh, location, case, year, resdir, costmodel='2020', design=N
                 CF, A_land, D_recv, H_recv, H_tower, n_helios, TES_capa=get_CST_design(rm, sh, location, case, resdir, year=year)
                 num_modules=1
         else:
-            CF, A_land, D_recv, H_recv, H_tower, n_helios, TES_capa, num_modules=design
+            if 'modular' in case:
+                CF, A_land, D_recv, H_recv, H_tower, n_helios, TES_capa, num_modules=design
+            else:
+                CF, A_land, D_recv, H_recv, H_tower, n_helios, TES_capa=design
+                num_modules=1
+                               
         if costmodel=='2020':
             C_recv_ref=pm.C_recv_ref
             C_tower_fix=pm.C_tower_fix
@@ -88,6 +93,11 @@ def update_cost(rm, sh, location, case, year, resdir, costmodel='2020', design=N
             c_wind_system=pm.c_wind_system_2050
             c_heater=pm.c_heater_2050
             c_TES=pm.c_TES_2050
+        else:
+            c_pv_system=costmodel['c_pv_system']
+            c_wind_system=costmodel['c_wind_system']
+            c_heater=costmodel['c_heater']
+            c_TES=costmodel['c_TES']
 
         lcoh=get_LCOH_TES(CF, P_heater, pv_max, wind_max, TES_capa, c_pv_system, c_wind_system, c_heater, c_TES, savename=savename)
 
@@ -120,6 +130,12 @@ def update_cost(rm, sh, location, case, year, resdir, costmodel='2020', design=N
             c_heater=pm.c_heater_2050
             c_bt_energy=pm.c_bt_energy_2050
             c_bt_power=pm.c_bt_power_2050
+        else:
+            c_pv_system=costmodel['c_pv_system']
+            c_wind_system=costmodel['c_wind_system']
+            c_heater=costmodel['c_heater']
+            c_bt_energy=costmodel['c_bt_energy']
+            c_bt_power=costmodel['c_bt_power']
 
         lcoh=get_LCOH_BAT(CF, P_heater, pv_max, wind_max, bat_capa, bat_pmax, c_pv_system, c_wind_system, c_heater, c_bt_energy, c_bt_power, savename=savename)
 
@@ -153,6 +169,12 @@ def update_cost(rm, sh, location, case, year, resdir, costmodel='2020', design=N
             c_heater=pm.c_heater_2050
             c_PHES_energy=pm.c_PHES_energy_2050
             c_PHES_power=pm.c_PHES_power_2050
+        else:
+            c_pv_system=costmodel['c_pv_system']
+            c_wind_system=costmodel['c_wind_system']
+            c_heater=costmodel['c_heater']
+            c_PHES_energy=costmodel['c_PHES_energy']
+            c_PHES_power=costmodel['c_PHES_power']
 
         lcoh=get_LCOH_PHES(CF, P_heater, pv_max, wind_max, PHES_capa, PHES_pmax, c_pv_system, c_wind_system, c_heater, c_PHES_energy, c_PHES_power, savename=savename)
 
@@ -192,58 +214,105 @@ def future_cost(location, case, year, costmodel, resdir, verbose=False):
     savedata=np.hstack((np.append(0, RM).reshape(m+1, 1), savedata))
     np.savetxt('%s/post/%s/%s-%s-data_CF.csv'%(resdir, costmodel, case, location), savedata, delimiter=',', fmt='%.2f') 
 
-def uncertainty_cost(location, case, year, resdir, num_sample, dev=0.25, verbose=False):
+def uncertainty_cost(location, case, resdir, num_sample, dev=0.25, verbose=False, plot=False):
     '''
     location (str): location
     case (str): case name
-    year (int): year of the design base
     resdir (str): the main directory to deal with input and output 
     num_sample (int): number of samples
     dev (float): range of deviation (uncertainty), e.g. +/-25%
     verbose (bool): to save the case design details or not
     '''
-
+    year=2020 # year of the design base and cost base
     data=np.loadtxt('%s/post/%s/%s-%s-LCOH-CF.csv'%(resdir, year, case, location), delimiter=',', skiprows=1)
 
     CF=data[:,0]
     SH=data[:,1]
     RM=data[:, 2]
+    LCOH_n=data[:,3]
+    pm=Parameters()
+    summary=np.array(['CF', 'LCOH nominal', 'LCOH min', 'LCOH max', 'LCOH avg', 'LCOH std' ])
+    if 'PV' in case:
+        F_pv=1
+    elif 'WIND' in case:
+        F_pv=0
+    elif 'HYBRID' in case:
+        F_pv=None
 
-    LCOH={}
     for i in range(len(CF)):
-        print('CF=', CF[i])
-        rm=RM[i]
-        sh=SH[i]
-        
-        lcoh_samples, cf=update_cost(rm, sh, location, case, year, costmodel, resdir, verbose)
+        print('CF=', CF[i], 'LCOH_n=', LCOH_n[i])
+        if LCOH_n[i]<999:
+            rm=RM[i]
+            sh=SH[i]
+            if 'CST' in case:
+                if 'modular' in case:
+                    design=get_CST_modular_design(rm, sh, location, case, resdir, year=year)
+                else:
+                    design=get_CST_design(rm, sh, location, case, resdir, year=year)
+                    num_modules=1
+                nd=6
+                names=['C_recv_ref', 'C_tower_fix', 'c_helio', 'c_site_cst', 'c_TES', 'c_land_cst']
+                nominals=np.r_[pm.C_recv_ref, pm.C_tower_fix, pm.c_helio, pm.c_site_cst, pm.c_TES, pm.c_land_cst]
 
-        LCOH=np.append(LCOH, lcoh)
-        CF=np.append(CF, cf)
+            elif 'TES' in case:
+                design=get_TES_design(rm, sh, location, case, resdir, year=year, F_pv=F_pv)
+                nd=4
+                names=['c_pv_system', 'c_wind_system', 'c_heater', 'c_TES']
+                nominals=np.r_[pm.c_pv_system, pm.c_wind_system, pm.c_heater, pm.c_TES]
 
-    LCOH=LCOH.reshape(m,n)
-    CF=CF.reshape(m,n) 
-    
+            elif 'BAT' in case:
+                design=get_BAT_design(rm, sh, location, case, resdir, year=year, F_pv=F_pv)
+                nd=5
+                names=['c_pv_system', 'c_wind_system', 'c_heater', 'c_bt_energy', 'c_bt_power']
+                nominals=np.r_[pm.c_pv_system, pm.c_wind_system, pm.c_heater, pm.c_bt_energy, pm.c_bt_power]
 
-    if costmodel=='uncertainty':
-        sample=gen_lhs(nd=6)
-        names=[pm.C_recv_ref, pm.C_tower_fix]
-        LB=[]
+            elif 'PHES' in case:
+                design=get_PHES_design(rm, sh, location, case, resdir, year=year, F_pv=F_pv)
+                nd=5
+                names=['c_pv_system', 'c_wind_system', 'c_heater', 'c_PHES_energy', 'c_PHES_power']
+                nominals=np.r_[pm.c_pv_system, pm.c_wind_system, pm.c_heater, pm.c_PHES_energy, pm.c_PHES_power]
 
-        C_recv = pm.C_recv_ref * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_exp
-        C_tower = pm.C_tower_fix * np.exp(pm.f_tower_exp * (H_tower - H_recv/2.+pm.H_helio/2.))
-        C_field = pm.c_helio * n_helios * pm.A_helio
-        C_site = pm.c_site_cst * pm.A_helio * n_helios
-        C_TES = pm.c_TES * TES_capa
-        C_land = pm.c_land_cst * A_land
+            samples=gen_lhs(nd, ns=num_sample)
+            l_bounds=nominals*(1.-dev)
+            u_bounds=nominals*(1.+dev)
+            vals=qmc.scale(samples, l_bounds, u_bounds)
+            costmodel={}
+            for n in range(nd):
+                key=names[n]
+                costmodel[key]=vals[:,n]
+            lcoh=update_cost(rm, sh, location, case, year, resdir, costmodel=costmodel, design=design, verbose=False)
+            lcoh_min=np.min(lcoh)
+            lcoh_max=np.max(lcoh)
+            lcoh_avg=np.average(lcoh)
+            lcoh_sdev=np.std(lcoh)
+            #TODO check
+            # CI https://www.mathsisfun.com/data/confidence-interval.html
+            # CI=Z*s/sqrt(n)
+            # Z=1.96 for 95%
+            # Z=2.576 for 99%
+            # Z=3.291 for 99.9%
+            ci=3.291*lcoh_sdev/np.sqrt(num_sample)
+            
+            lcoh_lb=lcoh_avg-ci
+            lcoh_ub=lcoh_avg+ci          
+            print('min=%.2f, max=%.2f, avg=%.2f, sdev=%.2f, lb=%.2f, ub=%.2f, ci=%.3f'%(lcoh_min, lcoh_max, lcoh_avg, lcoh_sdev, lcoh_lb, lcoh_ub, ci))
+            summary=np.append(summary, (CF[i], LCOH_n[i],lcoh_min, lcoh_max, lcoh_avg, lcoh_sdev ))           
+            if plot:
+                plt.hist(lcoh, bins=20)
+                plt.show()
+                plt.close()
+
+    summary=summary.reshape(int(len(summary)/6),6)
+    np.savetxt('%s/post/uncertainty/LCOH_statistics_%s_%s.csv'%(resdir, case, location), summary, delimiter=',', fmt='%s')
         
 def gen_lhs(nd, ns=200):
     '''
     ns (int): number of samples
     nd (ind): number of dimentions
     '''
-    sampler=qmc.latinHypercube(d=nd)
-    samaple=sampler.random(n=ns)
-
+    sampler=qmc.LatinHypercube(d=nd)
+    sample=sampler.random(n=ns)
+   
     return sample
 
 
@@ -397,8 +466,8 @@ def get_LCOH_TES(CF, P_heater, pv_max, wind_max, TES_capa, c_pv_system, c_wind_s
 
     LCOH, epy, OM_total=cal_LCOH(CF,  P_load, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_constr_pv)
 
-    print(LCOH)
-    print('TES CF=%.4f, LCOH=%.2f'%(CF, LCOH))	
+    #print(LCOH)
+    #print('TES CF=%.4f, LCOH=%.2f'%(CF, LCOH))	
 
     if savename!=None:
         summary=np.array([
@@ -465,7 +534,7 @@ def get_LCOH_BAT(CF, P_heater, pv_max, wind_max, bat_capa, bat_pmax, c_pv_system
     c_OM_var = 0.
 
     LCOH, epy, OM_total=cal_LCOH(CF,  P_load, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_constr_pv)
-    print('BAT CF=%.4f, LCOH=%.2f'%(CF, LCOH))	
+    #print('BAT CF=%.4f, LCOH=%.2f'%(CF, LCOH))	
 
     if savename!=None:
         np.savetxt('./summary_%s.csv'%savename, summary, fmt='%s', delimiter=',')
@@ -527,7 +596,7 @@ def get_LCOH_PHES(CF, P_heater, pv_max, wind_max, PHES_capa, PHES_pmax, c_pv_sys
 
     LCOH, epy, OM_total=cal_LCOH(CF,  P_load, C_cap, OM_fixed, c_OM_var, r_discount=pm.r_disc_real, t_life=pm.t_life, t_cons=pm.t_constr_pv)
 
-    print('PHES CF=%.4f, LCOH=%.2f'%(CF, LCOH))	
+    #print('PHES CF=%.4f, LCOH=%.2f'%(CF, LCOH))	
 
     if savename!=None:
         summary=np.array([
