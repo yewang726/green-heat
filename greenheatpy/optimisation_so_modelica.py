@@ -9,7 +9,7 @@ import time
 import functools
 from scipy import optimize as sciopt
 
-def objective_function(location, year, sim, t_storage, RM, obj_cf, par_n, par_v):
+def objective_function(location, year, sim, t_storage, RM, P_load, obj_cf, par_n, par_v):
 
     nv=len(par_n)
     for i in range(nv):
@@ -24,8 +24,8 @@ def objective_function(location, year, sim, t_storage, RM, obj_cf, par_n, par_v)
         elif par_n[i]=='t_storage':
             t_storage=par_v[i]
 
-    var_n=['t_storage','RM','F_pv','P_ST_max']
-    var_v=[str(t_storage), str(RM), str(r_pv), str(P_ST_max)]
+    var_n=['t_storage','RM','F_pv','P_ST_max', 'P_load']
+    var_v=[str(t_storage), str(RM), str(r_pv), str(P_ST_max), str(P_load)]
 
     try:
         sim.update_pars(var_n, var_v)
@@ -40,7 +40,7 @@ def objective_function(location, year, sim, t_storage, RM, obj_cf, par_n, par_v)
 
     return LCOH
 
-def objective_function_PHES(location, year, sim, t_storage, RM, obj_cf, par_n, par_v):
+def objective_function_PHES(location, year, sim, t_storage, RM, P_load, obj_cf, par_n, par_v):
 
     nv=len(par_n)
     for i in range(nv):
@@ -57,8 +57,8 @@ def objective_function_PHES(location, year, sim, t_storage, RM, obj_cf, par_n, p
 
     try:
         pm=Parameters()
-        var_n=['t_storage','RM','F_pv','P_ST_max', 'eff_ST_roundtrip']
-        var_v=[str(t_storage), str(RM), str(r_pv), str(P_ST), str(pm.eff_rdtrip_PHES)]
+        var_n=['t_storage','RM','F_pv','P_ST_max', 'eff_ST_roundtrip', 'P_load']
+        var_v=[str(t_storage), str(RM), str(r_pv), str(P_ST), str(pm.eff_rdtrip_PHES), str(P_load)]
         sim.update_pars(var_n, var_v)
         sim.simulate(start='0', stop='1y', step='5m', initStep=None, maxStep='5m', integOrder='1e-06', solver='dassl', nls='homotopy', lv='-LOG_SUCCESS,-stdout')
         res_fn=sim.res_fn
@@ -70,7 +70,7 @@ def objective_function_PHES(location, year, sim, t_storage, RM, obj_cf, par_n, p
 
     return LCOH
 
-def objective_function_TES(location, year, sim, t_storage, RM, obj_cf, par_n, par_v):
+def objective_function_TES(location, year, sim, t_storage, RM, P_load, obj_cf, par_n, par_v):
 
     nv=len(par_n)
     for i in range(nv):
@@ -85,8 +85,8 @@ def objective_function_TES(location, year, sim, t_storage, RM, obj_cf, par_n, pa
         elif par_n[i]=='t_storage':
             t_storage=par_v[i]
 
-    var_n=['t_storage','RM','F_pv','P_heater_max']
-    var_v=[str(t_storage), str(RM), str(r_pv), str(P_heater)]
+    var_n=['t_storage','RM','F_pv','P_heater_max', 'P_load']
+    var_v=[str(t_storage), str(RM), str(r_pv), str(P_heater), str(P_load)]
     try:
         sim.update_pars(var_n, var_v)
         sim.simulate(start='0', stop='1y', step='5m', initStep=None, maxStep='5m', integOrder='1e-06', solver='dassl', nls='homotopy', lv='-LOG_SUCCESS,-stdout')
@@ -98,7 +98,7 @@ def objective_function_TES(location, year, sim, t_storage, RM, obj_cf, par_n, pa
 
     return LCOH
 
-def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, casedir, case='BAT', year=2020, obj_cf=None, solcast_TMY=False):
+def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, casedir, P_load=500e6, case='BAT', year=2020, obj_cf=None, solcast_TMY=False):
     '''
     Arguments:
         model_name (str)  : minizic model name
@@ -149,11 +149,11 @@ def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, ca
         bounds.append([LB[i], UB[i]])        
 
     if case=='BAT':
-        objfunc = functools.partial(objective_function, location, year,sim, t_storage, RM, obj_cf, names)
+        objfunc = functools.partial(objective_function, location, year,sim, t_storage, RM, P_load, obj_cf, names)
     elif case=='TES':
-        objfunc = functools.partial(objective_function_TES,  location, year, sim, t_storage, RM, obj_cf, names)
+        objfunc = functools.partial(objective_function_TES,  location, year, sim, t_storage, RM, P_load, obj_cf, names)
     elif case=='PHES':
-        objfunc = functools.partial(objective_function_PHES, location, year, sim, t_storage, RM, obj_cf, names)
+        objfunc = functools.partial(objective_function_PHES, location, year, sim, t_storage, RM, P_load, obj_cf, names)
 
     res = sciopt.minimize(objfunc, nominals, method=method, bounds=bounds,
 			options={

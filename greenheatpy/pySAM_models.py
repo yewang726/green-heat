@@ -155,9 +155,18 @@ def cst_gen(Q_des_th, SM, location, casedir, wea_fn=None):
         module.value('tshours', 100) # because this model only takes the receiver output, a very large storage is set to ignor impact from SAM control 
 
         # add initial guess of tower and receiver design
-        H_recv_guess=3.603*SM+16.64
-        D_recv_guess=3.05*SM+14.63
-        H_tower_guess=32.21*SM+179.4
+        if abs(Q_des_th-500e3)<0.1:
+            H_recv_guess=3.603*SM+16.64
+            D_recv_guess=3.05*SM+14.63
+            H_tower_guess=32.21*SM+179.4
+        elif abs(Q_des_th-2.3e3)<0.1:
+            H_recv_guess=0.22*SM+1.29
+            D_recv_guess=0.42*SM+0.56
+            H_tower_guess=3.1*SM+9.68
+            # smaller heliostat size
+            module.value('helio_width', 3) 
+            module.value('helio_height', 3) 
+
         module.value('rec_height', H_recv_guess) 
         module.value('D_rec', D_recv_guess) 
         module.value('h_tower', H_tower_guess) 
