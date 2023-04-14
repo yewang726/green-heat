@@ -40,7 +40,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
     #Lat,Lon = get_location(location)
 
 
-
+    pm=Parameters()
     #TODO the weather data is loaded from the pre-saved data in data dir
     # it is Newman TMY from Solcast, sent by AM on 24 Jun
     # this part will be updated when the Solcast access is solved
@@ -82,6 +82,12 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
     if 'CST' in model_name:
         #if not os.path.exists(casedir+'/SolarSource.epw'):
         #    SolarResource(Lat,Lon, casedir)
+        if abs(P_load_des-2.3e3)<0.1:
+            pm.H_helio=3
+            pm.W_helio=3
+            pm.A_helio=pm.H_helio*pm.W_helio
+
+
         # Get SAM output 
         if solar_data_fn ==None:
             solar_data_fn=SolarResource(location, casedir=casedir, solcast_TMY=solcast_TMY)  
@@ -91,8 +97,8 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
             output_fn=datadir+'modular_cst_design/CST_gen_%s_load%.1fMWth.dat'%(location, module_power)
        
         else:
-    
-            output_fn= cst_gen(Q_des_th=P_load_des, SM=RM, location=location, casedir=casedir, wea_fn=solar_data_fn)
+            print('run SAM CST ...')    
+            output_fn= cst_gen(Q_des_th=P_load_des, SM=RM, location=location, casedir=casedir, helio_width=pm.W_helio, helio_height=pm.H_helio, wea_fn=solar_data_fn)
 
         with open(output_fn) as f:
             cst_output=f.read().splitlines()
@@ -117,7 +123,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
 
     # Set the inputs for plant optimisation and run the optimisation
     # These inputs are used by make_dzn_file function to create an input text file called hydrogen_plant_data.dzn. 
-    pm=Parameters()
+
     if model_name=='pv_wind_battery_heat':
         #P_heater=P_load_des/pm.eta_heater
         eta_storage=pm.eff_rdtrip_bt**0.5
@@ -258,7 +264,18 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
     elif model_name=='CST_TES_heat':
 
         C_recv = pm.C_recv_ref * ( H_recv * D_recv * np.pi / pm.A_recv_ref)**pm.f_recv_exp*num_modules
-        C_tower = pm.C_tower_fix * np.exp(pm.f_tower_exp * (H_tower - H_recv/2.+pm.H_helio/2.))*num_modules
+
+        H_tower=H_tower - H_recv/2.+pm.H_helio/2.
+        if H_tower<120.: # DELSOL manual (Kistler 1986)  P122, https://www.osti.gov/servlets/purl/7228886
+            CEPCI_1986=318.4
+            CEPCI_2020=596.2    
+            pm.C_tower_fix=1090250*CEPCI_2020/CEPCI_1986
+            pm.f_tower_exp=0.00879
+        else:
+            pass # SAM tower model
+
+        C_tower = pm.C_tower_fix * np.exp(pm.f_tower_exp *H_tower)*num_modules
+        print(pm.A_helio)
         C_field = pm.c_helio * n_helios * pm.A_helio*num_modules
         C_site = pm.c_site_cst * pm.A_helio * n_helios*num_modules
         C_TES = pm.c_TES * results['TES_capa'][0]

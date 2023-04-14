@@ -109,7 +109,7 @@ def wind_gen(capacity, location, casedir, wea_fn=None):
 
 
 
-def cst_gen(Q_des_th, SM, location, casedir, wea_fn=None):
+def cst_gen(Q_des_th, SM, location, casedir, helio_width, helio_height, wea_fn=None):
 
     """
     Arguments:
@@ -164,8 +164,8 @@ def cst_gen(Q_des_th, SM, location, casedir, wea_fn=None):
             D_recv_guess=0.42*SM+0.56
             H_tower_guess=3.1*SM+9.68
             # smaller heliostat size
-            module.value('helio_width', 3) 
-            module.value('helio_height', 3) 
+        module.value('helio_width', helio_width) 
+        module.value('helio_height', helio_height) 
 
         module.value('rec_height', H_recv_guess) 
         module.value('D_rec', D_recv_guess) 
@@ -187,7 +187,9 @@ def cst_gen(Q_des_th, SM, location, casedir, wea_fn=None):
         H_tower=module.TowerAndReceiver.h_tower # Tower height [m]
         n_helios=module.HeliostatField.N_hel #Number of heliostats
         A_land=module.Outputs.csp_pt_cost_total_land_area*4046.86 # Total land area [m2] (converted [acre] to m2)
-
+        land_area_base=module.HeliostatField.land_area_base	
+        csp_pt_sf_fixed_land_area=module.HeliostatField.csp_pt_sf_fixed_land_area
+        print('land_area_base', land_area_base, csp_pt_sf_fixed_land_area)
         #eta_field=module.Outputs.eta_field # field optical efficiency
         eta_recv=np.array(module.Outputs.eta_therm) # receiver thermal efficiency
         Q_recv_in=np.array(module.Outputs.q_dot_rec_inc) # incident thermal power on the receiver [MW_th]

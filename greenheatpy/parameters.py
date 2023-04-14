@@ -25,8 +25,9 @@ class Parameters:
 
     def cst_params(self):
 
-        self.A_helio = 12.2*12.2 # m2, default heliostat size
         self.H_helio = 12.2 # heilisotat height
+        self.W_helio = 12.2
+        self.A_helio = self.H_helio*self.W_helio # m2, default heliostat size
         self.c_helio = 127. # USD/m2
         self.c_helio_2030 = 75. # G3P3
         self.c_helio_2050 = 50. # HelioCon target TODO check 
