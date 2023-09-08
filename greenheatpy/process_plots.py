@@ -8,342 +8,307 @@ from greenheatpy.get_green_h2 import get_data, get_best_location, get_storage_da
 from greenheatpy.get_single_design import get_CST_design, get_CST_modular_design, get_TES_design, get_BAT_design,get_PHES_design
 from greenheatpy.process_cost import future_cost
 
-def plot_cf_curves(resdir, year=2020):
+def plot_cf_curves(resdir, case, location, title, rm_max, sh_max, year=2020):
     """
     plot CF-SH-RM curves
-    resdir (str): the main directory of the results
+    resdir   (str): the main directory of the results
+    case     (str): 'CST', 'CST-modular', 'TES-HYBRID', 'TES-PV', 'TES-WIND', 'BAT-HYBRID', 'BAT-PV', 'BAT-WIND', 'PHES-HYBRID', 'PHES-PV', 'PHES-WIND'
+    location (str): 'Pilbara', 'Burnie', 'Gladstone', 'Pinjarra', 'Upper Spencer Gulf', 'Kerang'
+    title    (str): name of the case
+    rm_max (float): the maximal renewable multiple
+    sh_max (float): the maximal storage hour
+    year     (int): year of the cost basis
+    
 
     """
-    locations=[ 'Pinjara',  'Pilbara',  'Gladstone', 'Burnie', 'Upper Spencer Gulf']
 
     COL=[ 'grey', 'cornflowerblue', 'black']
-
-    cases=['CST',
-           'CST-modular',
-           'TES-HYBRID',
-           'TES-PV',
-           'TES-WIND',
-           'BAT-HYBRID',
-           'BAT-PV',
-           'BAT-WIND',
-           'PHES-HYBRID',
-           'PHES-PV',
-           'PHES-WIND'
-            ]
-
-    titles=['CST',
-            'CST-modular',
-            'PV+Wind+TES',
-            'PV+TES',
-            'Wind+TES',
-            'PV+Wind+Batt',
-            'PV+Batt',
-            'Wind+Batt',
-            'PV+Wind+PHES',
-            'PV+PHES',
-            'Wind+PHES',
-            ]
-
-    info=np.loadtxt('%s/max_rm_sh.csv'%resdir, delimiter=',', dtype=str, skiprows=1)
-    INFO={}
-    for i in range(len(info)):
-        case=info[i,0][1:-1]
-        location=info[i,1][1:-1]
-        rm_max=info[i,2].astype(float)
-        sh_max=info[i,3].astype(float)
-        if case in INFO.keys():
-            INFO[case][location]=[rm_max, sh_max]
-        else:
-            INFO[case]={location: [rm_max, sh_max]}
-
     fts=14
     norm = matplotlib.colors.Normalize(vmin=1, vmax=9)
     c_map=cm.jet
     scalar_map=cm.ScalarMappable(cmap=c_map, norm=norm)
 
-    for i in range(len(cases)):
-        case=cases[i]
-        title=titles[i]
- 
-        for location in locations:  
-            t_storage=np.r_[1e-6,2,4,6,8,10,12,14,17,20,25,40,60]
-            multiple=np.append(np.arange(1, 5, 0.5), np.arange(5, 11, 2))
-            #if 'HYBRID' in case:
-            #    if year==2020:
-            #        casedir='%s/%s/%s'%(resdir, case, location)
-            #    else:
-            #        casedir='%s/%s/%s-%s'%(resdir, case, location, year)
-            #else:
-            casedir='%s/%s/%s'%(resdir, case, location)
+    t_storage=np.r_[1e-6,2,4,6,8,10,12,14,17,20,25,40,60]
+    multiple=np.append(np.arange(1, 5, 0.5), np.arange(5, 11, 2))
+    #if 'HYBRID' in case:
+    #    if year==2020:
+    #        casedir='%s/%s/%s'%(resdir, case, location)
+    #    else:
+    #        casedir='%s/%s/%s-%s'%(resdir, case, location, year)
+    #else:
+    casedir='%s/%s/%s'%(resdir, case, location)
 
-            print(case, location)
-            results=np.array([])
+    print(case, location)
+    results=np.array([])
+    if rm_max>9 or sh_max>60:            
+        multiple=np.append(multiple, np.arange(11, rm_max+3, 3))
+        t_storage=np.append(t_storage, np.linspace(120, sh_max, 3))
 
-            rm_max, sh_max=INFO[case][location]  
-            print(rm_max, sh_max)
-            if rm_max>9 or sh_max>60:            
-                multiple=np.append(multiple, np.arange(11, rm_max+3, 3))
-                t_storage=np.append(t_storage, np.linspace(120, sh_max, 3))
+    m=int(len(multiple))
+    n=int(len(t_storage))
 
-            m=int(len(multiple))
-            n=int(len(t_storage))
+    for rm in multiple:
+        for sh in t_storage:
+            res_fn=casedir+'/summary_%.3f_%.2f.csv'%(rm, sh)
+            if os.path.exists(res_fn):
+                data=np.loadtxt(res_fn, dtype=str, delimiter=',')
+                if len(data[:,1])==29:
+                    data=np.vstack((data[:4], np.array(['num_modules', 1, '-']).reshape(1, 3), data[4:]))                       
+            else:
+                data=np.zeros(np.shape(data))
+            results=np.append(results, data[:,1])
 
-       
-            for rm in multiple:
-                for sh in t_storage:
-                    res_fn=casedir+'/summary_%.3f_%.2f.csv'%(rm, sh)
-                    if os.path.exists(res_fn):
-                        data=np.loadtxt(res_fn, dtype=str, delimiter=',')
-                        if len(data[:,1])==29:
-                            data=np.vstack((data[:4], np.array(['num_modules', 1, '-']).reshape(1, 3), data[4:]))                       
-                    else:
-                        data=np.zeros(np.shape(data))
-                    results=np.append(results, data[:,1])
+    nd=int(len(data))
+
+    results=results.reshape(int(len(results)/nd), nd)
+    RM=results[:,0].reshape(m,n).astype(float)
+    SH=results[:,1].reshape(m,n).astype(float)
+    LCOH=results[:,2].reshape(m,n).astype(float)
+    CF=results[:,3].reshape(m,n).astype(float)
+    savedata=np.vstack((t_storage, CF))
+    savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
+    np.savetxt('%s/post/%s/%s-%s-data_CF.csv'%(resdir, year, case, location), savedata, fmt='%.6f', delimiter=',')
+
+    savedata=np.vstack((t_storage, LCOH))
+    savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
+    np.savetxt('%s/post/%s/%s-%s-data_LCOH.csv'%(resdir, year, case, location), savedata, fmt='%.6f', delimiter=',')
+
+    if 'HYBRID' in case:
+
+        F_pv=results[:,4].reshape(m,n).astype(float)
+        savedata=np.vstack((t_storage, F_pv))
+        savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
+        np.savetxt('%s/post/%s/%s-%s-data_F_pv.csv'%(resdir, year, case, location), savedata, fmt='%.6f', delimiter=',')
+
+    elif 'CST' in case:
+        Hrecv=results[:,5].reshape(m,n).astype(float)
+        Drecv=results[:,6].reshape(m,n).astype(float)
+        Htower=results[:,7].reshape(m,n).astype(float)
+        Nhelio=results[:,8].reshape(m,n).astype(float)
+        Aland=results[:,9].reshape(m,n).astype(float)
+        #print(Aland)
+        Rland=np.sqrt(Aland/np.pi)
+        #print(Rland)   
+
+        savedata=np.append(multiple, Htower[:,0]).reshape(2, m)
+        savedata=np.vstack((np.array(['SM', 'Tower height (m)']).reshape(1,2), savedata.T))
+        np.savetxt('%s/post/%s/%s-%s-data_Htower.csv'%(resdir, year, case, location), savedata, fmt='%s', delimiter=',')
+
+        savedata=np.append(multiple, Hrecv[:,0]).reshape(2, m)
+        savedata=np.vstack((np.array(['SM', 'Receiver height (m)']).reshape(1,2), savedata.T))    
+        np.savetxt('%s/post/%s/%s-%s-data_Hrecv.csv'%(resdir, year, case, location), savedata, fmt='%s', delimiter=',')
+
+        savedata=np.append(multiple, Drecv[:,0]).reshape(2, m)
+        savedata=np.vstack((np.array(['SM', 'Receiver diameter (m)']).reshape(1,2), savedata.T))  
+        np.savetxt('%s/post/%s/%s-%s-data_Drecv.csv'%(resdir, year, case, location), savedata, fmt='%s', delimiter=',')
+
+        savedata=np.append(multiple, Nhelio[:,0]).reshape(2, m)
+        savedata=np.vstack((np.array(['SM', 'Number of heliostats']).reshape(1,2), savedata.T))    
+        np.savetxt('%s/post/%s/%s-%s-data_Nhelio.csv'%(resdir, year, case, location), savedata, fmt='%s', delimiter=',')
+
+        savedata=np.append(multiple, Aland[:,0]).reshape(2, m)
+        savedata=np.vstack((np.array(['SM', 'Land area (m2)']).reshape(1,2), savedata.T))   
+        np.savetxt('%s/post/%s/%s-%s-data_Aland.csv'%(resdir, year, case, location), savedata, fmt='%s', delimiter=',')
+
+    if 'CST-modular' in case:
+        num_modules=results[:,4].reshape(m,n).astype(float)
+        savedata=np.vstack((t_storage, num_modules))
+        savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
+        np.savetxt('%s/post/%s/%s-%s-data_num_modules.csv'%(resdir, year, case, location), savedata, fmt='%s', delimiter=',')
+
+    if 'BAT' in case:
+        P_bat=results[:,9].reshape(m,n).astype(float) 
+
+        savedata=np.vstack((t_storage, P_bat))
+        savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
+        np.savetxt('%s/post/%s/%s-%s-data_P_bat.csv'%(resdir, year, case, location), savedata, fmt='%.2f', delimiter=',')  
+
+    elif 'PHES' in case:
+        P_PHES=results[:,9].reshape(m,n).astype(float) 
+
+        savedata=np.vstack((t_storage, P_PHES))
+        savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
+        np.savetxt('%s/post/%s/%s-%s-data_P_PHES.csv'%(resdir, year, case, location), savedata, fmt='%.2f', delimiter=',')  
+
+    elif 'TES' in case:
+        P_heater=results[:,7].reshape(m,n).astype(float)  
+
+        savedata=np.vstack((t_storage, P_heater))
+        savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
+        np.savetxt('%s/post/%s/%s-%s-data_P_heater.csv'%(resdir, year, case, location), savedata, fmt='%.2f', delimiter=',')            
+
+    for i in range(m):
+        if RM[i,0]>9:
+            col=i-11
+            plt.plot(SH[i], CF[i]*100., label='RM = %s'%RM[i,0], c=COL[col])
+        else:
+
+            plt.plot(SH[i], CF[i]*100., label='RM = %s'%RM[i,0], c=scalar_map.to_rgba(RM[i,0]))
+    plt.ylim([0,100])
+    plt.xlabel('SH (h)', fontsize=fts)
+    plt.ylabel('CF (%)', fontsize=fts)
+    plt.title(title, fontsize=fts)
+    plt.legend(loc=1, bbox_to_anchor=(1.4,1.), fontsize=fts)
+    plt.xticks(fontsize=fts)
+    plt.yticks(fontsize=fts)
+    plt.savefig(open('%s/post/%s/%s-%s-CF.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
+    #plt.show()
+    plt.close()    
+
+    for i in range(m):
+        if RM[i,0]>9:
+            col=i-11
+            plt.plot(SH[i], LCOH[i], label='RM = %s'%RM[i,0], c=COL[col])
+        else:
+            plt.plot(SH[i], LCOH[i], label='RM = %s'%RM[i,0], c=scalar_map.to_rgba(RM[i,0]))
+    if 'BAT' in case:
+        plt.ylim([30,600])
+    else:
+        plt.ylim([30,300])
+    plt.xlabel('SH (h)', fontsize=fts)
+    plt.ylabel('LCOH (USD/MWh$_\mathrm{th}$)', fontsize=fts)
+    plt.title(title, fontsize=fts)
+    #plt.legend(loc=1, bbox_to_anchor=(1.4,1.), fontsize=fts)
+    plt.xticks(fontsize=fts)
+    plt.yticks(fontsize=fts)
+    plt.savefig(open('%s/post/%s/%s-%s-CF-LCOH.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
+    #plt.show()
+    plt.close()    
+
+
+    if 'HYBRID' in case:
+        for i in range(m):
+            if RM[i,0]>9:
+                col=i-11
+                plt.plot(SH[i], F_pv[i], label='RM = %s'%RM[i,0], c=COL[col])
+            else:
+                plt.plot(SH[i], F_pv[i], label='RM = %s'%RM[i,0], c=scalar_map.to_rgba(RM[i,0]))
+        plt.ylim([0,1.1])
+        plt.xlabel('SH (h)', fontsize=fts)
+        plt.ylabel('PV fraction', fontsize=fts)
+        #plt.title(title, fontsize=fts)
+        plt.legend(loc=1, bbox_to_anchor=(1.4,1.), fontsize=fts)
+        plt.xticks(fontsize=fts)
+        plt.yticks(fontsize=fts)
+        plt.savefig(open('%s/post/%s/%s-%s-CF-Fpv.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
+        #plt.show()
+        plt.close()   
+
+    elif 'CST' in case: 
+
+        plt.plot(RM[:,0], Hrecv[:,0],  c=scalar_map.to_rgba(RM[i,0]))
+        #plt.ylim([0,1.1])
+        plt.xlabel('RM', fontsize=fts)
+        plt.ylabel('Receiver height (m)', fontsize=fts)
+        #plt.title(title, fontsize=fts)
+        plt.xticks(fontsize=fts)
+        plt.yticks(fontsize=fts)
+        plt.savefig(open('%s/post/%s/%s-%s-CF-Hrecv.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
+        #plt.show()
+        plt.close()   
 
         
-            nd=int(len(data))
-
-            results=results.reshape(int(len(results)/nd), nd)
-            RM=results[:,0].reshape(m,n).astype(float)
-            SH=results[:,1].reshape(m,n).astype(float)
-            LCOH=results[:,2].reshape(m,n).astype(float)
-            CF=results[:,3].reshape(m,n).astype(float)
-            savedata=np.vstack((t_storage, CF))
-            savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
-            np.savetxt('%s/post/%s/%s-%s-data_CF.csv'%(resdir, year, case, location), savedata, fmt='%.6f', delimiter=',')
-  
-            savedata=np.vstack((t_storage, LCOH))
-            savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
-            np.savetxt('%s/post/%s/%s-%s-data_LCOH.csv'%(resdir, year, case, location), savedata, fmt='%.6f', delimiter=',')
-
-            if 'HYBRID' in case:
-
-                F_pv=results[:,4].reshape(m,n).astype(float)
-                savedata=np.vstack((t_storage, F_pv))
-                savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
-                np.savetxt('%s/post/%s/%s-%s-data_F_pv.csv'%(resdir, year, case, location), savedata, fmt='%.6f', delimiter=',')
-
-            elif case=='CST':
-                Hrecv=results[:,5].reshape(m,n).astype(float)
-                Drecv=results[:,6].reshape(m,n).astype(float)
-                Htower=results[:,7].reshape(m,n).astype(float)
-                Nhelio=results[:,8].reshape(m,n).astype(float)
-                Aland=results[:,9].reshape(m,n).astype(float)
-                #print(Aland)
-                Rland=np.sqrt(Aland/np.pi)
-                #print(Rland)   
-
-                savedata=np.append(multiple, Htower[:,0]).reshape(2, m)
-                savedata=np.vstack((np.array(['SM', 'Tower height (m)']).reshape(1,2), savedata.T))
-                np.savetxt('%s/post/%s/%s-%s-data_Htower.csv'%(resdir, year, case, location), savedata, fmt='%s', delimiter=',')
-
-                savedata=np.append(multiple, Hrecv[:,0]).reshape(2, m)
-                savedata=np.vstack((np.array(['SM', 'Receiver height (m)']).reshape(1,2), savedata.T))    
-                np.savetxt('%s/post/%s/%s-%s-data_Hrecv.csv'%(resdir, year, case, location), savedata, fmt='%s', delimiter=',')
-
-                savedata=np.append(multiple, Drecv[:,0]).reshape(2, m)
-                savedata=np.vstack((np.array(['SM', 'Receiver diameter (m)']).reshape(1,2), savedata.T))  
-                np.savetxt('%s/post/%s/%s-%s-data_Drecv.csv'%(resdir, year, case, location), savedata, fmt='%s', delimiter=',')
-
-                savedata=np.append(multiple, Nhelio[:,0]).reshape(2, m)
-                savedata=np.vstack((np.array(['SM', 'Number of heliostats']).reshape(1,2), savedata.T))    
-                np.savetxt('%s/post/%s/%s-%s-data_Nhelio.csv'%(resdir, year, case, location), savedata, fmt='%s', delimiter=',')
-
-                savedata=np.append(multiple, Aland[:,0]).reshape(2, m)
-                savedata=np.vstack((np.array(['SM', 'Land area (m2)']).reshape(1,2), savedata.T))   
-                np.savetxt('%s/post/%s/%s-%s-data_Aland.csv'%(resdir, year, case, location), savedata, fmt='%s', delimiter=',')
-
-            if case=='CST-modular':
-                num_modules=results[:,4].reshape(m,n).astype(float)
-                savedata=np.vstack((t_storage, num_modules))
-                savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
-                np.savetxt('%s/post/%s/%s-%s-data_num_modules.csv'%(resdir, year, case, location), savedata, fmt='%s', delimiter=',')
-
-            if 'BAT' in case:
-                P_bat=results[:,9].reshape(m,n).astype(float) 
-
-                savedata=np.vstack((t_storage, P_bat))
-                savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
-                np.savetxt('%s/post/%s/%s-%s-data_P_bat.csv'%(resdir, year, case, location), savedata, fmt='%.2f', delimiter=',')  
-
-            elif 'PHES' in case:
-                P_PHES=results[:,9].reshape(m,n).astype(float) 
-
-                savedata=np.vstack((t_storage, P_PHES))
-                savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
-                np.savetxt('%s/post/%s/%s-%s-data_P_PHES.csv'%(resdir, year, case, location), savedata, fmt='%.2f', delimiter=',')  
-    
-            elif 'TES' in case:
-                P_heater=results[:,7].reshape(m,n).astype(float)  
-
-                savedata=np.vstack((t_storage, P_heater))
-                savedata=np.hstack((np.append(0, multiple).reshape(m+1, 1), savedata))
-                np.savetxt('%s/post/%s/%s-%s-data_P_heater.csv'%(resdir, year, case, location), savedata, fmt='%.2f', delimiter=',')            
-
-            for i in range(m):
-                if RM[i,0]>9:
-                    col=i-11
-                    plt.plot(SH[i], CF[i]*100., label='RM = %s'%RM[i,0], c=COL[col])
-                else:
- 
-                    plt.plot(SH[i], CF[i]*100., label='RM = %s'%RM[i,0], c=scalar_map.to_rgba(RM[i,0]))
-            plt.ylim([0,100])
-            plt.xlabel('SH (h)', fontsize=fts)
-            plt.ylabel('CF (%)', fontsize=fts)
-            plt.title(title, fontsize=fts)
-            plt.legend(loc=1, bbox_to_anchor=(1.4,1.), fontsize=fts)
-            plt.xticks(fontsize=fts)
-            plt.yticks(fontsize=fts)
-            plt.savefig(open('%s/post/%s/%s-%s-CF.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
-            #plt.show()
-            plt.close()    
-
-            for i in range(m):
-                plt.plot(SH[i], LCOH[i], label='RM = %s'%RM[i,0], c=scalar_map.to_rgba(RM[i,0]))
-            if 'BAT' in case:
-                plt.ylim([30,600])
-            else:
-                plt.ylim([30,300])
-            plt.xlabel('SH (h)', fontsize=fts)
-            plt.ylabel('LCOH (USD/MWh$_\mathrm{th}$)', fontsize=fts)
-            plt.title(title, fontsize=fts)
-            #plt.legend(loc=1, bbox_to_anchor=(1.4,1.), fontsize=fts)
-            plt.xticks(fontsize=fts)
-            plt.yticks(fontsize=fts)
-            plt.savefig(open('%s/post/%s/%s-%s-CF-LCOH.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
-            #plt.show()
-            plt.close()    
+        plt.plot(RM[:,0], Drecv[:,0], c=scalar_map.to_rgba(RM[i,0]))
+        #plt.ylim([0,1.1])
+        plt.xlabel('RM', fontsize=fts)
+        plt.ylabel('Receiver diameter (m)', fontsize=fts)
+        #plt.title(title, fontsize=fts)
+        plt.xticks(fontsize=fts)
+        plt.yticks(fontsize=fts)
+        plt.savefig(open('%s/post/%s/%s-%s-CF-Drecv.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
+        #plt.show()
+        plt.close()   
 
 
-            if 'HYBRID' in case:
-                for i in range(m):
-                    plt.plot(SH[i], F_pv[i], label='RM = %s'%RM[i,0], c=scalar_map.to_rgba(RM[i,0]))
-                plt.ylim([0,1.1])
-                plt.xlabel('SH (h)', fontsize=fts)
-                plt.ylabel('PV fraction', fontsize=fts)
-                #plt.title(title, fontsize=fts)
-                plt.legend(loc=1, bbox_to_anchor=(1.4,1.), fontsize=fts)
-                plt.xticks(fontsize=fts)
-                plt.yticks(fontsize=fts)
-                plt.savefig(open('%s/post/%s/%s-%s-CF-Fpv.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
-                #plt.show()
-                plt.close()   
-
-            elif case=='CST': 
-
-                plt.plot(RM[:,0], Hrecv[:,0],  c=scalar_map.to_rgba(RM[i,0]))
-                #plt.ylim([0,1.1])
-                plt.xlabel('RM', fontsize=fts)
-                plt.ylabel('Receiver height (m)', fontsize=fts)
-                #plt.title(title, fontsize=fts)
-                plt.xticks(fontsize=fts)
-                plt.yticks(fontsize=fts)
-                plt.savefig(open('%s/post/%s/%s-%s-CF-Hrecv.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
-                #plt.show()
-                plt.close()   
-
-                
-                plt.plot(RM[:,0], Drecv[:,0], c=scalar_map.to_rgba(RM[i,0]))
-                #plt.ylim([0,1.1])
-                plt.xlabel('RM', fontsize=fts)
-                plt.ylabel('Receiver diameter (m)', fontsize=fts)
-                #plt.title(title, fontsize=fts)
-                plt.xticks(fontsize=fts)
-                plt.yticks(fontsize=fts)
-                plt.savefig(open('%s/post/%s/%s-%s-CF-Drecv.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
-                #plt.show()
-                plt.close()   
+        plt.plot(RM[:,0], Htower[:,0],  c=scalar_map.to_rgba(RM[i,0]))
+        #plt.ylim([0,1.1])
+        plt.xlabel('RM', fontsize=fts)
+        plt.ylabel('Tower height (m)', fontsize=fts)
+        #plt.title(title, fontsize=fts)
+        plt.xticks(fontsize=fts)
+        plt.yticks(fontsize=fts)
+        plt.savefig(open('%s/post/%s/%s-%s-CF-Htower.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
+        #plt.show()
+        plt.close()   
 
 
-                plt.plot(RM[:,0], Htower[:,0],  c=scalar_map.to_rgba(RM[i,0]))
-                #plt.ylim([0,1.1])
-                plt.xlabel('RM', fontsize=fts)
-                plt.ylabel('Tower height (m)', fontsize=fts)
-                #plt.title(title, fontsize=fts)
-                plt.xticks(fontsize=fts)
-                plt.yticks(fontsize=fts)
-                plt.savefig(open('%s/post/%s/%s-%s-CF-Htower.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
-                #plt.show()
-                plt.close()   
+        plt.plot(RM[:,0], Nhelio[:,0],  c=scalar_map.to_rgba(RM[i,0]))
+        #plt.ylim([0,1.1])
+        plt.xlabel('RM', fontsize=fts)
+        plt.ylabel('Number of heliostats', fontsize=fts)
+        #plt.title(title, fontsize=fts)
+        plt.xticks(fontsize=fts)
+        plt.yticks(fontsize=fts)
+        plt.savefig(open('%s/post/%s/%s-%s-CF-Nhelio.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
+        #plt.show()
+        plt.close()   
 
 
-                plt.plot(RM[:,0], Nhelio[:,0],  c=scalar_map.to_rgba(RM[i,0]))
-                #plt.ylim([0,1.1])
-                plt.xlabel('RM', fontsize=fts)
-                plt.ylabel('Number of heliostats', fontsize=fts)
-                #plt.title(title, fontsize=fts)
-                plt.xticks(fontsize=fts)
-                plt.yticks(fontsize=fts)
-                plt.savefig(open('%s/post/%s/%s-%s-CF-Nhelio.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
-                #plt.show()
-                plt.close()   
+        plt.plot(RM[:,0], Rland[:,0],  c=scalar_map.to_rgba(RM[i,0]))
+        #plt.ylim([0,1.1])
+        plt.xlabel('RM', fontsize=fts)
+        plt.ylabel('Tower to the most distant heliost (m)', fontsize=fts)
+        #plt.title(title, fontsize=fts)
+        plt.xticks(fontsize=fts)
+        plt.yticks(fontsize=fts)
+        plt.savefig(open('%s/post/%s/%s-%s-CF-Rland.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
+        #plt.show()
+        plt.close()   
+
+    elif 'CST-modular' in case: 
+        plt.plot(RM[:,0], num_modules[:,0],  c=scalar_map.to_rgba(RM[i,0]))
+        #plt.ylim([0,1.1])
+        plt.xlabel('RM', fontsize=fts)
+        plt.ylabel('Number of modules', fontsize=fts)
+        #plt.title(title, fontsize=fts)
+        plt.xticks(fontsize=fts)
+        plt.yticks(fontsize=fts)
+        plt.savefig(open('%s/post/%s/%s-%s-CF-num_modules.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
+        #plt.show()
+        plt.close() 
+
+    if 'BAT' in case:
+        for i in range(m):
+            plt.plot(SH[i], P_bat[i], label='RM = %s'%RM[i,0], c=scalar_map.to_rgba(RM[i,0]))
+        #plt.ylim([0,1.1])
+        plt.xlabel('SH (h)', fontsize=fts)
+        plt.ylabel('Battery power (MW)', fontsize=fts)
+        #plt.title(title, fontsize=fts)
+        plt.legend(loc=1, bbox_to_anchor=(1.4,1.), fontsize=fts)
+        plt.xticks(fontsize=fts)
+        plt.yticks(fontsize=fts)
+        plt.savefig(open('%s/post/%s/%s-%s-CF-P_bat.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
+        #plt.show()
+        plt.close()   
+
+    if 'PHES' in case:
+        for i in range(m):
+            plt.plot(SH[i], P_PHES[i], label='RM = %s'%RM[i,0], c=scalar_map.to_rgba(RM[i,0]))
+        #plt.ylim([0,1.1])
+        plt.xlabel('SH (h)', fontsize=fts)
+        plt.ylabel('Power of PHES (MW)', fontsize=fts)
+        #plt.title(title, fontsize=fts)
+        plt.legend(loc=1, bbox_to_anchor=(1.4,1.), fontsize=fts)
+        plt.xticks(fontsize=fts)
+        plt.yticks(fontsize=fts)
+        plt.savefig(open('%s/post/%s/%s-%s-CF-P_PHES.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
+        #plt.show()
+        plt.close()  
 
 
-                plt.plot(RM[:,0], Rland[:,0],  c=scalar_map.to_rgba(RM[i,0]))
-                #plt.ylim([0,1.1])
-                plt.xlabel('RM', fontsize=fts)
-                plt.ylabel('Tower to the most distant heliost (m)', fontsize=fts)
-                #plt.title(title, fontsize=fts)
-                plt.xticks(fontsize=fts)
-                plt.yticks(fontsize=fts)
-                plt.savefig(open('%s/post/%s/%s-%s-CF-Rland.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
-                #plt.show()
-                plt.close()   
-
-            elif case=='CST-modular': 
-                plt.plot(RM[:,0], num_modules[:,0],  c=scalar_map.to_rgba(RM[i,0]))
-                #plt.ylim([0,1.1])
-                plt.xlabel('RM', fontsize=fts)
-                plt.ylabel('Number of modules', fontsize=fts)
-                #plt.title(title, fontsize=fts)
-                plt.xticks(fontsize=fts)
-                plt.yticks(fontsize=fts)
-                plt.savefig(open('%s/post/%s/%s-%s-CF-num_modules.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
-                #plt.show()
-                plt.close() 
-
-            if 'BAT' in case:
-                for i in range(m):
-                    plt.plot(SH[i], P_bat[i], label='RM = %s'%RM[i,0], c=scalar_map.to_rgba(RM[i,0]))
-                #plt.ylim([0,1.1])
-                plt.xlabel('SH (h)', fontsize=fts)
-                plt.ylabel('Battery power (MW)', fontsize=fts)
-                #plt.title(title, fontsize=fts)
-                plt.legend(loc=1, bbox_to_anchor=(1.4,1.), fontsize=fts)
-                plt.xticks(fontsize=fts)
-                plt.yticks(fontsize=fts)
-                plt.savefig(open('%s/post/%s/%s-%s-CF-P_bat.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
-                #plt.show()
-                plt.close()   
-
-            if 'PHES' in case:
-                for i in range(m):
-                    plt.plot(SH[i], P_PHES[i], label='RM = %s'%RM[i,0], c=scalar_map.to_rgba(RM[i,0]))
-                #plt.ylim([0,1.1])
-                plt.xlabel('SH (h)', fontsize=fts)
-                plt.ylabel('Power of PHES (MW)', fontsize=fts)
-                #plt.title(title, fontsize=fts)
-                plt.legend(loc=1, bbox_to_anchor=(1.4,1.), fontsize=fts)
-                plt.xticks(fontsize=fts)
-                plt.yticks(fontsize=fts)
-                plt.savefig(open('%s/post/%s/%s-%s-CF-P_PHES.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
-                #plt.show()
-                plt.close()  
-
-
-            if 'TES' in case:
-                for i in range(m):
-                    plt.plot(SH[i], P_heater[i], label='RM = %s'%RM[i,0], c=scalar_map.to_rgba(RM[i,0]))
-                #plt.ylim([0,1.1])
-                plt.xlabel('SH (h)', fontsize=fts)
-                plt.ylabel('Heater power (MW)', fontsize=fts)
-                #plt.title(title, fontsize=fts)
-                plt.legend(loc=1, bbox_to_anchor=(1.4,1.), fontsize=fts)
-                plt.xticks(fontsize=fts)
-                plt.yticks(fontsize=fts)
-                plt.savefig(open('%s/post/%s/%s-%s-CF-P_heater.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
-                #plt.show()
-                plt.close()   
+    if 'TES' in case:
+        for i in range(m):
+            plt.plot(SH[i], P_heater[i], label='RM = %s'%RM[i,0], c=scalar_map.to_rgba(RM[i,0]))
+        #plt.ylim([0,1.1])
+        plt.xlabel('SH (h)', fontsize=fts)
+        plt.ylabel('Heater power (MW)', fontsize=fts)
+        #plt.title(title, fontsize=fts)
+        plt.legend(loc=1, bbox_to_anchor=(1.4,1.), fontsize=fts)
+        plt.xticks(fontsize=fts)
+        plt.yticks(fontsize=fts)
+        plt.savefig(open('%s/post/%s/%s-%s-CF-P_heater.png'%(resdir, year, case, location), 'wb'),  bbox_inches='tight')
+        #plt.show()
+        plt.close()   
 
 
 def fmt(x):
@@ -467,7 +432,7 @@ def get_cf_lcoh_optimal(location, case, resdir, year=2020, plot=True):
         #plt.show()
         plt.close()
         
-        idx=(results[:,0]!=50)*(results[:,-1]<9999) 
+        idx=(results[:,-1]<9999) # (results[:,0]!=50)*(results[:,-1]<9999) 
         plt.plot(results[:,0][idx], results[:,-1][idx], 'r')
         #plt.plot(results[:,0], results[:,-1])
         plt.xlabel('Capacity factor (%)', fontsize=fts)
@@ -487,7 +452,7 @@ def get_cf_lcoh_optimal_hydrogen(year=2020):
 
     CF, LCOH, LCOH2, locations=get_data(year=year)  
     best=get_best_location(year=year)
-    regions=[ 'Burnie', 'Pinjara',  'Pilbara', 'Upper Spencer Gulf',  'Gladstone']
+    regions=[ 'Burnie', 'Pinjarra',  'Pilbara', 'Upper Spencer Gulf',  'Gladstone']
     LCOH_best={}
     LCOH_storage={}
     for region in regions:
@@ -497,6 +462,8 @@ def get_cf_lcoh_optimal_hydrogen(year=2020):
             if location=='%s %s'%(region, bid):
                 lcoh=LCOH[i]
                 LCOH_best[region]=lcoh
+                if 'Pinjarra' in location:
+                    location='Pinjara '+location[-1]
                 cf, lcoh, lcoh2=get_storage_data(year=year, location=location, cost=1000)
                 LCOH_storage[region]=lcoh
     return LCOH_best, CF, LCOH_storage
@@ -564,7 +531,7 @@ def plot_cf_lcoh_comparison(location, resdir, year=2020):
     plt.close()
 
 
-def plot_breakdown_bars(location, resdir, year=2020):
+def plot_breakdown_bars(location, resdir, P_load=500e3, year=2020, OM_method='SL', fast=True):
 
     cases=['CST', 'CST-modular','TES-PV', 'TES-WIND', 'TES-HYBRID',  'BAT-PV', 'BAT-WIND', 'BAT-HYBRID','PHES-PV','PHES-WIND','PHES-HYBRID']
     #LABELS=['CST+TES', 'PV+TES',  'WT+TES', 'PV+WT+TES',  'PV+BAT', 'WT+BAT', 'PV+WT+BAT', 'PV+PHES', 'WT+PHES','PV+WT+PHES']
@@ -572,7 +539,7 @@ def plot_breakdown_bars(location, resdir, year=2020):
     print(len(LABELS2))
 
 
-    CF0=np.r_[50., 80., 90., 95., 99.]
+    CF0=np.r_[60., 70., 80., 90., 95., 99.]
 
     width = 0.5 
     fig, ax = plt.subplots(figsize=(12,6))
@@ -609,8 +576,8 @@ def plot_breakdown_bars(location, resdir, year=2020):
         SHs=data[:,1]
         RMs=data[:,2]
         LCOHs=data[:,3] 
-
-
+        if 'CST' in case:
+            des_details=np.array(['CF', 'C_field', 'C_recv', 'C_tower', 'C_site', 'C_TES',' C_om'])
         for j in range(len(CF0)):
             cf0=CF0[j]
             idx=abs(cf0-cfs)<0.01
@@ -620,36 +587,35 @@ def plot_breakdown_bars(location, resdir, year=2020):
                 rm=RMs[idx][0]
                 lcoh=LCOHs[idx][0]
                 cf=cfs[idx][0]
-                savename='design_%s_CF=%.0f%%'%(case, cf0)
-                resdir='%s/post/%s'%(resdir, year)
+                savename='design_%s_%s_CF=%.0f%%'%(location, case, cf0)
+ 
                 if case=='CST':
-                    lcoh_1, cf_1=get_CST_design(rm, sh, location, case, resdir, savename)
+                    lcoh_1, cf_1=get_CST_design(rm, sh, location, case, resdir, P_load=P_load, savename=savename, OM_method=OM_method, fast=fast)
                 if case=='CST-modular':
-                    lcoh_1, cf_1=get_CST_modular_design(rm, sh, location, case, resdir, savename)
+                    lcoh_1, cf_1=get_CST_modular_design(rm, sh, location, case, resdir, P_load=P_load, savename=savename)
                 elif case=='TES-PV':
-                    lcoh_1, cf_1=get_TES_design(rm, sh, location, case, resdir, savename, F_pv=1)
+                    lcoh_1, cf_1=get_TES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=1)
                 elif case=='TES-WIND':
-                    lcoh_1, cf_1=get_TES_design(rm, sh, location, case, resdir, savename, F_pv=0)
+                    lcoh_1, cf_1=get_TES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=0)
                 elif case=='TES-HYBRID':
-                    lcoh_1, cf_1=get_TES_design(rm, sh, location, case, resdir, savename, F_pv=None)
+                    lcoh_1, cf_1=get_TES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=None)
                 elif case=='BAT-PV':
-                    lcoh_1, cf_1=get_BAT_design(rm, sh, location, case, resdir, savename, F_pv=1)
+                    lcoh_1, cf_1=get_BAT_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=1)
                 elif case=='BAT-WIND':
-                    lcoh_1, cf_1=get_BAT_design(rm, sh, location, case, resdir, savename, F_pv=0)
+                    lcoh_1, cf_1=get_BAT_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=0)
                 elif case=='BAT-HYBRID':
-                    lcoh_1, cf_1=get_BAT_design(rm, sh, location, case, resdir, savename, F_pv=None)
+                    lcoh_1, cf_1=get_BAT_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=None)
                 elif case=='PHES-PV':
-                    lcoh_1, cf_1=get_PHES_design(rm, sh, location, case, resdir, savename, F_pv=1)
+                    lcoh_1, cf_1=get_PHES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=1)
                 elif case=='PHES-WIND':
-                    lcoh_1, cf_1=get_PHES_design(rm, sh, location, case, resdir, savename, F_pv=0)
+                    lcoh_1, cf_1=get_PHES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=0)
                 elif case=='PHES-HYBRID':
-                    lcoh_1, cf_1=get_PHES_design(rm, sh, location, case, resdir, savename, F_pv=None)
+                    lcoh_1, cf_1=get_PHES_design(rm, sh, location, case, resdir, P_load=P_load, savename=savename, F_pv=None)
 
                 print(case, "CF=%s%%"%cf0, "%.1f%%"%(cf_1*100.), 'LCOH diff: %.1f%%'%((lcoh_1-lcoh)/lcoh*100.))    
 
-                fn_des=resdir+'/summary_design_%s_CF=%.0f%%.csv'%(case, cf0)
+                fn_des=resdir+'/post/%s/summary_design_%s_%s_CF=%.0f%%.csv'%(year, location, case, cf0)
                 res=np.loadtxt(fn_des, delimiter=',', dtype=str)
-                print(res[3,1])
                 cf=res[3,1].astype(float)
 
                 if 'TES' in case:
@@ -742,6 +708,7 @@ def plot_breakdown_bars(location, resdir, year=2020):
                     C_heater_replace=0        
                     C_others=(C_contingency+C_indirect+C_site)*f/epy*1e6
                     C_om=res[12,1].astype(float)/epy*1e6
+                    des_details=np.append(des_details, (cf, C_field, C_recv, C_tower, C_site, C_TES, C_om))
 
                 elif case=='CST-modular':
                     epy=res[10,1].astype(float)
@@ -802,6 +769,10 @@ def plot_breakdown_bars(location, resdir, year=2020):
             C_OTHERS=np.append( C_OTHERS, C_others)
             C_OM=np.append(C_OM, C_om)  
             CFs=np.append(CFs, cf)
+        if 'CST' in case:
+            print(int(len(des_details)/7), len(des_details), location, case)
+            des_details=des_details.reshape(int(len(des_details)/7), 7)
+            np.savetxt('%s/%s-des-details-%s.csv'%(resdir, case, location), des_details, fmt='%s,', delimiter=',')            
 
         bar_width=0.5
         index=np.arange(len(CF0))*0.8
@@ -928,8 +899,60 @@ def interp_lcoh(LCOH, CF, cf):
     return lcoh
 
 
+def hydrogen_table():
+
+    LCOH_best, CF, LCOH_storage=get_cf_lcoh_optimal_hydrogen(year=2020)
+
+    CF, LCOH, LCOH2, locations=get_data(year=year)  
+    best=get_best_location(year=year)
+    regions=[ 'Burnie', 'Pinjara',  'Pilbara', 'Upper Spencer Gulf',  'Gladstone']
+    LCOH_best={}
+    LCOH_storage={}
+    for region in regions:
+        bid=best[region]
+        for i in range(len(locations)):
+            location=locations[i]
+            if location=='%s %s'%(region, bid):
+                lcoh=LCOH[i]
+                LCOH_best[region]=lcoh
+                cf, lcoh, lcoh2=get_storage_data(year=year, location=location, cost=1000)
+                LCOH_storage[region]=lcoh
+
+
+def get_CST_breakdown(location):
+    resdir='/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/results/CF-curves-new-wind/post/2020/design details'
+    CFS=np.r_[50, 80, 90, 95, 99]
+    for cf in CFS:
+        fn=resdir+'/summary_design_%s_CST_CF=%.0f%%.csv'%(location, cf)  
+        data=np.loadtxt(fn, delimiter=',', dtype=str)
+        if cf==50:  
+            summary=data[:,0]
+        summary=np.append(summary, data[:,1])
+        if cf==99:
+            summary=np.append(summary, data[:,2])
+
+    summary=summary.reshape(len(CFS)+2, int(len(summary)/(len(CFS)+2)))
+    summary=summary.T
+    np.savetxt(resdir+'/summary_%s_CST.csv'%location, summary, fmt='%s', delimiter=',')
+
+    for cf in CFS:
+        fn=resdir+'/summary_design_%s_CST-modular_CF=%.0f%%.csv'%(location, cf)  
+        data=np.loadtxt(fn, delimiter=',', dtype=str)
+        if cf==50:  
+            summary=data[:,0]
+        summary=np.append(summary, data[:,1])
+        if cf==99:
+            summary=np.append(summary, data[:,2])
+
+    summary=summary.reshape(len(CFS)+2, int(len(summary)/(len(CFS)+2)))
+    summary=summary.T
+    np.savetxt(resdir+'/summary_%s_CST-modular.csv'%location, summary, fmt='%s', delimiter=',')
+
+
+
+
 if __name__=='__main__':
-    locations=[ 'Pilbara', 'Gladstone', 'Burnie',  'Pinjara',  'Upper Spencer Gulf']
+    locations=[ 'Pinjarra', 'Pilbara', 'Gladstone', 'Burnie',   'Upper Spencer Gulf']
     cases=['CST',
            'CST-modular',
            'TES-HYBRID',
@@ -942,24 +965,56 @@ if __name__=='__main__':
            'PHES-PV',
            'PHES-WIND'
             ]
+    titles=['CST',
+            'CST-modular',
+            'PV+Wind+TES',
+            'PV+TES',
+            'Wind+TES',
+            'PV+Wind+Batt',
+            'PV+Batt',
+            'Wind+Batt',
+            'PV+Wind+PHES',
+            'PV+PHES',
+            'Wind+PHES',
+            ]
+
     workdir='/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/results/CF-curves-new-wind'
-    year=2030
-    #plot_cf_curves(workdir, year=year)
+    year=2050
 
+    # plot CF-RM-SH curves
+    if 1:
+        info=np.loadtxt('%s/max_rm_sh.csv'%workdir, delimiter=',', dtype=str, skiprows=1)
+        INFO={}
+        for i in range(len(info)):
+            case=info[i,0][1:-1]
+            location=info[i,1][1:-1]
+            rm_max=info[i,2].astype(float)
+            sh_max=info[i,3].astype(float)
+            if case in INFO.keys():
+                INFO[case][location]=[rm_max, sh_max]
+            else:
+                INFO[case]={location: [rm_max, sh_max]}
 
-    for case in cases:
+        #for i in range(len(cases)):
+        #    case=cases[i]
+        #    title=titles[i]
+        #    for location in locations:
+        #        rm_max, sh_max=INFO[case][location]  
+        #        plot_cf_curves(workdir, case, location, title, rm_max, sh_max, year=year)
+
+        #for case in cases:
+        #    for location in locations:
+        #        #print(case, location)
+        #        costmodel=str(year)
+        #        future_cost(location, case, P_load=500.e3, year=2020, costmodel=costmodel, resdir= workdir)
+        #        get_cf_lcoh_optimal(location, case, resdir= workdir, year=year, plot=False)
+         
+
         for location in locations:
-            #print(case, location)
-            costmodel=str(year)
-            future_cost(location, case, year=2020, costmodel=costmodel, resdir= workdir)
-            get_cf_lcoh_optimal(location, case, resdir= workdir, year=year, plot=False)
+            #plot_cf_lcoh_comparison(location, workdir, year)
      
+            plot_breakdown_bars(location, workdir)
 
-    for location in locations:
-        plot_cf_lcoh_comparison(location, workdir, year)
- 
-        #plot_breakdown_bars(location, workdir)
+        plot_breakdown_compare(cf0=99., workdir)
+    #get_CST_breakdown('Pilbara')
 
-    #plot_breakdown_compare(cf0=99., workdir)
-
-    

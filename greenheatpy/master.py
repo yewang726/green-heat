@@ -93,8 +93,12 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
             solar_data_fn=SolarResource(location, casedir=casedir, solcast_TMY=solcast_TMY)  
      
         if multi_cst_modules:
-            module_power =1250 #MWrh
-            output_fn=datadir+'modular_cst_design/CST_gen_%s_load%.1fMWth.dat'%(location, module_power)
+            if abs(P_load_des-2.3e3)<0.1:
+                module_power =9.2 #MWth
+                output_fn=datadir+'modular_cst_design/CST_gen_%s_load%.2fMWth.dat'%(location, module_power)
+            else:
+                module_power =1250 #MWth
+                output_fn=datadir+'modular_cst_design/CST_gen_%s_load%.1fMWth.dat'%(location, module_power)
        
         else:
             print('run SAM CST ...')    
@@ -108,7 +112,7 @@ def master(model_name, location, RM, t_storage, P_load_des=500e3, r_pv=None, P_h
         P_recv_out = list(np.float_(cst_output[3][1:-1].split(',')))  
 
         if multi_cst_modules:
-            num_modules=RM*P_load_des/1250e3
+            num_modules=RM*P_load_des/module_power/1e3
             for i in range(len(P_recv_out)):
                 P_recv_out[i] *= num_modules
 

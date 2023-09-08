@@ -44,6 +44,8 @@ def get_data(year, savedir=None):
 
     for i in range(len(locations)):
         locations[i]=locations[i][:-5]
+        if 'Pinjara' in locations[i]:
+            locations[i]='Pinjarra '+locations[i][-1]
 
     return CF, LCOH, LCOH2, locations  
 
@@ -90,7 +92,7 @@ def get_best_location(year, verbose=False):
     '''
     get the best local location in each region that produced the lowest LCOH2 for hydrogen
     '''
-    regions=np.array(['Pilbara', 'Pinjara', 'Gladstone', 'Burnie', 'Upper Spencer Gulf'])
+    regions=np.array(['Pilbara', 'Pinjarra', 'Gladstone', 'Burnie', 'Upper Spencer Gulf'])
     CF, LCOH, LCOH2, locations=get_data(year, savedir=None)
     best={}
     for region in regions:

@@ -6,7 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import qmc
 
-def update_cost(rm, sh, location, case, year, resdir, costmodel='2020', design=None, verbose=False):
+def update_cost(rm, sh, location, case, year, resdir,  P_load=500.e3, costmodel='2020', design=None, verbose=False):
     '''
     rm (float): renewable multiple
     sh (float): storage hour
@@ -26,9 +26,10 @@ def update_cost(rm, sh, location, case, year, resdir, costmodel='2020', design=N
     if 'CST' in case:
         if design==None:
             if 'modular' in case:
-                CF, A_land, D_recv, H_recv, H_tower, n_helios, TES_capa, num_modules=get_CST_modular_design(rm, sh, location, case, resdir, year=year)
+                lcoh, CF=get_CST_modular_design(rm, sh, location, case, resdir, P_load, year=year, costmodel=costmodel)
+
             else:
-                CF, A_land, D_recv, H_recv, H_tower, n_helios, TES_capa=get_CST_design(rm, sh, location, case, resdir, year=year)
+                lcoh, CF=get_CST_design(rm, sh, location, case, resdir, P_load, year=year, costmodel=costmodel, fast=True)
                 num_modules=1
         else:
             if 'modular' in case:
@@ -37,35 +38,35 @@ def update_cost(rm, sh, location, case, year, resdir, costmodel='2020', design=N
                 CF, A_land, D_recv, H_recv, H_tower, n_helios, TES_capa=design
                 num_modules=1
                                
-        if costmodel=='2020':
-            C_recv_ref=pm.C_recv_ref
-            C_tower_fix=pm.C_tower_fix
-            c_helio=pm.c_helio
-            c_site_cst=pm.c_site_cst
-            c_TES=pm.c_TES
-            c_land_cst=pm.c_land_cst
-        elif costmodel=='2030':  
-            C_recv_ref=pm.C_recv_ref_2030
-            C_tower_fix=pm.C_tower_fix_2030
-            c_helio=pm.c_helio_2030
-            c_site_cst=pm.c_site_cst_2030
-            c_TES=pm.c_TES_2030
-            c_land_cst=pm.c_land_cst_2030
-        elif costmodel=='2050':  
-            C_recv_ref=pm.C_recv_ref_2050
-            C_tower_fix=pm.C_tower_fix_2050
-            c_helio=pm.c_helio_2050
-            c_site_cst=pm.c_site_cst_2050
-            c_TES=pm.c_TES_2050
-            c_land_cst=pm.c_land_cst_2050
-        else: # costmodel=='uncertainty':
-            C_recv_ref=costmodel['C_recv_ref']
-            C_tower_fix=costmodel['C_tower_fix']
-            c_helio=costmodel['c_helio']
-            c_site_cst=costmodel['c_site_cst']
-            c_TES=costmodel['c_TES']
-            c_land_cst=costmodel['c_land_cst']
-        lcoh=get_LCOH_CST(CF, A_land, D_recv, H_recv, H_tower, n_helios, TES_capa, C_recv_ref, C_tower_fix, c_helio, c_site_cst, c_TES, c_land_cst, num_modules, savename=savename)
+            if costmodel=='2020':
+                C_recv_ref=pm.C_recv_ref
+                C_tower_fix=pm.C_tower_fix
+                c_helio=pm.c_helio
+                c_site_cst=pm.c_site_cst
+                c_TES=pm.c_TES
+                c_land_cst=pm.c_land_cst
+            elif costmodel=='2030':  
+                C_recv_ref=pm.C_recv_ref_2030
+                C_tower_fix=pm.C_tower_fix_2030
+                c_helio=pm.c_helio_2030
+                c_site_cst=pm.c_site_cst_2030
+                c_TES=pm.c_TES_2030
+                c_land_cst=pm.c_land_cst_2030
+            elif costmodel=='2050':  
+                C_recv_ref=pm.C_recv_ref_2050
+                C_tower_fix=pm.C_tower_fix_2050
+                c_helio=pm.c_helio_2050
+                c_site_cst=pm.c_site_cst_2050
+                c_TES=pm.c_TES_2050
+                c_land_cst=pm.c_land_cst_2050
+            else: # costmodel=='uncertainty':
+                C_recv_ref=costmodel['C_recv_ref']
+                C_tower_fix=costmodel['C_tower_fix']
+                c_helio=costmodel['c_helio']
+                c_site_cst=costmodel['c_site_cst']
+                c_TES=costmodel['c_TES']
+                c_land_cst=costmodel['c_land_cst']
+            lcoh=get_LCOH_CST(CF, A_land, D_recv, H_recv, H_tower, n_helios, TES_capa, C_recv_ref, C_tower_fix, c_helio, c_site_cst, c_TES, c_land_cst, num_modules, savename=savename)
 
     elif 'TES' in case:
         if 'PV' in case:
@@ -75,31 +76,32 @@ def update_cost(rm, sh, location, case, year, resdir, costmodel='2020', design=N
         elif 'HYBRID' in case:
             F_pv=None
         if design==None:
-            CF, P_heater, pv_max, wind_max, TES_capa =get_TES_design(rm, sh, location, case, resdir, year=year, F_pv=F_pv)
+            lcoh, CF=get_TES_design(rm, sh, location, case, resdir, P_load, year=year, costmodel=costmodel, F_pv=F_pv)
+
         else:
             CF, P_heater, pv_max, wind_max, TES_capa=design
-        if costmodel=='2020':
-            c_pv_system=pm.c_pv_system
-            c_wind_system=pm.c_wind_system
-            c_heater=pm.c_heater
-            c_TES=pm.c_TES
-        elif costmodel=='2030':
-            c_pv_system=pm.c_pv_system_2030
-            c_wind_system=pm.c_wind_system_2030
-            c_heater=pm.c_heater_2030
-            c_TES=pm.c_TES_2030
-        elif costmodel=='2050':
-            c_pv_system=pm.c_pv_system_2050
-            c_wind_system=pm.c_wind_system_2050
-            c_heater=pm.c_heater_2050
-            c_TES=pm.c_TES_2050
-        else:
-            c_pv_system=costmodel['c_pv_system']
-            c_wind_system=costmodel['c_wind_system']
-            c_heater=costmodel['c_heater']
-            c_TES=costmodel['c_TES']
+            if costmodel=='2020':
+                c_pv_system=pm.c_pv_system
+                c_wind_system=pm.c_wind_system
+                c_heater=pm.c_heater
+                c_TES=pm.c_TES
+            elif costmodel=='2030':
+                c_pv_system=pm.c_pv_system_2030
+                c_wind_system=pm.c_wind_system_2030
+                c_heater=pm.c_heater_2030
+                c_TES=pm.c_TES_2030
+            elif costmodel=='2050':
+                c_pv_system=pm.c_pv_system_2050
+                c_wind_system=pm.c_wind_system_2050
+                c_heater=pm.c_heater_2050
+                c_TES=pm.c_TES_2050
+            else:
+                c_pv_system=costmodel['c_pv_system']
+                c_wind_system=costmodel['c_wind_system']
+                c_heater=costmodel['c_heater']
+                c_TES=costmodel['c_TES']
 
-        lcoh=get_LCOH_TES(CF, P_heater, pv_max, wind_max, TES_capa, c_pv_system, c_wind_system, c_heater, c_TES, savename=savename)
+            lcoh=get_LCOH_TES(CF, P_heater, pv_max, wind_max, TES_capa, c_pv_system, c_wind_system, c_heater, c_TES, savename=savename)
 
     elif 'BAT' in case:
         if 'PV' in case:
@@ -109,35 +111,35 @@ def update_cost(rm, sh, location, case, year, resdir, costmodel='2020', design=N
         elif 'HYBRID' in case:
             F_pv=None
         if design==None:
-            CF, P_heater, pv_max, wind_max, bat_capa, bat_pmax=get_BAT_design(rm, sh, location, case, resdir, year=year, F_pv=F_pv)
+            lcoh, CF=get_BAT_design(rm, sh, location, case, resdir, P_load, year=year, costmodel=costmodel, F_pv=F_pv)
         else:
             CF, P_heater, pv_max, wind_max, bat_capa, bat_pmax=design
-        if costmodel=='2020':
-            c_pv_system=pm.c_pv_system
-            c_wind_system=pm.c_wind_system
-            c_heater=pm.c_heater
-            c_bt_energy=pm.c_bt_energy
-            c_bt_power=pm.c_bt_power
-        elif costmodel=='2030':
-            c_pv_system=pm.c_pv_system_2030
-            c_wind_system=pm.c_wind_system_2030
-            c_heater=pm.c_heater_2030
-            c_bt_energy=pm.c_bt_energy_2030
-            c_bt_power=pm.c_bt_power_2030
-        elif costmodel=='2050':
-            c_pv_system=pm.c_pv_system_2050
-            c_wind_system=pm.c_wind_system_2050
-            c_heater=pm.c_heater_2050
-            c_bt_energy=pm.c_bt_energy_2050
-            c_bt_power=pm.c_bt_power_2050
-        else:
-            c_pv_system=costmodel['c_pv_system']
-            c_wind_system=costmodel['c_wind_system']
-            c_heater=costmodel['c_heater']
-            c_bt_energy=costmodel['c_bt_energy']
-            c_bt_power=costmodel['c_bt_power']
+            if costmodel=='2020':
+                c_pv_system=pm.c_pv_system
+                c_wind_system=pm.c_wind_system
+                c_heater=pm.c_heater
+                c_bt_energy=pm.c_bt_energy
+                c_bt_power=pm.c_bt_power
+            elif costmodel=='2030':
+                c_pv_system=pm.c_pv_system_2030
+                c_wind_system=pm.c_wind_system_2030
+                c_heater=pm.c_heater_2030
+                c_bt_energy=pm.c_bt_energy_2030
+                c_bt_power=pm.c_bt_power_2030
+            elif costmodel=='2050':
+                c_pv_system=pm.c_pv_system_2050
+                c_wind_system=pm.c_wind_system_2050
+                c_heater=pm.c_heater_2050
+                c_bt_energy=pm.c_bt_energy_2050
+                c_bt_power=pm.c_bt_power_2050
+            else:
+                c_pv_system=costmodel['c_pv_system']
+                c_wind_system=costmodel['c_wind_system']
+                c_heater=costmodel['c_heater']
+                c_bt_energy=costmodel['c_bt_energy']
+                c_bt_power=costmodel['c_bt_power']
 
-        lcoh=get_LCOH_BAT(CF, P_heater, pv_max, wind_max, bat_capa, bat_pmax, c_pv_system, c_wind_system, c_heater, c_bt_energy, c_bt_power, savename=savename)
+            lcoh=get_LCOH_BAT(CF, P_heater, pv_max, wind_max, bat_capa, bat_pmax, c_pv_system, c_wind_system, c_heater, c_bt_energy, c_bt_power, savename=savename)
 
     elif 'PHES' in case:
         if 'PV' in case:
@@ -147,40 +149,40 @@ def update_cost(rm, sh, location, case, year, resdir, costmodel='2020', design=N
         elif 'HYBRID' in case:
             F_pv=None
         if design==None:
-            CF, P_heater, pv_max, wind_max, PHES_capa, PHES_pmax=get_PHES_design(rm, sh, location, case, resdir, year=year, F_pv=F_pv)
+            lcoh, CF=get_PHES_design(rm, sh, location, case, resdir, P_load, year=year, costmodel=costmodel, F_pv=F_pv)
         else:
             CF, P_heater, pv_max, wind_max, PHES_capa, PHES_pmax=design
 
-        if costmodel=='2020':
-            c_pv_system=pm.c_pv_system
-            c_wind_system=pm.c_wind_system
-            c_heater=pm.c_heater
-            c_PHES_energy=pm.c_PHES_energy
-            c_PHES_power=pm.c_PHES_power
-        elif costmodel=='2030':
-            c_pv_system=pm.c_pv_system_2030
-            c_wind_system=pm.c_wind_system_2030
-            c_heater=pm.c_heater_2030
-            c_PHES_energy=pm.c_PHES_energy_2030
-            c_PHES_power=pm.c_PHES_power_2030
-        elif costmodel=='2050':
-            c_pv_system=pm.c_pv_system_2050
-            c_wind_system=pm.c_wind_system_2050
-            c_heater=pm.c_heater_2050
-            c_PHES_energy=pm.c_PHES_energy_2050
-            c_PHES_power=pm.c_PHES_power_2050
-        else:
-            c_pv_system=costmodel['c_pv_system']
-            c_wind_system=costmodel['c_wind_system']
-            c_heater=costmodel['c_heater']
-            c_PHES_energy=costmodel['c_PHES_energy']
-            c_PHES_power=costmodel['c_PHES_power']
+            if costmodel=='2020':
+                c_pv_system=pm.c_pv_system
+                c_wind_system=pm.c_wind_system
+                c_heater=pm.c_heater
+                c_PHES_energy=pm.c_PHES_energy
+                c_PHES_power=pm.c_PHES_power
+            elif costmodel=='2030':
+                c_pv_system=pm.c_pv_system_2030
+                c_wind_system=pm.c_wind_system_2030
+                c_heater=pm.c_heater_2030
+                c_PHES_energy=pm.c_PHES_energy_2030
+                c_PHES_power=pm.c_PHES_power_2030
+            elif costmodel=='2050':
+                c_pv_system=pm.c_pv_system_2050
+                c_wind_system=pm.c_wind_system_2050
+                c_heater=pm.c_heater_2050
+                c_PHES_energy=pm.c_PHES_energy_2050
+                c_PHES_power=pm.c_PHES_power_2050
+            else:
+                c_pv_system=costmodel['c_pv_system']
+                c_wind_system=costmodel['c_wind_system']
+                c_heater=costmodel['c_heater']
+                c_PHES_energy=costmodel['c_PHES_energy']
+                c_PHES_power=costmodel['c_PHES_power']
 
-        lcoh=get_LCOH_PHES(CF, P_heater, pv_max, wind_max, PHES_capa, PHES_pmax, c_pv_system, c_wind_system, c_heater, c_PHES_energy, c_PHES_power, savename=savename)
+            lcoh=get_LCOH_PHES(CF, P_heater, pv_max, wind_max, PHES_capa, PHES_pmax, c_pv_system, c_wind_system, c_heater, c_PHES_energy, c_PHES_power, savename=savename)
 
     return lcoh
 
-def future_cost(location, case, year, costmodel, resdir, verbose=False):
+def future_cost(location, case, year, costmodel, resdir, P_load=500.e3, verbose=False):
     '''
     location (str): location
     case (str): case name
@@ -202,7 +204,7 @@ def future_cost(location, case, year, costmodel, resdir, verbose=False):
 
     for rm in RM:
         for sh in SH:
-            lcoh=update_cost(rm, sh, location, case, year, resdir, costmodel, verbose=verbose) 
+            lcoh=update_cost(rm, sh, location, case, year, resdir,  P_load, costmodel, verbose=verbose) 
             LCOH=np.append(LCOH, lcoh)
 
     LCOH=LCOH.reshape(m,n)
