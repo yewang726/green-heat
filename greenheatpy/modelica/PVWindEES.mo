@@ -50,7 +50,7 @@ model PVWindEES
   SI.Power P_ST_out "Discharging power";
   SI.Energy E_ST_stored "Stored energy";  
   SI.Energy E_heat "Annual heat production";      
-  Real SOC(start=0.5) "State of charge"; 
+  Real SOC(start=1e-8) "State of charge"; 
   Real CF "Capacity factor";    
 
 equation
