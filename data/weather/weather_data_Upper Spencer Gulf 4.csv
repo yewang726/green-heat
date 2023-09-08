@@ -1,5 +1,5 @@
 country,source,state,timezone,lat,lon,elevation,Temperature Units,Azimuth Units,Cloud Opacity Units,Dew Point Units,DHI Units,DNI Units,EBH Units,GHI Units,Snow Depth Units,Pressure Units,Wind Direction Units,Wind Speed Units,Zenith Units
-Australia,Solcast https://solcast.com,Burnie,9,-32.955673,137.615433,0,deg C,degree,%,deg C,W/m2,W/m2,W/m2,W/m2,cm,mbar,degree,m/s,degree
+Australia,Solcast https://solcast.com,Upper Spencer Gulf,9,-32.955673,137.615433,0,deg C,degree,%,deg C,W/m2,W/m2,W/m2,W/m2,cm,mbar,degree,m/s,degree
 Year,Month,Day,Hour,Minute,Temperature,Azimuth,Cloud Opacity,Dew Point,DHI,DNI,EBH,GHI,Snow Depth,Pressure,Wind Direction,Wind Speed,Zenith,,
 2015,1,1,0,0,20.2,-170,0,14.7,0,0,0,0,0,995.6,152,9.09,123,,
 2015,1,1,1,0,19.6,-154,0.1,15.1,0,0,0,0,0,995.1,148.7,7.974,119,,

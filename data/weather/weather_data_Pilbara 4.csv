@@ -1,5 +1,5 @@
 country,source,state,timezone,lat,lon,elevation,Temperature Units,Azimuth Units,Cloud Opacity Units,Dew Point Units,DHI Units,DNI Units,EBH Units,GHI Units,Snow Depth Units,Pressure Units,Wind Direction Units,Wind Speed Units,Zenith Units
-Australia,Solcast https://solcast.com,Burnie,7,-24.076559,117.108765,0,deg C,degree,%,deg C,W/m2,W/m2,W/m2,W/m2,cm,mbar,degree,m/s,degree
+Australia,Solcast https://solcast.com,Pilbara,7,-24.076559,117.108765,0,deg C,degree,%,deg C,W/m2,W/m2,W/m2,W/m2,cm,mbar,degree,m/s,degree
 Year,Month,Day,Hour,Minute,Temperature,Azimuth,Cloud Opacity,Dew Point,DHI,DNI,EBH,GHI,Snow Depth,Pressure,Wind Direction,Wind Speed,Zenith,,
 2019,1,1,0,0,31.5,-157,0,0.1,0,0,0,0,0,957,295.7,9.926,129,,
 2019,1,1,1,0,30.9,-143,0,0.4,0,0,0,0,0,957,308.4,8.247,122,,

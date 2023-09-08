@@ -1,5 +1,5 @@
 country,source,state,timezone,lat,lon,elevation,Temperature Units,Azimuth Units,Cloud Opacity Units,Dew Point Units,DHI Units,DNI Units,EBH Units,GHI Units,Snow Depth Units,Pressure Units,Wind Direction Units,Wind Speed Units,Zenith Units
-Australia,Solcast https://solcast.com,Burnie,10,-24.327077,151.951904,0,deg C,degree,%,deg C,W/m2,W/m2,W/m2,W/m2,cm,mbar,degree,m/s,degree
+Australia,Solcast https://solcast.com,Gladstone,10,-24.327077,151.951904,0,deg C,degree,%,deg C,W/m2,W/m2,W/m2,W/m2,cm,mbar,degree,m/s,degree
 Year,Month,Day,Hour,Minute,Temperature,Azimuth,Cloud Opacity,Dew Point,DHI,DNI,EBH,GHI,Snow Depth,Pressure,Wind Direction,Wind Speed,Zenith,,
 2014,1,1,0,0,25.6,-169,0,22.5,0,0,0,0,0,999.7,43.7,5.334,131,,
 2014,1,1,1,0,25.4,-152,0,22.5,0,0,0,0,0,999.7,49.7,5.037,127,,
