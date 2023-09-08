@@ -9,7 +9,7 @@ import time
 import functools
 from scipy import optimize as sciopt
 
-def objective_function(location, year, sim, t_storage, RM, P_load, obj_cf, par_n, par_v):
+def objective_function(location, year, sim, t_storage, RM, P_load, obj_cf, ele, par_n, par_v):
 
     nv=len(par_n)
     for i in range(nv):
@@ -26,6 +26,7 @@ def objective_function(location, year, sim, t_storage, RM, P_load, obj_cf, par_n
 
     var_n=['t_storage','RM','F_pv','P_ST_max', 'P_load']
     var_v=[str(t_storage), str(RM), str(r_pv), str(P_ST_max), str(P_load)]
+    #print(var_n)
 
     try:
         sim.update_pars(var_n, var_v)
@@ -33,7 +34,7 @@ def objective_function(location, year, sim, t_storage, RM, P_load, obj_cf, par_n
         res_fn=sim.res_fn
         res=DyMat.DyMatFile(res_fn)
 
-        LCOH=process_BAT(res, year, obj_cf=obj_cf, verbose=True) 
+        LCOH=process_BAT(res, year, obj_cf=obj_cf, ele=ele, verbose=False) 
 
     except:
         LCOH=99999
@@ -98,7 +99,7 @@ def objective_function_TES(location, year, sim, t_storage, RM, P_load, obj_cf, p
 
     return LCOH
 
-def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, casedir, P_load=500e6, case='BAT', year=2020, obj_cf=None, solcast_TMY=False):
+def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, casedir, P_load=500e6, case='BAT', year=2020, obj_cf=None, ele=False,  solcast_TMY=False):
     '''
     Arguments:
         model_name (str)  : minizic model name
@@ -149,7 +150,7 @@ def st_sciopt(mofn, location, t_storage, RM, method, LB, UB, nominals, names, ca
         bounds.append([LB[i], UB[i]])        
 
     if case=='BAT':
-        objfunc = functools.partial(objective_function, location, year,sim, t_storage, RM, P_load, obj_cf, names)
+        objfunc = functools.partial(objective_function, location, year,sim, t_storage, RM, P_load, obj_cf, ele, names)
     elif case=='TES':
         objfunc = functools.partial(objective_function_TES,  location, year, sim, t_storage, RM, P_load, obj_cf, names)
     elif case=='PHES':
@@ -352,7 +353,10 @@ results.write()
         f.write(bb)  
 
 
-def process_BAT(res, year=2020, obj_cf=None, verbose=False):
+def process_BAT(res, year=2020, obj_cf=None, ele=False, verbose=False, savename=''):
+    '''
+    ele: True, purely electricity system
+    '''
     pm=Parameters()
     CF=res.data('CF')[-1]
     RM=res.data('RM')[-1]
@@ -367,6 +371,8 @@ def process_BAT(res, year=2020, obj_cf=None, verbose=False):
     eta_storage=res.data('eff_ST_in')[0]
 
     pm=Parameters()
+    if bat_capa<1e-3:
+        bat_pmax=1e-9 
     if year==2020:
         C_pv=pm.c_pv_system*pv_max
         C_wind=pm.c_wind_system*wind_max
@@ -388,6 +394,10 @@ def process_BAT(res, year=2020, obj_cf=None, verbose=False):
     else:
         print('Year %s data is not implemented'%year)
 
+    if ele:
+        C_heater=0.
+        CF=min(CF/0.99, 1)
+
     CAPEX=C_pv+C_wind+C_heater+C_bat
 
    # heater replacement
@@ -408,6 +418,11 @@ def process_BAT(res, year=2020, obj_cf=None, verbose=False):
         t=(i+1)*pm.t_life_bt+pm.t_constr_pv
         C_replc_bt_NPV+=C_replace_bt/(1+pm.r_disc_real)**t
 
+    if ele:
+        C_replc_heater_NPV=0
+   
+
+
     C_replace_NPV=C_replc_heater_NPV+C_replc_bt_NPV
 
     C_cap=CAPEX*(1+pm.r_conting_pv)+C_replace_NPV
@@ -419,36 +434,54 @@ def process_BAT(res, year=2020, obj_cf=None, verbose=False):
 
     print('RM=%.1f, SH=%.1f, F_pv=%.3f, P_bat=%.1f (MW), CF=%.4f, LCOH=%.2f'%(RM, t_storage,  F_pv, bat_pmax/1e3, CF, LCOH))	
 
-    if verbose:
-        summary=np.array([
-                ['RM',RM, '-'],
-                ['t_storage', t_storage, 'h'],
-                ['LCOH', LCOH, 'USD/MWh_th'],
-                ['CF', CF, '-'],
-                ['F_pv', F_pv, '-'],
-                ['pv_max', pv_max/1e3, 'MW'],
-                ['wind_max', wind_max/1e3, 'MW'],
-                ['P_heater',P_heater/1e3, 'MW'],
-                ['bat_capa',bat_capa/1e3, 'MWh'],
-                ['bat_pmax',bat_pmax/1e3, 'MW'],
-                ['storage in/out efficiency', eta_storage, '-'],
-                ['EPY', epy, 'MWh'],
-                ['C_cap_tot', C_cap/1e6, 'M.USD'],
-                ['OM_tot', OM_total/1e6, 'M.USD'],
-                ['C_equipment', CAPEX/1e6, 'M.USD'],
-                ['C_pv', C_pv/1e6, 'M.USD'],            
-                ['C_wind', C_wind/1e6, 'M.USD'],  
-                ['C_bat', C_bat/1e6, 'M.USD'],  
-                ['C_heater', C_heater/1e6, 'M.USD'],  
-                ['C_replace_heater_NPV', C_replc_heater_NPV/1e6, 'M.USD'],  
-                ['C_replace_bt_NPV', C_replc_bt_NPV/1e6, 'M.USD'],  
-                ['C_replace_NPV', C_replace_NPV/1e6, 'M.USD'],  
-                ['r_real_discount', pm.r_disc_real, '-'],
-                ['t_construction', pm.t_constr_pv, 'year'],
-                ['t_life', pm.t_life, 'year']            
-        ])
+    summary=np.array([
+            ['RM',RM, '-'],
+            ['t_storage', t_storage, 'h'],
+            ['LCOH', LCOH, 'USD/MWh_th'],
+            ['CF', CF, '-'],
+            ['F_pv', F_pv, '-'],
+            ['pv_max', pv_max/1e3, 'MW'],
+            ['wind_max', wind_max/1e3, 'MW'],
+            ['P_heater',P_heater/1e3, 'MW'],
+            ['bat_capa',bat_capa/1e3, 'MWh'],
+            ['bat_pmax',bat_pmax/1e3, 'MW'],
+            ['storage in/out efficiency', eta_storage, '-'],
+            ['EPY', epy, 'MWh'],
+            ['C_cap_tot', C_cap/1e6, 'M.USD'],
+            ['OM_tot', OM_total/1e6, 'M.USD'],
+            ['C_equipment', CAPEX/1e6, 'M.USD'],
+            ['C_pv', C_pv/1e6, 'M.USD'],            
+            ['C_wind', C_wind/1e6, 'M.USD'],  
+            ['C_bat', C_bat/1e6, 'M.USD'],  
+            ['C_heater', C_heater/1e6, 'M.USD'],  
+            ['C_replace_heater_NPV', C_replc_heater_NPV/1e6, 'M.USD'],  
+            ['C_replace_bt_NPV', C_replc_bt_NPV/1e6, 'M.USD'],  
+            ['C_replace_NPV', C_replace_NPV/1e6, 'M.USD'],  
+            ['r_real_discount', pm.r_disc_real, '-'],
+            ['t_construction', pm.t_constr_pv, 'year'],
+            ['t_life', pm.t_life, 'year']            
+    ])
 
-        np.savetxt('./summary_%.3f_%.2f.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
+    np.savetxt('./summary_%.3f_%.2f.csv'%(RM, t_storage), summary, fmt='%s', delimiter=',')
+    if verbose:
+        P_ele=res.data('P_ele')
+        time=res.abscissa('P_ele', valuesOnly=True)
+        P_ele=np.append(P_ele, time)
+        P_ele=P_ele.reshape(2, len(time))
+
+        P_pv_out=res.data('P_pv_out')
+        time=res.abscissa('P_pv_out', valuesOnly=True)
+        P_pv_out=np.append(P_pv_out, time)
+        P_pv_out=P_pv_out.reshape(2, len(time))
+
+        P_wind_out=res.data('P_wind_out')
+        time=res.abscissa('P_wind_out', valuesOnly=True)
+        P_wind_out=np.append(P_wind_out, time)
+        P_wind_out=P_wind_out.reshape(2, len(time))
+
+        np.savetxt('./details_%.3f_%.2f_P_ele.csv'%(RM, t_storage), P_ele.T, fmt='%.4f', delimiter=',')
+        np.savetxt('./details_%.3f_%.2f_pv_out.csv'%(RM, t_storage), P_pv_out.T, fmt='%.4f', delimiter=',')
+        np.savetxt('./details_%.3f_%.2f_wind_out.csv'%(RM, t_storage), P_wind_out.T, fmt='%.4f', delimiter=',')
 
 
     if obj_cf!=None:
