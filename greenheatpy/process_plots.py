@@ -450,11 +450,20 @@ def get_cf_lcoh_optimal(location, case, resdir, year=2020, plot=True):
 
 def get_cf_lcoh_optimal_hydrogen(year=2020):
 
-    CF, LCOH, LCOH2, locations=get_data(year=year)  
+    CF, LCOH, LCOH2, locations, PV, WIND, EL, H2ST =get_data(year=year)  
     best=get_best_location(year=year)
     regions=[ 'Burnie', 'Pinjarra',  'Pilbara', 'Upper Spencer Gulf',  'Gladstone']
     LCOH_best={}
+    PV_best={}
+    WIND_best={}
+    EL_best={}
+    H2ST_best={}
+
     LCOH_storage={}
+    PV_storage={}
+    WIND_storage={}
+    EL_storage={}
+    H2ST_storage={}
     for region in regions:
         bid=best[region]
         for i in range(len(locations)):
@@ -462,11 +471,19 @@ def get_cf_lcoh_optimal_hydrogen(year=2020):
             if location=='%s %s'%(region, bid):
                 lcoh=LCOH[i]
                 LCOH_best[region]=lcoh
+                PV_best[region]=PV[i]
+                WIND_best[region]=WIND[i]
+                EL_best[region]=EL[i]
+                H2ST_best[region]=H2ST[i]
                 if 'Pinjarra' in location:
                     location='Pinjara '+location[-1]
-                cf, lcoh, lcoh2=get_storage_data(year=year, location=location, cost=1000)
+                cf, lcoh, lcoh2, pv, wind, electrolyser, h2_storage =get_storage_data(year=year, location=location, cost=1000)
                 LCOH_storage[region]=lcoh
-    return LCOH_best, CF, LCOH_storage
+                PV_storage[region]=pv
+                WIND_storage[region]=wind
+                EL_storage[region]=electrolyser
+                H2ST_storage[region]=h2_storage
+    return LCOH_best, CF, LCOH_storage, PV_best, WIND_best, EL_best, H2ST_best, PV_storage, WIND_storage, EL_storage, H2ST_storage
 
 
 
@@ -476,6 +493,7 @@ def plot_cf_lcoh_comparison(location, resdir, year=2020):
     cases=['CST', 'CST-modular', 'TES-PV', 'TES-WIND', 'TES-HYBRID','BAT-PV','BAT-WIND','BAT-HYBRID','PHES-PV','PHES-WIND','PHES-HYBRID', 'H2', 'H2-storage']
     linestyles=['-', '-', '-', '-', 'o', '--', '--', '^', '-.', '-.', 's', ':', ':'] 
 
+    #summary=np.array([])	
     norm = matplotlib.colors.Normalize(vmin=1, vmax=20)
     c_map=cm.tab20c
     scalar_map=cm.ScalarMappable(cmap=c_map, norm=norm)
@@ -486,22 +504,43 @@ def plot_cf_lcoh_comparison(location, resdir, year=2020):
     for i in range(len(cases)):
         case=cases[i]
 
-        if 'H2' in case:
-            LCOH_h2, CF, LCOH_storage=get_cf_lcoh_optimal_hydrogen(year)
+        if 'H2' in case: 
+            LCOH_h2, CF, LCOH_storage, PV_best, WIND_best, EL_best, H2ST_best, PV_storage, WIND_storage, EL_storage, H2ST_storage=get_cf_lcoh_optimal_hydrogen(year)
             if 'storage' in case:
                 lcoh=LCOH_storage[location]
+                sh=H2ST_storage[location]
+                rm=PV_storage[location]+WIND_storage[location]
             else:
                 lcoh=LCOH_h2[location]
+                sh=H2ST_best[location]
+                rm=PV_best[location]+WIND_best[location]
             cf=CF*100.
         else:
-            fn='%s/post/%s/%s-%s-LCOH-CF.csv'%(resdir, year, case, location)
-            data=np.loadtxt(fn, delimiter=',', skiprows=1)
+            try:
+                fn='%s/post/%s/%s-%s-LCOH-CF.csv'%(resdir, year, case, location)
+                data=np.loadtxt(fn, delimiter=',', skiprows=1)
+            except:
+                if location=='Pinjarra':
+                    fn='%s/post/%s/%s-%s-LCOH-CF.csv'%(resdir, year, case, 'Pinjara')
+                    data=np.loadtxt(fn, delimiter=',', skiprows=1)
             cf=data[:,0]
+            sh=data[:,1]
+            rm=data[:, 2]
             lcoh=data[:,3]
+
         idx=(lcoh<9990)
         l,=ax.plot(cf[idx], lcoh[idx], linestyles[i], c=colors[i])
         plot_lines.append(l)
+    #    data= np.append(cf, (sh, rm, lcoh))
+    #    title=np.array([case, 'SH' , 'RM', 'LCOH'])
+    #    data=data.reshape(4, len(cf))
+    #    data=data.T
+    #    title=title.reshape(1, 4)
+    #    data=np.vstack((title, data))
+    #    summary=np.append(summary, data)
 
+    #summary=summary.reshape(int(len(summary)/4), 4)
+    #np.savetxt('%s/post/summary-LCOH-CF-%s-%s.csv'%(resdir, location, year), summary, fmt='%s', delimiter=',')
 
     ax2 = ax.twinx()
     ll=["TES", "Batt", "PHES"]
@@ -901,7 +940,7 @@ def interp_lcoh(LCOH, CF, cf):
 
 def hydrogen_table():
 
-    LCOH_best, CF, LCOH_storage=get_cf_lcoh_optimal_hydrogen(year=2020)
+    LCOH_best, CF, LCOH_storage, PV_best, WIND_best, EL_best, H2ST_best, PV_storage, WIND_storage, EL_storage, H2ST_storage=get_cf_lcoh_optimal_hydrogen(year=2020)
 
     CF, LCOH, LCOH2, locations=get_data(year=year)  
     best=get_best_location(year=year)
@@ -979,7 +1018,7 @@ if __name__=='__main__':
             ]
 
     workdir='/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/results/CF-curves-new-wind'
-    year=2050
+    year=2020
 
     # plot CF-RM-SH curves
     if 1:
@@ -1011,10 +1050,10 @@ if __name__=='__main__':
          
 
         for location in locations:
-            #plot_cf_lcoh_comparison(location, workdir, year)
+            plot_cf_lcoh_comparison(location, workdir, year)
      
-            plot_breakdown_bars(location, workdir)
+            #plot_breakdown_bars(location, workdir)
 
-        plot_breakdown_compare(cf0=99., workdir)
+        #plot_breakdown_compare(cf0=99., workdir=workdir)
     #get_CST_breakdown('Pilbara')
 

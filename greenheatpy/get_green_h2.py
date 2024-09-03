@@ -16,19 +16,36 @@ def get_data(year, savedir=None):
     LCOH2=np.array([])
     LCOH=np.array([])
     title=np.array([])
+    PV=np.array([])
+    WIND=np.array([])
+    EL=np.array([])
+    H2ST=np.array([])
 
     for location in locations:
         ws=wb[location]
         CF=get_row_values(ws, min_row=7, max_row=12, min_col=1, max_col=1) 
         lcoh2=get_row_values(ws, min_row=7, max_row=12, min_col=33, max_col=33) 
+        pv=get_row_values(ws, min_row=7, max_row=12, min_col=3, max_col=3) #kW
+        wind=get_row_values(ws, min_row=7, max_row=12, min_col=4, max_col=4) #kW   
+        electrolyser=get_row_values(ws, min_row=7, max_row=12, min_col=5, max_col=5) #kW H2 (kg)=power(kW) * efficiency/39.4 , efficiency=0.7
+        h2_storage=get_row_values(ws, min_row=7, max_row=12, min_col=6, max_col=6) #kg H2, net H2 supply is 5 kg/s
+
         lcoh=convert_lcoh(lcoh2)
-        
         LCOH2=np.append(LCOH2, lcoh2) #USD/kg
         LCOH=np.append(LCOH, lcoh) # USD/MWh
         title=np.append(title, location)
-        
+  
+        PV=np.append(PV, pv)
+        WIND=np.append(WIND, wind)
+        EL=np.append(EL, electrolyser)
+        H2ST=np.append(H2ST, h2_storage)
+      
     LCOH=LCOH.reshape(len(locations), len(CF))
     LCOH2=LCOH2.reshape(len(locations), len(CF))
+    PV=PV.reshape(len(locations), len(CF))
+    WIND=WIND.reshape(len(locations), len(CF))
+    EL=EL.reshape(len(locations), len(CF))
+    H2ST=H2ST.reshape(len(locations), len(CF))
       
     if savedir!=None:
         CF=CF.reshape(len(CF), 1)
@@ -40,14 +57,14 @@ def get_data(year, savedir=None):
         title2=np.append('CF/LCOH2 (USD/kg)', title)
         LCOH2=np.vstack((title2, LCOH2))  
         data=np.vstack((LCOH, LCOH2))
-        np.savetxt(savedir+'/CF_LCOH_%s.csv'%year, data, delimiter=',', fmt='%s') 
+        np.savetxt(savedir+'/CF_LCOH2_%s.csv'%year, data, delimiter=',', fmt='%s') 
 
     for i in range(len(locations)):
         locations[i]=locations[i][:-5]
         if 'Pinjara' in locations[i]:
             locations[i]='Pinjarra '+locations[i][-1]
 
-    return CF, LCOH, LCOH2, locations  
+    return CF, LCOH, LCOH2, locations, PV, WIND, EL, H2ST  
 
 def get_storage_data(year, location, cost):
 
@@ -63,9 +80,12 @@ def get_storage_data(year, location, cost):
     CF=get_row_values(ws, min_row=7, max_row=12, min_col=1, max_col=1) 
     LCOH2=get_row_values(ws, min_row=7, max_row=12, min_col=33, max_col=33) 
     LCOH=convert_lcoh(LCOH2)
-    
+    pv=get_row_values(ws, min_row=7, max_row=12, min_col=3, max_col=3) #kW
+    wind=get_row_values(ws, min_row=7, max_row=12, min_col=4, max_col=4) #kW   
+    electrolyser=get_row_values(ws, min_row=7, max_row=12, min_col=5, max_col=5) #kW H2 (kg)=power(kW) * efficiency/39.4 , efficiency=0.7
+    h2_storage=get_row_values(ws, min_row=7, max_row=12, min_col=6, max_col=6) #kg H2, net H2 supply is 5 kg/s    
 
-    return CF, LCOH, LCOH2 
+    return CF, LCOH, LCOH2, pv, wind, electrolyser, h2_storage 
 
 
 def convert_lcoh(lcoh2):
@@ -93,7 +113,7 @@ def get_best_location(year, verbose=False):
     get the best local location in each region that produced the lowest LCOH2 for hydrogen
     '''
     regions=np.array(['Pilbara', 'Pinjarra', 'Gladstone', 'Burnie', 'Upper Spencer Gulf'])
-    CF, LCOH, LCOH2, locations=get_data(year, savedir=None)
+    CF, LCOH, LCOH2, locations, PV, WIND, EL, H2ST =get_data(year, savedir=None)
     best={}
     for region in regions:
         data=np.array([])
@@ -125,10 +145,10 @@ if __name__=='__main__':
 
     years=[2020, 2030, 2050]
     for year in years:
-        #CF, LCOH, LCOH2, locations =get_data(year, savedir=None)
+        CF, LCOH, LCOH2, locations, PV, WIND, EL, H2ST =get_data(year, savedir='./')
         #best=get_best_location(year, verbose=True)
         #plot_bar(locations, LCOH2[:,-2])
         #print(best)
-        CF, LCOH, LCOH2=get_storage_data(year=2020, location='Pilbara 3', cost=1000)
-        print(CF, LCOH, LCOH2)
+        #CF, LCOH, LCOH2=get_storage_data(year=2020, location='Pilbara 3', cost=1000)
+        #print(CF, LCOH, LCOH2)
         stop
