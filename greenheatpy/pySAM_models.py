@@ -15,14 +15,20 @@ import platform
 import os
 
 
-def pv_gen(capacity, location, casedir, wea_fn=None):
+def pv_gen(capacity, location, casedir,  wea_fn=None, tilt=0., azimuth=180., array_type=2):
     """
     Arguments:
         capacity (float): system capacity (kW)
         location   (str): location of the system
+ 
         casedir    (str): case directory
         wea_fn     (str): directory of the weather data file for the SAM PV model
                 the default 'None' will load the weather file in the 'data' directory
+        tilt     (float): tilt angle of pv panel, 0 is horizontal 
+					      it is normall set to the location's latitude according to SAM manual (SAM/runtime/help/html/index.html?pvwatts_system_design.htm)
+        azimuth  (float):  An azimuth value of zero is facing north, 90 degrees = east, 180 degrees = south, and 270 degrees = west
+                           a typical azimuth value would be 180 degrees. For systems south of the equator, a typical value would be 0 degrees.
+        array_type (int):  0: fixed open rack, 2: one-axis tracking	     
     Return:
         output    (list): energy production (kW) by the PV system in time series in a year 
     
@@ -51,6 +57,9 @@ def pv_gen(capacity, location, casedir, wea_fn=None):
 
             
         module.SystemDesign.system_capacity = capacity
+        module.SystemDesign.tilt=tilt
+        module.SystemDesign.azimuth=azimuth
+        module.SystemDesign.array_type=array_type # 0: fixed open rack, 2: 1-axis tracking	
         module.execute()
         output = np.array(module.Outputs.gen)
         output=output.tolist()

@@ -490,14 +490,15 @@ def get_cf_lcoh_optimal_hydrogen(year=2020):
 
 def plot_cf_lcoh_comparison(location, resdir, year=2020):
 
-    cases=['CST', 'CST-modular', 'TES-PV', 'TES-WIND', 'TES-HYBRID','BAT-PV','BAT-WIND','BAT-HYBRID','PHES-PV','PHES-WIND','PHES-HYBRID', 'H2', 'H2-storage']
-    linestyles=['-', '-', '-', '-', 'o', '--', '--', '^', '-.', '-.', 's', ':', ':'] 
+    cases=['CST', 'CST-modular', 'TES-PV','BAT-PV', 'PHES-PV', 'TES-WIND','BAT-WIND','PHES-WIND', 'TES-HYBRID','BAT-HYBRID','PHES-HYBRID', 'H2', 'H2-storage']
+    linestyles=['-', '-',  '-', '--', '-.',   '-', '--', '-.', 'o-', '^-',  's-', ':', ':'] 
 
     #summary=np.array([])	
     norm = matplotlib.colors.Normalize(vmin=1, vmax=20)
     c_map=cm.tab20c
     scalar_map=cm.ScalarMappable(cmap=c_map, norm=norm)
-    colors=[ scalar_map.to_rgba(5), scalar_map.to_rgba(6), scalar_map.to_rgba(9), scalar_map.to_rgba(1), scalar_map.to_rgba(13), scalar_map.to_rgba(9), scalar_map.to_rgba(1), scalar_map.to_rgba(13), scalar_map.to_rgba(9), scalar_map.to_rgba(1), scalar_map.to_rgba(13), 'crimson', 'fuchsia'] #
+    colors=[ scalar_map.to_rgba(5), scalar_map.to_rgba(6), scalar_map.to_rgba(9), scalar_map.to_rgba(9), scalar_map.to_rgba(9), scalar_map.to_rgba(1), scalar_map.to_rgba(1), scalar_map.to_rgba(1), scalar_map.to_rgba(13), scalar_map.to_rgba(13), scalar_map.to_rgba(13), 'crimson', 'fuchsia'] #
+    alphas=[1,1,1,1,1,1,1,1,0.5,0.5,0.5,1,1]
     plot_lines = []
     fts=14
     fig, ax = plt.subplots()
@@ -529,7 +530,7 @@ def plot_cf_lcoh_comparison(location, resdir, year=2020):
             lcoh=data[:,3]
 
         idx=(lcoh<9990)
-        l,=ax.plot(cf[idx], lcoh[idx], linestyles[i], c=colors[i])
+        l,=ax.plot(cf[idx], lcoh[idx], linestyles[i], c=colors[i], alpha=alphas[i])
         plot_lines.append(l)
     #    data= np.append(cf, (sh, rm, lcoh))
     #    title=np.array([case, 'SH' , 'RM', 'LCOH'])
@@ -550,12 +551,13 @@ def plot_cf_lcoh_comparison(location, resdir, year=2020):
                  label=ll[ss], c='black')
     ax2.get_yaxis().set_visible(False)
 
-    legend1 = plt.legend([plot_lines[0],plot_lines[1],plot_lines[2],plot_lines[3]], ["CST", "CST-md", "PV", "Wind"], loc=1, bbox_to_anchor=(1.33,1.), fontsize=fts)
-    ax.legend([plot_lines[4],plot_lines[7], plot_lines[10], plot_lines[11], plot_lines[12]] , ["PV+Wind+TES", "PV+Wind+Batt", "PV+Wind+PHES", "H$_2$", "H$_2$ (high \$ stor)"], loc=1, bbox_to_anchor=(1.492,0.66), fontsize=fts)
-    plt.gca().add_artist(legend1)
+    legend_labels=['CST (single-tower)', 'CST (multi-tower)', 'PV+TES', 'PV+Batt', 'PV+PHES','Wind+TES', 'Wind+Batt', 'Wind+PHES', 'PV+Wind+TES',  'PV+Wind+Batt',  'PV+Wind+PHES', 'H$_2$+Lined rock cavern',"H$_2$+Aboveground storage" ] #LRC is 40--115 USD/kg, aboveground is 1000 USD/kg
+    #legend1 = plt.legend([plot_lines[0],plot_lines[1],plot_lines[2],plot_lines[3]], ["CST", "CST-md", "PV", "Wind"], loc=1, bbox_to_anchor=(1.33,1.), fontsize=fts)
+    #ax.legend([plot_lines[4],plot_lines[7], plot_lines[10], plot_lines[11], plot_lines[12]] , ["PV+Wind+TES", "PV+Wind+Batt", "PV+Wind+PHES", "H$_2$", "H$_2$ (high c$_\mathrm{H₂,storage}$)"], loc=1, bbox_to_anchor=(1.54,0.66), fontsize=fts)
+    #plt.gca().add_artist(legend1)
 
-    ax2.legend(loc=1, bbox_to_anchor=(1.58,1), fontsize=fts)
-
+    #ax2.legend(loc=1, bbox_to_anchor=(1.58,1), fontsize=fts)
+    ax.legend(plot_lines, legend_labels, bbox_to_anchor=(1.01,1.03), fontsize=fts)
     #plt.legend()
     #plt.xlim([0.15,1])
     ax.set_ylabel('LCOH (USD/MWh$_\mathrm{th}$)', fontsize=fts)
@@ -959,8 +961,8 @@ def hydrogen_table():
 
 
 def get_CST_breakdown(location):
-    resdir='/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/results/CF-curves-new-wind/post/2020/design details'
-    CFS=np.r_[50, 80, 90, 95, 99]
+    resdir='/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/results/CF-curves-new-wind/post/2020/design-details'
+    CFS=np.r_[40, 50, 60, 70, 80, 90, 95, 99]
     for cf in CFS:
         fn=resdir+'/summary_design_%s_CST_CF=%.0f%%.csv'%(location, cf)  
         data=np.loadtxt(fn, delimiter=',', dtype=str)
@@ -987,11 +989,70 @@ def get_CST_breakdown(location):
     summary=summary.T
     np.savetxt(resdir+'/summary_%s_CST-modular.csv'%location, summary, fmt='%s', delimiter=',')
 
+def get_breakdown_design(location, resdir, P_load=500e3, year=2020, OM_method='SL', fast=True):
+
+    cases=['CST', 'CST-modular','TES-PV', 'TES-WIND', 'TES-HYBRID',  'BAT-PV', 'BAT-WIND', 'BAT-HYBRID','PHES-PV','PHES-WIND','PHES-HYBRID']
+    #LABELS=['CST+TES', 'PV+TES',  'WT+TES', 'PV+WT+TES',  'PV+BAT', 'WT+BAT', 'PV+WT+BAT', 'PV+PHES', 'WT+PHES','PV+WT+PHES']
+ 
+    CF0=np.r_[40., 50., 60., 70., 80., 90., 95., 99.]
+
+    fts=14
+    for i in range(len(cases)):
+
+        case=cases[i]
+        fn='%s/post/%s/%s-%s-LCOH-CF.csv'%(resdir, year, case, location)
+        try:
+            data=np.loadtxt(fn, delimiter=',', skiprows=1)
+        except:
+            fn='%s/post/%s/%s-%s-LCOH-CF.csv'%(resdir, year, case, 'Pinjara')
+            data=np.loadtxt(fn, delimiter=',', skiprows=1)
+        cfs=data[:,0]
+        SHs=data[:,1]
+        RMs=data[:,2]
+        LCOHs=data[:,3] 
+        if 'CST' in case:
+            des_details=np.array(['CF', 'C_field', 'C_recv', 'C_tower', 'C_site', 'C_TES',' C_om'])
+        for j in range(len(CF0)):
+            cf0=CF0[j]
+            idx=abs(cf0-cfs)<0.01
+
+            if LCOHs[idx]<999:
+                sh=SHs[idx][0]
+                rm=RMs[idx][0]
+                lcoh=LCOHs[idx][0]
+                cf=cfs[idx][0]
+                savename='design_%s_%s_CF=%.0f%%'%(location, case, cf0)
+ 
+                if case=='CST':
+                    lcoh_1, cf_1=get_CST_design(rm, sh, location, case, resdir, P_load=P_load, savename=savename, OM_method=OM_method, fast=fast)
+                if case=='CST-modular':
+                    lcoh_1, cf_1=get_CST_modular_design(rm, sh, location, case, resdir, P_load=P_load, savename=savename)
+                elif case=='TES-PV':
+                    lcoh_1, cf_1=get_TES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=1)
+                elif case=='TES-WIND':
+                    lcoh_1, cf_1=get_TES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=0)
+                elif case=='TES-HYBRID':
+                    lcoh_1, cf_1=get_TES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=None)
+                elif case=='BAT-PV':
+                    lcoh_1, cf_1=get_BAT_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=1)
+                elif case=='BAT-WIND':
+                    lcoh_1, cf_1=get_BAT_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=0)
+                elif case=='BAT-HYBRID':
+                    lcoh_1, cf_1=get_BAT_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=None)
+                elif case=='PHES-PV':
+                    lcoh_1, cf_1=get_PHES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=1)
+                elif case=='PHES-WIND':
+                    lcoh_1, cf_1=get_PHES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=0)
+                elif case=='PHES-HYBRID':
+                    lcoh_1, cf_1=get_PHES_design(rm, sh, location, case, resdir, P_load=P_load, savename=savename, F_pv=None)
+
+                print(case, "CF=%s%%"%cf0, "%.1f%%"%(cf_1*100.), 'LCOH diff: %.1f%%'%((lcoh_1-lcoh)/lcoh*100.))    
+
 
 
 
 if __name__=='__main__':
-    locations=[ 'Pinjarra', 'Pilbara', 'Gladstone', 'Burnie',   'Upper Spencer Gulf']
+    locations=[ 'Upper Spencer Gulf', 'Burnie',   'Gladstone', 'Pinjarra', 'Pilbara']
     cases=['CST',
            'CST-modular',
            'TES-HYBRID',
@@ -1018,10 +1079,10 @@ if __name__=='__main__':
             ]
 
     workdir='/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/results/CF-curves-new-wind'
-    year=2020
+    year=2050
 
     # plot CF-RM-SH curves
-    if 1:
+    if 0:
         info=np.loadtxt('%s/max_rm_sh.csv'%workdir, delimiter=',', dtype=str, skiprows=1)
         INFO={}
         for i in range(len(info)):
@@ -1048,12 +1109,14 @@ if __name__=='__main__':
         #        future_cost(location, case, P_load=500.e3, year=2020, costmodel=costmodel, resdir= workdir)
         #        get_cf_lcoh_optimal(location, case, resdir= workdir, year=year, plot=False)
          
-
+    if 1:
         for location in locations:
-            plot_cf_lcoh_comparison(location, workdir, year)
+            plot_cf_lcoh_comparison(location, workdir, year)		
      
             #plot_breakdown_bars(location, workdir)
 
         #plot_breakdown_compare(cf0=99., workdir=workdir)
-    #get_CST_breakdown('Pilbara')
-
+    if 0:
+	    #get_CST_breakdown('Pilbara')
+	    for location in locations:
+	        get_breakdown_design(location, resdir=workdir, P_load=500e3, year=2020, OM_method='SL', fast=True)
