@@ -855,7 +855,7 @@ def plot_breakdown_bars(location, resdir, P_load=500e3, year=2020, OM_method='SL
 
 def plot_breakdown_compare(cf0, resdir, year=2020, process=False):
 
-    locations=np.array([ 'Pilbara', 'Burnie',  'Gladstone', 'Pinjara',   'Upper Spencer Gulf'])
+    locations=np.array([ 'Pilbara', 'Burnie',  'Gladstone', 'Pinjarra',   'Upper Spencer Gulf'])
     cases=np.array(['CST-modular', 'TES-PV', 'TES-WIND', 'TES-HYBRID',  'BAT-PV', 'BAT-WIND', 'BAT-HYBRID','PHES-PV','PHES-WIND','PHES-HYBRID', 'H2'])
     LABELS=['TES+CST', 'TES+PV',  'TES+Wind', 'TES+PV+Wind',  'BAT+PV', 'BAT+Wind', 'BAT+PV+Wind', 'PHES+PV', 'PHES+Wind','PHES+PV+Wind', 'Hydrogen']
     loc_labels=[ 'Pilbara', 'Burnie',  'Gladstone',   'Pinjara',  'Upper Spencer Gulf']
@@ -884,7 +884,7 @@ def plot_breakdown_compare(cf0, resdir, year=2020, process=False):
                 location=locations[j]
 
                 if case=='H2':
-                    LCOH_best, CF=get_cf_lcoh_optimal_hydrogen()
+                    LCOH_best, CF, LCOH_storage, PV_best, WIND_best, EL_best, H2ST_best, PV_storage, WIND_storage, EL_storage, H2ST_storage=get_cf_lcoh_optimal_hydrogen()
                     lcoh=interp_lcoh(LCOH_best[location], CF*100., cf0)
                     LCOH=np.append(LCOH, lcoh)
                 else:
@@ -1110,12 +1110,12 @@ if __name__=='__main__':
         #        get_cf_lcoh_optimal(location, case, resdir= workdir, year=year, plot=False)
          
     if 1:
-        for location in locations:
-            plot_cf_lcoh_comparison(location, workdir, year)		
+        #for location in locations:
+        #    plot_cf_lcoh_comparison(location, workdir, year)		
      
             #plot_breakdown_bars(location, workdir)
 
-        #plot_breakdown_compare(cf0=99., workdir=workdir)
+        plot_breakdown_compare(cf0=90., resdir=workdir, year=2050, process=True)
     if 0:
 	    #get_CST_breakdown('Pilbara')
 	    for location in locations:
