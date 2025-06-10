@@ -991,7 +991,7 @@ def get_CST_breakdown(location):
 
 def get_breakdown_design(location, resdir, P_load=500e3, year=2020, OM_method='SL', fast=True):
 
-    cases=['CST', 'CST-modular','TES-PV', 'TES-WIND', 'TES-HYBRID',  'BAT-PV', 'BAT-WIND', 'BAT-HYBRID','PHES-PV','PHES-WIND','PHES-HYBRID']
+    cases=['CST', 'CST-modular']#,'TES-PV', 'TES-WIND', 'TES-HYBRID',  'BAT-PV', 'BAT-WIND', 'BAT-HYBRID','PHES-PV','PHES-WIND','PHES-HYBRID']
     #LABELS=['CST+TES', 'PV+TES',  'WT+TES', 'PV+WT+TES',  'PV+BAT', 'WT+BAT', 'PV+WT+BAT', 'PV+PHES', 'WT+PHES','PV+WT+PHES']
  
     CF0=np.r_[40., 50., 60., 70., 80., 90., 95., 99.]
@@ -1022,29 +1022,29 @@ def get_breakdown_design(location, resdir, P_load=500e3, year=2020, OM_method='S
                 lcoh=LCOHs[idx][0]
                 cf=cfs[idx][0]
                 savename='design_%s_%s_CF=%.0f%%'%(location, case, cf0)
- 
+                print(savename)
                 if case=='CST':
-                    lcoh_1, cf_1=get_CST_design(rm, sh, location, case, resdir, P_load=P_load, savename=savename, OM_method=OM_method, fast=fast)
+                    lcoh_1, cf_1=get_CST_design(rm, sh, location, case, resdir, P_load=P_load, savename=savename, OM_method=OM_method, fast=fast, year=year)
                 if case=='CST-modular':
-                    lcoh_1, cf_1=get_CST_modular_design(rm, sh, location, case, resdir, P_load=P_load, savename=savename)
+                    lcoh_1, cf_1=get_CST_modular_design(rm, sh, location, case, resdir, P_load=P_load, savename=savename, year=year)
                 elif case=='TES-PV':
-                    lcoh_1, cf_1=get_TES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=1)
+                    lcoh_1, cf_1=get_TES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=1, year=year)
                 elif case=='TES-WIND':
-                    lcoh_1, cf_1=get_TES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=0)
+                    lcoh_1, cf_1=get_TES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=0, year=year)
                 elif case=='TES-HYBRID':
-                    lcoh_1, cf_1=get_TES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=None)
+                    lcoh_1, cf_1=get_TES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=None, year=year)
                 elif case=='BAT-PV':
-                    lcoh_1, cf_1=get_BAT_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=1)
+                    lcoh_1, cf_1=get_BAT_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=1, year=year)
                 elif case=='BAT-WIND':
-                    lcoh_1, cf_1=get_BAT_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=0)
+                    lcoh_1, cf_1=get_BAT_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=0, year=year)
                 elif case=='BAT-HYBRID':
-                    lcoh_1, cf_1=get_BAT_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=None)
+                    lcoh_1, cf_1=get_BAT_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=None, year=year)
                 elif case=='PHES-PV':
-                    lcoh_1, cf_1=get_PHES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=1)
+                    lcoh_1, cf_1=get_PHES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=1, year=year)
                 elif case=='PHES-WIND':
-                    lcoh_1, cf_1=get_PHES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=0)
+                    lcoh_1, cf_1=get_PHES_design(rm, sh, location, case, resdir, P_load=P_load,savename=savename, F_pv=0, year=year)
                 elif case=='PHES-HYBRID':
-                    lcoh_1, cf_1=get_PHES_design(rm, sh, location, case, resdir, P_load=P_load, savename=savename, F_pv=None)
+                    lcoh_1, cf_1=get_PHES_design(rm, sh, location, case, resdir, P_load=P_load, savename=savename, F_pv=None, year=year)
 
                 print(case, "CF=%s%%"%cf0, "%.1f%%"%(cf_1*100.), 'LCOH diff: %.1f%%'%((lcoh_1-lcoh)/lcoh*100.))    
 
@@ -1078,7 +1078,7 @@ if __name__=='__main__':
             'Wind+PHES',
             ]
 
-    workdir='/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/results/CF-curves-new-wind'
+    workdir='/mnt/data/Research/git-greenheat-paper/CF-curves-new-wind'#'/media/yewang/Data/Work/Research/Topics/yewang/HILTCRC/results/CF-curves-new-wind'
     year=2050
 
     # plot CF-RM-SH curves
@@ -1109,14 +1109,14 @@ if __name__=='__main__':
         #        future_cost(location, case, P_load=500.e3, year=2020, costmodel=costmodel, resdir= workdir)
         #        get_cf_lcoh_optimal(location, case, resdir= workdir, year=year, plot=False)
          
-    if 1:
+    if 0:
         #for location in locations:
         #    plot_cf_lcoh_comparison(location, workdir, year)		
      
             #plot_breakdown_bars(location, workdir)
 
         plot_breakdown_compare(cf0=90., resdir=workdir, year=2050, process=True)
-    if 0:
+    if 1:
 	    #get_CST_breakdown('Pilbara')
 	    for location in locations:
-	        get_breakdown_design(location, resdir=workdir, P_load=500e3, year=2020, OM_method='SL', fast=True)
+	        get_breakdown_design(location, resdir=workdir, P_load=500e3, year=year, OM_method='SL', fast=True)
