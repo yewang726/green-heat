@@ -50,8 +50,28 @@ def pv_gen(capacity, location, casedir,  wea_fn=None, tilt=0., azimuth=180., arr
         with open(json_fn, 'r') as f:
             data = json.load(f)
         f.close()
-        print(data)
-        print(data.items())
+        for k,v in data.items():
+            if k != "number_inputs":
+                module.value(k, v)
+
+        if wea_fn==None:
+            module.value('solar_resource_file', datadir+'/SolarSource.csv')
+        else:
+            module.value('solar_resource_file', wea_fn)
+
+            
+        module.SystemDesign.system_capacity = capacity
+        module.SystemDesign.tilt=tilt
+        module.SystemDesign.azimuth=azimuth
+        module.SystemDesign.array_type=array_type # 0: fixed open rack, 2: 1-axis tracking	
+        module.execute()
+        output = np.array(module.Outputs.gen)
+        output=output.tolist()
+        
+        with open(output_fn, "w") as text_file:
+            text_file.write(str(output))
+                  
+    return output_fn
 
 
 def wind_gen(capacity, location, casedir, wea_fn=None, modeldir=None):
