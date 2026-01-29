@@ -15,7 +15,7 @@ import platform
 import os
 
 
-def pv_gen(capacity, location, casedir,  wea_fn=None, tilt=0., azimuth=180., array_type=2):
+def pv_gen(capacity, location, casedir,  wea_fn=None, tilt=0., azimuth=180., array_type=2, modeldir=None):
     """
     Arguments:
         capacity (float): system capacity (kW)
@@ -34,6 +34,10 @@ def pv_gen(capacity, location, casedir,  wea_fn=None, tilt=0., azimuth=180., arr
     
     """
     output_fn=casedir+'/pv_gen_%s_%.1fMWe.dat'%(location, capacity/1000)
+    if modeldir==None:
+        datadir=datadir
+    else:
+        datadir=modeldir	
 
     if not os.path.exists(output_fn):        
         module = PVWatts.new()
@@ -70,7 +74,7 @@ def pv_gen(capacity, location, casedir,  wea_fn=None, tilt=0., azimuth=180., arr
     return output_fn
 
 
-def wind_gen(capacity, location, casedir, wea_fn=None):
+def wind_gen(capacity, location, casedir, wea_fn=None, modeldir=None):
     """
     Arguments:
         capacity (float): system capacity (kW)
@@ -82,6 +86,11 @@ def wind_gen(capacity, location, casedir, wea_fn=None):
         output    (list): energy production (kW) by the Wind system in time series in a year 
  
     """
+    if modeldir==None:
+        datadir=datadir
+    else:
+        datadir=modeldir
+
     output_fn=casedir+'/wind_gen_%s_%.1fMWe.dat'%(location, capacity/1000)
 
     if not os.path.exists(output_fn):  
@@ -118,7 +127,7 @@ def wind_gen(capacity, location, casedir, wea_fn=None):
 
 
 
-def cst_gen(Q_des_th, SM, location, casedir, helio_width, helio_height, wea_fn=None):
+def cst_gen(Q_des_th, SM, location, casedir, helio_width, helio_height, wea_fn=None, modeldir=None):
 
     """
     Arguments:
@@ -137,6 +146,10 @@ def cst_gen(Q_des_th, SM, location, casedir, helio_width, helio_height, wea_fn=N
         A_land   (float): the total land area of the optimal field layout designed by SAM (m2)
  
     """
+    if modeldir==None:
+        datadir=datadir
+    else:
+        datadir=modeldir
 
     output_fn=casedir+'/CST_gen_%s_load%.1fMWth_SM%.1f.dat'%(location, Q_des_th/1000., SM )
 
