@@ -51,7 +51,8 @@ def pv_gen(capacity, location, casedir,  wea_fn=None, tilt=0., azimuth=180., arr
             data = json.load(f)
         f.close()
         print(data)
-        print(data.items)
+        print(data.items())
+        '''
         for k,v in data.items():
             if k != "number_inputs":
                 print(k,v)
@@ -75,7 +76,7 @@ def pv_gen(capacity, location, casedir,  wea_fn=None, tilt=0., azimuth=180., arr
             text_file.write(str(output))
                   
     return output_fn
-
+    '''
 
 def wind_gen(capacity, location, casedir, wea_fn=None, modeldir=None):
     """
