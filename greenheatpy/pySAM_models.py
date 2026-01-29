@@ -52,6 +52,7 @@ def pv_gen(capacity, location, casedir,  wea_fn=None, tilt=0., azimuth=180., arr
         f.close()
         for k,v in data.items():
             if k != "number_inputs":
+                print(k,v)
                 module.value(k, v)
 
         if wea_fn==None:
